@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reflective Journal Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="text-slate-800 antialiased py-8 px-4 sm:px-6 lg:px-8 flex flex-col items-center">
+
+    <header class="w-full max-w-5xl flex flex-col items-center justify-center mb-10 text-center animate-fade-in">
+        <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Reflective Journal Portal</h1>
+        <p class="text-slate-600 font-medium mt-1">Academic Submission Generator</p>
+    </header>
+
+    <main class="w-full max-w-5xl glass-panel rounded-2xl p-6 sm:p-10 shadow-xl">
+        
+        <div class="flex items-center justify-between mb-8 relative">
+            <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-200 z-0 rounded-full hidden sm:block"></div>
+            <div class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-indigo-600 z-0 rounded-full transition-all duration-300 hidden sm:block" id="progress-bar" style="width: 0%;"></div>
+            
+            <div class="step-indicator relative z-10 flex flex-col items-center gap-2" id="indicator-1">
+                <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold shadow-md transition-colors">1</div>
+                <span class="text-xs font-semibold text-indigo-700 hidden sm:block">Student Info</span>
+            </div>
+            <div class="step-indicator relative z-10 flex flex-col items-center gap-2" id="indicator-2">
+                <div class="w-10 h-10 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold shadow-sm transition-colors">2</div>
+                <span class="text-xs font-semibold text-slate-500 hidden sm:block">Academic Info</span>
+            </div>
+            <div class="step-indicator relative z-10 flex flex-col items-center gap-2" id="indicator-3">
+                <div class="w-10 h-10 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold shadow-sm transition-colors">3</div>
+                <span class="text-xs font-semibold text-slate-500 hidden sm:block">Journal Content</span>
+            </div>
+        </div>
+
+        <form id="journalForm">
+            <div id="step-1" class="step-content active">
+                <h2 class="text-xl font-semibold mb-6 flex items-center gap-2 text-slate-800 border-b pb-3">
+                    Student Information
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Student Name</label>
+                        <input type="text" id="studentName" required class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none" placeholder="e.g. K Charan Tej">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Registration Number</label>
+                        <input type="text" id="regNumber" required class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none" placeholder="e.g. 252U1R1110">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Class & Section</label>
+                        <input type="text" id="classSection" required class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none" placeholder="e.g. 212 1B">
+                    </div>
+                </div>
+            </div>
+
+            <div id="step-2" class="step-content">
+                <h2 class="text-xl font-semibold mb-6 flex items-center gap-2 text-slate-800 border-b pb-3">
+                    Academic Information
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Year</label>
+                        <select id="year" required class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none bg-white">
+                            <option value="" disabled selected>Select Year</option>
+                            <option value="I">Year I</option>
+                            <option value="II">Year II</option>
+                            <option value="III">Year III</option>
+                            <option value="IV">Year IV</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Term</label>
+                        <select id="term" required disabled class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none bg-slate-50 cursor-not-allowed">
+                            <option value="">Select Year First</option>
+                        </select>
+                    </div>
+                    <div class="lg:col-span-1">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Subject Name</label>
+                        <select id="subject" required disabled class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none bg-slate-50 cursor-not-allowed">
+                            <option value="">Select Term First</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Assessment Number</label>
+                        <select id="assessmentNo" required disabled class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none bg-slate-50 cursor-not-allowed">
+                            <option value="">Select Subject First</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Date (Entry & Submission)</label>
+                        <input type="date" id="journalDate" required class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none">
+                    </div>
+                    <div class="lg:col-span-3">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Journal Entry Topic</label>
+                        <input type="text" id="topic" readonly class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg bg-indigo-50 text-indigo-800 font-semibold cursor-not-allowed" placeholder="Topic auto-generates based on selection">
+                    </div>
+                </div>
+            </div>
+
+            <div id="step-3" class="step-content">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 border-b pb-3 gap-4">
+                    <h2 class="text-xl font-semibold text-slate-800">Journal Content</h2>
+                    <button type="button" id="aiFillBtn" class="flex items-center justify-center gap-2 px-5 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold rounded-lg transition-colors border border-purple-300 shadow-sm">
+                        <span>✨ Auto-Fill with AI</span>
+                        <svg id="aiSpinner" class="animate-spin hidden w-4 h-4 text-purple-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    </button>
+                </div>
+                
+                <div id="aiErrorMsg" class="hidden mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-200">
+                    Failed to connect to AI. Please check your API key or fill the boxes manually.
+                </div>
+
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">1. Experience (Class Content)</label>
+                        <textarea id="experience" required class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none leading-relaxed" placeholder="Detailed description of the class experience..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">2. Feelings (Emotional Reactions)</label>
+                        <textarea id="feelings" required class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none leading-relaxed" placeholder="How did you feel about the topics discussed?"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">3. Learning (Key Insights)</label>
+                        <textarea id="learning" required class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none leading-relaxed" placeholder="What were the main takeaways and insights?"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">4. Application (Practical Use)</label>
+                        <textarea id="application" required class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none leading-relaxed" placeholder="How will you apply this knowledge in real-world scenarios?"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">5. Conclusion</label>
+                        <textarea id="conclusion" required class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none leading-relaxed" placeholder="Summarize your overall experience and final thoughts..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-10 flex justify-between items-center border-t border-slate-200 pt-6">
+                <button type="button" id="prevBtn" class="hidden px-6 py-2.5 rounded-lg font-medium text-slate-600 hover:bg-slate-100 transition-colors">
+                    &larr; Back
+                </button>
+                <div class="flex-grow"></div>
+                <button type="button" id="nextBtn" class="px-8 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium shadow-md transition-all hover:shadow-lg">
+                    Next Step &rarr;
+                </button>
+                
+                <button type="submit" id="generateBtn" class="hidden flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg font-bold shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl">
+                    <span id="btnText">Generate PDF</span>
+                </button>
+            </div>
+            
+            <div id="successMsg" class="hidden mt-4 p-4 bg-green-50 text-green-700 rounded-lg text-center font-medium border border-green-200">
+                🎉 PDF Generated Successfully! Check your downloads.
+            </div>
+        </form>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
