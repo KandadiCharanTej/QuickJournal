@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const fetch = require("node-fetch");
@@ -10,7 +11,7 @@ app.use(express.json());
 app.use(express.static(__dirname));
 
 // 🔥 PUT YOUR GEMINI API KEY HERE
-const API_KEY = "AIzaSyC2CZzQ2GH5GKtCvWEAg1g31FLjDmjOdSE";
+const API_KEY = process.env.API_KEY;
 
 app.post("/api/generate", async (req, res) => {
     const { prompt } = req.body;
