@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
         aiErrorMsg.classList.add('hidden');
 
         // ✅ STEP: Replace the URL below with YOUR n8n cloud webhook URL
-        const endpoint = 'https://your-backend-url.onrender.com/api/generate';
+        const endpoint = 'https://quickjournal-backend.onrender.com';
 
         
         // ✅ Rich prompt that includes the FULL syllabus so AI writes accurate content
