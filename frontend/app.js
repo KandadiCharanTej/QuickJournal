@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
         aiErrorMsg.classList.add('hidden');
 
         // ✅ STEP: Replace the URL below with YOUR n8n cloud webhook URL
-        const endpoint = 'http://localhost:3000/api/generate';
+        const endpoint = 'https://your-backend-url.onrender.com/api/generate';
 
         
         // ✅ Rich prompt that includes the FULL syllabus so AI writes accurate content
@@ -287,7 +287,7 @@ IMPORTANT:
             }
             
             const data = await res.json();
-            const text = data.candidates[0].content.parts[0].text;
+            const text = data.text;
 
             // Parse sections using markers
             const expMatch  = text.match(/\[EXP\]([\s\S]*?)\[FEEL\]/i);
