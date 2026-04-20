@@ -1,4 +1,7 @@
 require("dotenv").config();
+
+console.log("API KEY STATUS:", process.env.GROQ_API_KEY ? "FOUND" : "MISSING");
+
 const express = require("express");
 const cors = require("cors");
 const fetch = require("node-fetch");
@@ -34,8 +37,15 @@ async function generateWithAI(prompt) {
 
         const data = await response.json();
 
+        // 🔥 IMPORTANT DEBUG
+        console.log("GROQ RESPONSE:", JSON.stringify(data, null, 2));
+
         if (!response.ok) {
             throw new Error(data.error?.message || "API failed");
+        }
+
+        if (!data?.choices?.[0]?.message?.content) {
+            throw new Error("No content returned from AI");
         }
 
         return data.choices[0].message.content;
@@ -62,6 +72,8 @@ app.post("/api/generate", async (req, res) => {
         res.json({ text });
 
     } catch (err) {
+        console.error("ROUTE ERROR:", err.message);
+
         res.status(500).json({
             error: "AI failed",
             details: err.message
@@ -70,7 +82,7 @@ app.post("/api/generate", async (req, res) => {
 });
 
 /* =========================
-   TEST ROUTE
+   HEALTH CHECK
 ========================= */
 app.get("/", (req, res) => {
     res.send("QuickJournal API running 🚀");
