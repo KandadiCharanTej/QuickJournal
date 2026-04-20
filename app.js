@@ -436,6 +436,17 @@ IMPORTANT:
             drawContentSection('4. Application\n(Practical Use)', data.app, doc.lastAutoTable.finalY);
             drawContentSection('5. Conclusion', data.conc, doc.lastAutoTable.finalY);
 
+            // Add watermark link at the bottom center
+            const watermarkY = doc.lastAutoTable.finalY + 15;
+            doc.setFont("times", "italic");
+            doc.setFontSize(10);
+            doc.setTextColor(128, 128, 128); // Grey color for subtle watermark
+            doc.text("Generated with QuickJournal", pageWidth / 2, watermarkY, { align: "center" });
+            
+            // Reset state
+            doc.setTextColor(0, 0, 0);
+            doc.setFont("times", "normal");
+
             // Draw header image on ALL pages created
             const totalPages = doc.internal.getNumberOfPages();
             for (let i = 1; i <= totalPages; i++) {
