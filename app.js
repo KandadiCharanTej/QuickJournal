@@ -22,10 +22,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 indicator.className = "w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center font-bold shadow-md transition-colors";
                 indicator.innerHTML = "✓";
             } else if (i === currentStep) {
-                indicator.className = "w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold shadow-md transition-colors";
+                indicator.className = "w-10 h-10 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold shadow-lg shadow-violet-500/40 transition-colors";
                 indicator.innerHTML = i;
             } else {
-                indicator.className = "w-10 h-10 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold shadow-sm transition-colors";
+                indicator.className = "w-10 h-10 rounded-full bg-slate-100 border border-slate-200 text-slate-400 flex items-center justify-center font-bold transition-colors";
                 indicator.innerHTML = i;
             }
         }

@@ -1,159 +1,331 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reflective Journal Generator</title>
+    <title>QuickJournal | Smart Academic Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body class="text-slate-800 antialiased py-8 px-4 sm:px-6 lg:px-8 flex flex-col items-center">
+<body class="antialiased relative text-slate-800 flex flex-col items-center">
+    
+    <!-- 1. Glass Navbar -->
+    <nav class="glass-nav sticky top-0 z-50 px-6 py-4 flex justify-between items-center w-full max-w-7xl mx-auto rounded-b-2xl">
+        <div class="flex items-center gap-4">
+            <!-- Added the user's NIAT x Aurora logo -->
+            <img src="logo.png" alt="NIAT Aurora" class="h-10 object-contain" onerror="this.style.display='none'">
+            <span class="text-2xl mt-1 font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-fuchsia-500">QuickJournal</span>
+        </div>
+        <div class="hidden sm:block text-sm font-semibold text-slate-500">
+            Powered for NIAT x Aurora Students
+        </div>
+    </nav>
 
-    <header class="w-full max-w-5xl flex flex-col items-center justify-center mb-10 text-center animate-fade-in">
-        <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Reflective Journal Portal</h1>
-        <p class="text-slate-600 font-medium mt-1">Academic Submission Generator</p>
-    </header>
+    <!-- 2. Hero Section -->
+    <section class="min-h-[80vh] w-full flex flex-col items-center justify-center px-4 text-center relative z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-100/50 via-slate-50 to-slate-50">
+        <div class="inline-block mb-4 mt-8 px-4 py-1.5 rounded-full border border-violet-200 bg-white text-sm font-bold text-violet-700 shadow-sm">
+            ✨ AI-Powered Academic Assistant
+        </div>
+        <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-800 mt-4 mb-6 leading-tight max-w-4xl drop-shadow-sm">
+            Write Smart. Submit Faster.
+        </h1>
+        <p class="text-lg md:text-xl text-slate-500 max-w-2xl mb-10 font-medium leading-relaxed">
+            Generate complete reflective journals in seconds using AI — structured, human-like, and ready to submit exactly as your professors expect.
+        </p>
+        <a href="#generator" class="btn-glow px-8 py-4 rounded-xl text-lg flex items-center gap-2 group shadow-xl">
+            Generate Journal Now
+            <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </a>
+    </section>
 
-    <main class="w-full max-w-5xl glass-panel rounded-2xl p-6 sm:p-10 shadow-xl">
+    <!-- 3. Features Section -->
+    <section class="py-24 px-4 w-full max-w-7xl mx-auto relative z-10">
+        <div class="text-center mb-16">
+            <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-500 mb-4">Engineered for Excellence</h2>
+            <p class="text-slate-500 font-medium">Stop wasting hours on formatting and generic summaries.</p>
+        </div>
         
-        <div class="flex items-center justify-between mb-8 relative">
-            <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-200 z-0 rounded-full hidden sm:block"></div>
-            <div class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-indigo-600 z-0 rounded-full transition-all duration-300 hidden sm:block" id="progress-bar" style="width: 0%;"></div>
-            
-            <div class="step-indicator relative z-10 flex flex-col items-center gap-2" id="indicator-1">
-                <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold shadow-md transition-colors">1</div>
-                <span class="text-xs font-semibold text-indigo-700 hidden sm:block">Student Info</span>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Card 1 -->
+            <div class="glass-panel p-8 rounded-2xl hover-lift">
+                <div class="w-12 h-12 rounded-lg bg-violet-100 border border-violet-200 flex items-center justify-center mb-6 text-violet-600 text-xl shadow-sm">⚡</div>
+                <h3 class="text-xl font-bold text-slate-800 mb-3">Instant AI Generation</h3>
+                <p class="text-slate-600 text-sm leading-relaxed">Turn your topic into a structured 2000-word academic journal instantly with highly context-aware AI models that understand exactly what you need.</p>
             </div>
-            <div class="step-indicator relative z-10 flex flex-col items-center gap-2" id="indicator-2">
-                <div class="w-10 h-10 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold shadow-sm transition-colors">2</div>
-                <span class="text-xs font-semibold text-slate-500 hidden sm:block">Academic Info</span>
+            <!-- Card 2 -->
+            <div class="glass-panel p-8 rounded-2xl hover-lift">
+                <div class="w-12 h-12 rounded-lg bg-violet-100 border border-violet-200 flex items-center justify-center mb-6 text-violet-600 text-xl shadow-sm">📄</div>
+                <h3 class="text-xl font-bold text-slate-800 mb-3">Auto-Formatted PDF</h3>
+                <p class="text-slate-600 text-sm leading-relaxed">Downloads perfectly structured with the official Aurora letterhead, cover tables, and exact formatting margins required for submission.</p>
             </div>
-            <div class="step-indicator relative z-10 flex flex-col items-center gap-2" id="indicator-3">
-                <div class="w-10 h-10 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center font-bold shadow-sm transition-colors">3</div>
-                <span class="text-xs font-semibold text-slate-500 hidden sm:block">Journal Content</span>
+            <!-- Card 3 -->
+            <div class="glass-panel p-8 rounded-2xl hover-lift">
+                <div class="w-12 h-12 rounded-lg bg-violet-100 border border-violet-200 flex items-center justify-center mb-6 text-violet-600 text-xl shadow-sm">🎓</div>
+                <h3 class="text-xl font-bold text-slate-800 mb-3">Structured Content</h3>
+                <p class="text-slate-600 text-sm leading-relaxed">Automatically divides content into required sections: Experience, Feelings, Learning, Application, and Conclusion exactly as graded.</p>
+            </div>
+            <!-- Card 4 -->
+            <div class="glass-panel p-8 rounded-2xl hover-lift">
+                <div class="w-12 h-12 rounded-lg bg-violet-100 border border-violet-200 flex items-center justify-center mb-6 text-violet-600 text-xl shadow-sm">🧠</div>
+                <h3 class="text-xl font-bold text-slate-800 mb-3">Human-like Writing Style</h3>
+                <p class="text-slate-600 text-sm leading-relaxed">Bypasses basic AI checking patterns by using authentic reflection points, academic transitions, and natural student phrasing.</p>
+            </div>
+            <!-- Card 5 -->
+            <div class="glass-panel p-8 rounded-2xl hover-lift lg:col-span-2">
+                <div class="flex items-start gap-6">
+                    <div class="w-12 h-12 shrink-0 rounded-lg bg-violet-100 border border-violet-200 flex items-center justify-center mt-1 text-violet-600 text-xl shadow-sm">⏱️</div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800 mb-3">Saves 2–3 Hours Per Assignment</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed max-w-lg">Focus on learning, not formatting. Reclaim your weekend while delivering top-tier reflective journals that hit every grading matrix point meticulously, cleanly, and securely.</p>
+                    </div>
+                </div>
             </div>
         </div>
+    </section>
 
-        <form id="journalForm">
-            <div id="step-1" class="step-content active">
-                <h2 class="text-xl font-semibold mb-6 flex items-center gap-2 text-slate-800 border-b pb-3">
-                    Student Information
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Student Name</label>
-                        <input type="text" id="studentName" required class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none" placeholder="e.g. Student Name">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Registration Number</label>
-                        <input type="text" id="regNumber" required class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none" placeholder="e.g. Registration ID">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Class & Section</label>
-                        <input type="text" id="classSection" required class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none" placeholder="e.g. Class & Section">
-                    </div>
+    <!-- 4. How It Works -->
+    <section class="py-24 px-4 bg-white border-y border-slate-200 relative z-10 w-full shadow-sm">
+        <div class="max-w-5xl mx-auto text-center">
+            <h2 class="text-3xl font-bold text-slate-800 mb-16">How It Works</h2>
+            
+            <div class="flex flex-col md:flex-row justify-between relative gap-10">
+                <div class="step-glow-line hidden md:block"></div>
+                
+                <div class="relative z-10 flex flex-col items-center glass-panel p-6 rounded-2xl flex-1 border-violet-200 hover:border-violet-400 transition-colors bg-white">
+                    <div class="w-12 h-12 rounded-full bg-violet-600 border-4 border-white flex items-center justify-center text-white font-bold mb-4 shadow-lg shadow-violet-500/30">1</div>
+                    <h4 class="text-lg font-bold text-slate-800 mb-2">Enter Details</h4>
+                    <p class="text-slate-500 text-sm">Select your subject and topic from the academic dropdowns inside the dashboard.</p>
+                </div>
+                
+                <div class="relative z-10 flex flex-col items-center glass-panel p-6 rounded-2xl flex-1 border-violet-200 hover:border-violet-400 transition-colors bg-white">
+                    <div class="w-12 h-12 rounded-full bg-violet-600 border-4 border-white flex items-center justify-center text-white font-bold mb-4 shadow-lg shadow-violet-500/30">2</div>
+                    <h4 class="text-lg font-bold text-slate-800 mb-2">AI Generates Content</h4>
+                    <p class="text-slate-500 text-sm">Our powerful cloud AI engine writes a highly structured academic entry for you instantly.</p>
+                </div>
+                
+                <div class="relative z-10 flex flex-col items-center glass-panel p-6 rounded-2xl flex-1 border-violet-200 hover:border-violet-400 transition-colors bg-gradient-to-b from-violet-50 to-white">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 border-4 border-white flex items-center justify-center text-white font-bold mb-4 shadow-lg shadow-fuchsia-500/40">3</div>
+                    <h4 class="text-lg font-bold text-slate-800 mb-2">Download PDF</h4>
+                    <p class="text-slate-500 text-sm">Export a professionally formatted PDF ready to submit, completely seamlessly.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. Journal Preview Section -->
+    <section class="py-24 px-4 w-full max-w-6xl mx-auto relative z-10 flex flex-col lg:flex-row items-center gap-16">
+        <div class="flex-1">
+            <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-500 mb-6">Pixel-Perfect Formatting.</h2>
+            <p class="text-slate-600 text-lg leading-relaxed mb-6 font-medium">
+                Don't worry about tables, margins, fonts, or headers. QuickJournal automatically aligns everything perfectly to match academic submission guidelines visually.
+            </p>
+            <ul class="space-y-4">
+                <li class="flex items-center gap-3 text-slate-700 font-semibold">
+                    <span class="text-violet-600 bg-violet-100 rounded-full w-6 h-6 flex items-center justify-center">✓</span> Official University Letterhead Injection
+                </li>
+                <li class="flex items-center gap-3 text-slate-700 font-semibold">
+                    <span class="text-violet-600 bg-violet-100 rounded-full w-6 h-6 flex items-center justify-center">✓</span> Automated Cover Information Tables
+                </li>
+                <li class="flex items-center gap-3 text-slate-700 font-semibold">
+                    <span class="text-violet-600 bg-violet-100 rounded-full w-6 h-6 flex items-center justify-center">✓</span> Standardized Font & Margin Compliance
+                </li>
+            </ul>
+        </div>
+        <div class="flex-1 preview-tilt-container perspective w-full max-w-md">
+            <div class="preview-tilt p-6 text-xs text-black border border-slate-200">
+                <div class="border-b-4 border-black pb-4 mb-4 text-center pb-2">
+                    <h3 class="text-lg font-bold uppercase" style="font-family: serif;">Aurora Higher Education</h3>
+                    <p class="text-slate-600">Uppal, Hyderabad, Telangana</p>
+                </div>
+                <table class="w-full border-collapse border border-black mb-4">
+                    <tr><td class="border border-black p-1 font-bold">Student Name</td><td class="border border-black p-1" colspan="2">Name</td></tr>
+                    <tr><td class="border border-black p-1 font-bold">Registration No</td><td class="border border-black p-1">Registration No</td><td class="border border-black p-1 font-bold">Class & Section</td></tr>
+                </table>
+                <h4 class="text-center font-bold mb-4" style="font-family: serif;">Reflective Journal - III</h4>
+                <div class="border border-black p-2 mb-2 bg-slate-50"><span class="font-bold text-slate-800">1. Experience:</span> The module comprehensively covered control structures...</div>
+                <div class="border border-black p-2 mb-2 bg-slate-50"><span class="font-bold text-slate-800">2. Feelings:</span> I felt engaged yet appropriately challenged by...</div>
+                <div class="border border-black p-2 bg-slate-50"><span class="font-bold text-slate-800">3. Learning:</span> Mastered iteration including while and for loops...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. Generator App (The core form) -->
+    <section id="generator" class="py-24 px-4 w-full max-w-5xl mx-auto relative z-10 scroll-mt-20">
+        <div class="text-center mb-10">
+            <h2 class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-fuchsia-500 mb-3">Dashboard</h2>
+            <p class="text-slate-500 font-medium">Complete the steps below to build your document.</p>
+        </div>
+        
+        <main class="w-full bg-white border border-slate-200 rounded-2xl p-6 sm:p-10 shadow-xl relative">
+            <div class="flex items-center justify-between mb-10 relative">
+                <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-[3px] bg-slate-100 z-0 rounded-full hidden sm:block"></div>
+                <div class="absolute left-0 top-1/2 -translate-y-1/2 h-[3px] bg-violet-600 z-0 rounded-full transition-all duration-300 hidden sm:block shadow-sm" id="progress-bar" style="width: 0%;"></div>
+                
+                <div class="step-indicator relative z-10 flex flex-col items-center gap-3" id="indicator-1">
+                    <div class="w-10 h-10 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold shadow-lg shadow-violet-500/40 transition-colors border-2 border-white">1</div>
+                    <span class="text-xs font-bold text-violet-700 hidden sm:block">Student Info</span>
+                </div>
+                <div class="step-indicator relative z-10 flex flex-col items-center gap-3" id="indicator-2">
+                    <div class="w-10 h-10 rounded-full bg-slate-100 border-2 border-white text-slate-400 flex items-center justify-center font-bold transition-colors shadow-sm">2</div>
+                    <span class="text-xs font-bold text-slate-400 hidden sm:block">Academic Info</span>
+                </div>
+                <div class="step-indicator relative z-10 flex flex-col items-center gap-3" id="indicator-3">
+                    <div class="w-10 h-10 rounded-full bg-slate-100 border-2 border-white text-slate-400 flex items-center justify-center font-bold transition-colors shadow-sm">3</div>
+                    <span class="text-xs font-bold text-slate-400 hidden sm:block">Journal Content</span>
                 </div>
             </div>
 
-            <div id="step-2" class="step-content">
-                <h2 class="text-xl font-semibold mb-6 flex items-center gap-2 text-slate-800 border-b pb-3">
-                    Academic Information
-                </h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Year</label>
-                        <select id="year" required class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none bg-white">
-                            <option value="" disabled selected>Select Year</option>
-                            <option value="I">Year I</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Term</label>
-                        <select id="term" required disabled class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none bg-slate-50 cursor-not-allowed">
-                            <option value="">Select Year First</option>
-                        </select>
-                    </div>
-                    <div class="lg:col-span-1">
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Subject Name</label>
-                        <select id="subject" required disabled class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none bg-slate-50 cursor-not-allowed">
-                            <option value="">Select Term First</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Assessment Number</label>
-                        <select id="assessmentNo" required disabled class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none bg-slate-50 cursor-not-allowed">
-                            <option value="">Select Subject First</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Date (Entry & Submission)</label>
-                        <input type="date" id="journalDate" required class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none">
-                    </div>
-                    <div class="lg:col-span-3">
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Journal Entry Topic</label>
-                        <input type="text" id="topic" readonly class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg bg-indigo-50 text-indigo-800 font-semibold cursor-not-allowed" placeholder="Topic auto-generates based on selection">
+            <form id="journalForm">
+                <div id="step-1" class="step-content active">
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2 text-slate-800 border-b border-slate-100 pb-3">
+                        Student Information
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Student Name</label>
+                            <input type="text" id="studentName" required class="form-input w-full px-4 py-3 rounded-lg shadow-sm" placeholder="e.g. Student Name">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Registration Number</label>
+                            <input type="text" id="regNumber" required class="form-input w-full px-4 py-3 rounded-lg shadow-sm" placeholder="e.g. Registration ID">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Class & Section</label>
+                            <input type="text" id="classSection" required class="form-input w-full px-4 py-3 rounded-lg shadow-sm" placeholder="e.g. Class & Section">
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div id="step-3" class="step-content">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 border-b pb-3 gap-4">
-                    <h2 class="text-xl font-semibold text-slate-800">Journal Content</h2>
-                    <button type="button" id="aiFillBtn" class="flex items-center justify-center gap-2 px-5 py-2 bg-purple-100 hover:bg-purple-200 text-purple-700 font-bold rounded-lg transition-colors border border-purple-300 shadow-sm">
-                        <span>✨ Auto-Fill with AI</span>
-                        <svg id="aiSpinner" class="animate-spin hidden w-4 h-4 text-purple-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                <div id="step-2" class="step-content">
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-2 text-slate-800 border-b border-slate-100 pb-3">
+                        Academic Information
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Year</label>
+                            <select id="year" required class="form-input w-full px-4 py-3 rounded-lg shadow-sm">
+                                <option value="" disabled selected>Select Year</option>
+                                <option value="I">Year I</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Term</label>
+                            <select id="term" required disabled class="form-input w-full px-4 py-3 rounded-lg shadow-sm">
+                                <option value="">Select Year First</option>
+                            </select>
+                        </div>
+                        <div class="lg:col-span-1">
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Subject Name</label>
+                            <select id="subject" required disabled class="form-input w-full px-4 py-3 rounded-lg shadow-sm">
+                                <option value="">Select Term First</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Assessment Number</label>
+                            <select id="assessmentNo" required disabled class="form-input w-full px-4 py-3 rounded-lg shadow-sm">
+                                <option value="">Select Subject First</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Date <span class="font-normal text-slate-400">(Entry & Submission)</span></label>
+                            <input type="date" id="journalDate" required class="form-input w-full px-4 py-3 rounded-lg shadow-sm">
+                        </div>
+                        <div class="lg:col-span-3">
+                            <label class="block text-sm font-bold text-slate-700 mb-2">Journal Entry Topic</label>
+                            <input type="text" id="topic" readonly class="form-input w-full px-4 py-3 rounded-lg border border-dashed border-violet-300 text-violet-700 bg-violet-50 shadow-sm" placeholder="Topic auto-generates based on selection">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="step-3" class="step-content">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 border-b border-slate-100 pb-4 gap-4">
+                        <h2 class="text-xl font-bold text-slate-800">Journal Content</h2>
+                        <button type="button" id="aiFillBtn" class="flex items-center justify-center gap-2 px-5 py-2.5 bg-violet-100 hover:bg-violet-200 text-violet-700 font-bold rounded-lg transition-colors border border-violet-200 shadow-sm hover:shadow-md">
+                            <span class="">✨</span> <span>Auto-Fill with AI</span>
+                            <svg id="aiSpinner" class="animate-spin hidden w-4 h-4 text-violet-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        </button>
+                    </div>
+                    
+                    <div id="aiErrorMsg" class="hidden mb-6 p-4 bg-red-50 text-red-600 font-medium text-sm rounded-lg border border-red-200 shadow-sm">
+                        Failed to connect to AI. Please check your API key or fill the boxes manually.
+                    </div>
+
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">1. Experience <span class="text-slate-400 font-medium">(Class Content)</span></label>
+                            <textarea id="experience" required class="form-input w-full px-4 py-3 rounded-lg leading-relaxed shadow-sm" placeholder="Detailed description of the class experience..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">2. Feelings <span class="text-slate-400 font-medium">(Emotional Reactions)</span></label>
+                            <textarea id="feelings" required class="form-input w-full px-4 py-3 rounded-lg leading-relaxed shadow-sm" placeholder="How did you feel about the topics discussed?"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">3. Learning <span class="text-slate-400 font-medium">(Key Insights)</span></label>
+                            <textarea id="learning" required class="form-input w-full px-4 py-3 rounded-lg leading-relaxed shadow-sm" placeholder="What were the main takeaways and insights?"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">4. Application <span class="text-slate-400 font-medium">(Practical Use)</span></label>
+                            <textarea id="application" required class="form-input w-full px-4 py-3 rounded-lg leading-relaxed shadow-sm" placeholder="How will you apply this knowledge in real-world scenarios?"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">5. Conclusion</label>
+                            <textarea id="conclusion" required class="form-input w-full px-4 py-3 rounded-lg leading-relaxed shadow-sm" placeholder="Summarize your overall experience and final thoughts..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-10 flex justify-between items-center border-t border-slate-100 pt-6">
+                    <button type="button" id="prevBtn" class="hidden px-6 py-2.5 rounded-lg font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-colors">
+                        &larr; Back
+                    </button>
+                    <div class="flex-grow"></div>
+                    <button type="button" id="nextBtn" class="px-8 py-2.5 bg-slate-800 hover:bg-slate-900 border border-slate-700 text-white rounded-lg font-bold shadow-md transition-all hover:shadow-lg">
+                        Next Step &rarr;
+                    </button>
+                    
+                    <button type="submit" id="generateBtn" class="hidden flex items-center gap-2 px-8 py-3 btn-glow rounded-xl font-bold shadow-lg">
+                        <span id="btnText">Download PDF Document</span>
                     </button>
                 </div>
                 
-                <div id="aiErrorMsg" class="hidden mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-200">
-                    Failed to connect to AI. Please check your API key or fill the boxes manually.
+                <div id="successMsg" class="hidden mt-6 p-4 bg-emerald-50 text-emerald-700 rounded-lg text-center font-bold border border-emerald-200 shadow-sm">
+                    <span class="">🎉</span> PDF Generated Successfully! Check your downloads folder.
                 </div>
+            </form>
+        </main>
+    </section>
 
-                <div class="space-y-5">
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">1. Experience (Class Content)</label>
-                        <textarea id="experience" required class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none leading-relaxed" placeholder="Detailed description of the class experience..."></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">2. Feelings (Emotional Reactions)</label>
-                        <textarea id="feelings" required class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none leading-relaxed" placeholder="How did you feel about the topics discussed?"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">3. Learning (Key Insights)</label>
-                        <textarea id="learning" required class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none leading-relaxed" placeholder="What were the main takeaways and insights?"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">4. Application (Practical Use)</label>
-                        <textarea id="application" required class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none leading-relaxed" placeholder="How will you apply this knowledge in real-world scenarios?"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">5. Conclusion</label>
-                        <textarea id="conclusion" required class="form-input w-full px-4 py-3 border border-slate-200 rounded-lg outline-none leading-relaxed" placeholder="Summarize your overall experience and final thoughts..."></textarea>
-                    </div>
-                </div>
-            </div>
+    <!-- 6. Call-To-Action Section -->
+    <section class="py-24 px-4 text-center border-t border-slate-200 bg-gradient-to-t from-violet-50 to-transparent relative z-10 w-full">
+        <h2 class="text-4xl font-bold text-slate-800 mb-6">Start Generating Now</h2>
+        <p class="text-slate-600 mb-10 max-w-xl mx-auto font-medium">Join hundreds of successful students submitting flawless reflective journals instantly without the stress of manual formatting.</p>
+        <a href="#generator" class="btn-glow px-10 py-4 mx-auto rounded-xl text-lg inline-block font-semibold shadow-xl">
+            Launch Generator
+        </a>
+    </section>
 
-            <div class="mt-10 flex justify-between items-center border-t border-slate-200 pt-6">
-                <button type="button" id="prevBtn" class="hidden px-6 py-2.5 rounded-lg font-medium text-slate-600 hover:bg-slate-100 transition-colors">
-                    &larr; Back
-                </button>
-                <div class="flex-grow"></div>
-                <button type="button" id="nextBtn" class="px-8 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium shadow-md transition-all hover:shadow-lg">
-                    Next Step &rarr;
-                </button>
-                
-                <button type="submit" id="generateBtn" class="hidden flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg font-bold shadow-lg transition-all hover:-translate-y-0.5 hover:shadow-xl">
-                    <span id="btnText">Generate PDF</span>
-                </button>
+    <!-- 7. Footer -->
+    <footer class="py-12 border-t border-slate-200 bg-slate-50 text-slate-500 relative z-10 w-full mt-auto">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-3">
+                <span class="font-bold text-slate-700">QuickJournal</span>
             </div>
-            
-            <div id="successMsg" class="hidden mt-4 p-4 bg-green-50 text-green-700 rounded-lg text-center font-medium border border-green-200">
-                🎉 PDF Generated Successfully! Check your downloads.
+            <div class="flex gap-6 text-sm font-semibold">
+                <a href="#" class="hover:text-violet-600 transition-colors">About QuickJournal</a>
+                <span class="text-slate-300">|</span>
+                <a href="#" class="hover:text-violet-600 transition-colors">Built for Students</a>
+                <span class="text-slate-300">|</span>
+                <a href="#" class="hover:text-violet-600 transition-colors">GitHub</a>
+                <span class="text-slate-300">|</span>
+                <a href="#" class="hover:text-violet-600 transition-colors">Contact</a>
             </div>
-        </form>
-    </main>
+            <div class="text-xs font-semibold text-slate-400">
+                &copy; 2026 Academic Tools. All rights reserved.
+            </div>
+        </div>
+    </footer>
 
     <script src="data.js"></script>
     <script src="app.js"></script>
