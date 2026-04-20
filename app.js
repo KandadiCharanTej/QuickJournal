@@ -313,14 +313,38 @@ IMPORTANT:
     });
 
     // ---------------- FORM SUBMIT & PDF GENERATION ----------------
-    document.getElementById('journalForm').addEventListener('submit', (e) => {
+    document.getElementById('journalForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         if(!validateCurrentStep()) return;
 
         const successMsg = document.getElementById('successMsg');
         successMsg.classList.add('hidden');
+        
+        // Helper to load image
+        const getBase64ImageFromURL = (url) => {
+            return new Promise((resolve, reject) => {
+                var img = new Image();
+                img.setAttribute("crossOrigin", "anonymous");
+                img.onload = () => {
+                    var canvas = document.createElement("canvas");
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    var ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL("image/png"));
+                };
+                img.onerror = error => reject(error);
+                img.src = url;
+            });
+        };
 
         try {
+            const btnText = document.getElementById('btnText');
+            if (btnText) btnText.innerText = "Generating PDF...";
+            document.getElementById('generateBtn').disabled = true;
+
+            const headerImageData = await getBase64ImageFromURL('header.png').catch(() => null);
+
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ format: 'a4', orientation: 'portrait' });
 
@@ -347,26 +371,12 @@ IMPORTANT:
             };
 
             const pageWidth = doc.internal.pageSize.width;
-            let startY = 15;
-
-            // Header
-            doc.setFont("times", "bold");
-            doc.setFontSize(16);
-            doc.text("AURORA HIGHER EDUCATION", pageWidth/2, startY, { align: "center" });
-            doc.text("AND RESEARCH ACADEMY", pageWidth/2, startY + 6, { align: "center" });
-            
-            doc.setFontSize(11);
-            doc.setFont("times", "normal");
-            doc.text("Deemed-to-be-University Estd.u/s.03 of UGC Act 1956", pageWidth/2, startY + 12, { align: "center" });
-            
-            doc.setFontSize(10);
-            doc.text("Uppal, Hyderabad, Telangana | Bhongir, Yadadri, Telangana", pageWidth/2, startY + 18, { align: "center" });
-            
-            startY += 25;
+            let startY = 45; // Start below the header space
 
             // Table 1: Student Information
             doc.autoTable({
                 startY: startY,
+                margin: { top: 45 },
                 theme: 'grid',
                 styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
                 body: [
@@ -380,6 +390,7 @@ IMPORTANT:
             // Table 2: Assessment Data
             doc.autoTable({
                 startY: doc.lastAutoTable.finalY + 5,
+                margin: { top: 45 },
                 theme: 'grid',
                 styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
                 body: [
@@ -398,6 +409,7 @@ IMPORTANT:
             currentY += 8;
             doc.autoTable({
                 startY: currentY,
+                margin: { top: 45 },
                 theme: 'grid',
                 styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
                 body: [
@@ -410,6 +422,7 @@ IMPORTANT:
             const drawContentSection = (title, content, startPosY) => {
                 doc.autoTable({
                     startY: startPosY,
+                    margin: { top: 45 },
                     theme: 'grid',
                     styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 4 },
                     columnStyles: { 0: { cellWidth: 40, fontStyle: 'bold' } },
@@ -423,16 +436,48 @@ IMPORTANT:
             drawContentSection('4. Application\n(Practical Use)', data.app, doc.lastAutoTable.finalY);
             drawContentSection('5. Conclusion', data.conc, doc.lastAutoTable.finalY);
 
-            // DOWNLOAD THE PDF — clean filename e.g. 252U1R1110_Module_III.pdf
-            const cleanFilename = `${data.reg}_Module_${moduleRoman}_${data.sub.replace(/[^a-zA-Z0-9]/g,'_')}`;
+            // Draw header image on ALL pages created
+            const totalPages = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= totalPages; i++) {
+                doc.setPage(i);
+                if (headerImageData) {
+                    doc.addImage(headerImageData, 'PNG', 0, 0, pageWidth, 35);
+                } else {
+                    // Fallback if image failed to load
+                    doc.setFont("times", "bold");
+                    doc.setFontSize(16);
+                    doc.text("AURORA HIGHER EDUCATION", pageWidth/2, 15, { align: "center" });
+                    doc.text("AND RESEARCH ACADEMY", pageWidth/2, 21, { align: "center" });
+                    doc.setFontSize(11);
+                    doc.setFont("times", "normal");
+                    doc.text("Deemed-to-be-University Estd.u/s.03 of UGC Act 1956", pageWidth/2, 27, { align: "center" });
+                    doc.setFontSize(10);
+                    doc.text("Uppal, Hyderabad, Telangana | Bhongir, Yadadri, Telangana", pageWidth/2, 33, { align: "center" });
+                }
+            }
+
+            // DOWNLOAD THE PDF
+            const safeName = data.name.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+            const safeReg = data.reg.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+            const safeSub = data.sub.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+            const cleanFilename = `${safeName}_${safeReg}_ReflectiveJournal_${safeSub}-${moduleRoman}`;
             doc.save(`${cleanFilename}.pdf`);
 
             // Show Success Notification
             successMsg.classList.remove('hidden');
 
+            if (document.getElementById('btnText')) {
+                document.getElementById('btnText').innerText = "Generate PDF";
+                document.getElementById('generateBtn').disabled = false;
+            }
+
         } catch (err) {
             console.error("PDF Generation Error:", err);
             alert("An error occurred while building the PDF structure. Please try again.");
+            if (document.getElementById('btnText')) {
+                document.getElementById('btnText').innerText = "Generate PDF";
+                document.getElementById('generateBtn').disabled = false;
+            }
         }
     });
 
