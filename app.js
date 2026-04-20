@@ -258,8 +258,8 @@ WRITING STYLE RULES (VERY IMPORTANT):
 
 WORD COUNT:
 
-- Total ~2000-2200 words
-- Each section ~400–450 words
+- Total ~2100 words
+- Each section ~420 words
 
 ---------------------------------------
 

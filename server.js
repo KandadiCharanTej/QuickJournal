@@ -10,62 +10,83 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(__dirname));
 
-// 🔥 PUT YOUR GEMINI API KEY HERE
-const API_KEY = process.env.API_KEY;
+const API_KEY = process.env.GROQ_API_KEY;
 
-app.post("/api/generate", async (req, res) => {
-    const { prompt } = req.body;
-
+/* =========================
+   AI FUNCTION (DEBUG)
+========================= */
+async function generateWithAI(prompt) {
     try {
-        console.log("📤 Prompt received");
+        console.log("🔑 API KEY:", API_KEY ? "FOUND" : "MISSING");
 
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${API_KEY}`,
+            "https://api.groq.com/openai/v1/chat/completions",
             {
                 method: "POST",
                 headers: {
+                    "Authorization": `Bearer ${API_KEY}`,
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    contents: [
-                        {
-                            parts: [
-                                { text: prompt }
-                            ]
-                        }
-                    ]
+                    model: "llama-3.3-70b-versatile",
+                    messages: [
+                        { role: "user", content: prompt }
+                    ],
+                    max_tokens: 4000
                 })
             }
         );
 
         const data = await response.json();
 
-        console.log("📥 Gemini response:", data);
+        console.log("📥 FULL RESPONSE:", JSON.stringify(data, null, 2));
 
-        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-        if (!text) {
-            return res.status(500).json({
-                error: "AI failed",
-                details: data
-            });
+        // 🔥 IMPORTANT DEBUG
+        if (data.error) {
+            console.log("❌ API ERROR:", data.error);
+            return { error: data.error };
         }
 
-        // 🔥 IMPORTANT → match your frontend format
-        res.json({
-            candidates: [
-                {
-                    content: {
-                        parts: [{ text }]
-                    }
-                }
-            ]
-        });
+        const text = data?.choices?.[0]?.message?.content;
+
+        if (!text) {
+            return { error: "No text returned" };
+        }
+
+        return { text };
 
     } catch (err) {
-        console.log("❌ Server error:", err);
-        res.status(500).json({ error: "Server error" });
+        console.log("❌ CRASH:", err);
+        return { error: err.message };
     }
+}
+
+/* =========================
+   ROUTE
+========================= */
+app.post("/api/generate", async (req, res) => {
+    const { prompt } = req.body;
+
+    console.log("📤 Prompt received");
+
+    const result = await generateWithAI(prompt);
+
+    if (result.error) {
+        return res.status(500).json({
+            error: "AI failed",
+            details: result.error
+        });
+    }
+
+    res.json({
+        candidates: [
+            {
+                content: {
+                    parts: [{ text: result.text }]
+                }
+            }
+        ]
+    });
 });
 
 app.listen(PORT, () => {
