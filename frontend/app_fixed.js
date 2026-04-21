@@ -1,4 +1,4 @@
-/**
+﻿/**
  * app.js
  * Core application logic, AI generation, and PDF generation.
  */
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (i < currentStep) {
                 indicator.className = "w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center font-bold shadow-md transition-colors";
-                indicator.innerHTML = "✓";
+                indicator.innerHTML = "Γ£ô";
             } else if (i === currentStep) {
                 indicator.className = "w-10 h-10 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold shadow-lg shadow-violet-500/40 transition-colors";
                 indicator.innerHTML = i;
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const sub  = subjSel.value;
         const modules = academicData[year]?.[term]?.[sub] || {};
 
-        // Populate module dropdown with "Module I - Title" labels from data.js
+        // Γ£à Populate module dropdown with "Module I - Title" labels from data.js
         assessSel.innerHTML = '<option value="" disabled selected>Select Module</option>';
         const romanNumerals = ["I","II","III","IV","V","VI","VII","VIII","IX","X"];
         Object.keys(modules).forEach(num => {
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
         topicInp.value = "";
     });
 
-    // When module is selected, show the module title in the topic box
+    // Γ£à When module is selected, show the module title in the topic box
     function updateTopic() {
         const y = yearSel.value;
         const t = termSel.value;
@@ -162,13 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ---------------- AI AUTO-FILL LOGIC ----------------
     const aiFillBtn = document.getElementById('aiFillBtn');
-
-    function extractSection(text, startTag, endTag) {
-        const regex = new RegExp(`\\[${startTag}\\]([\\s\\S]*?)(\\[${endTag}\\]|$)`, "i");
-        const match = text.match(regex);
-        return match ? match[1].replace(/\*/g, '').trim() : "";
-    }
-
+    
     aiFillBtn.addEventListener('click', async () => {
         const topic = topicInp.value;
         const subject = subjSel.value;
@@ -181,6 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Γ£à Get the full syllabus text for this module from data.js
         const moduleData = academicData[y]?.[t]?.[subject]?.[moduleNum];
         const syllabus = moduleData?.syllabus || topic;
         const romanNumerals = ["I","II","III","IV","V","VI","VII","VIII","IX","X"];
@@ -193,171 +188,123 @@ document.addEventListener('DOMContentLoaded', () => {
         aiFillBtn.disabled = true;
         aiErrorMsg.classList.add('hidden');
 
-        // Note: Make sure the endpoint points to your live backend url when deployed.
-        const endpoint = 'https://quickjournal-backend.onrender.com/api/generate';
+        // Γ£à STEP: Replace the URL below with YOUR n8n cloud webhook URL
+        const endpoint = 'http://localhost:3000/api/generate';
 
-        const prompt = `
-You are a B.Tech student writing a deeply reflective academic journal.
+        
+        // Γ£à Rich prompt that includes the FULL syllabus so AI writes accurate content
+        const prompt =`
+You are a B.Tech student writing a reflective journal for an academic submission.
 
-Your task is to write a HIGH-QUALITY, HUMAN-LIKE reflective journal of approximately 2000-2200 words.
-
----------------------------------------
-STRICT OUTPUT FORMAT (DO NOT BREAK)
----------------------------------------
-
-You MUST follow this exact structure:
-
-[EXP]
-<Write experience section>
-
-[FEEL]
-<Write feelings section>
-
-[LEARN]
-<Write learning section>
-
-[APP]
-<Write application section>
-
-[CONC]
-<Write conclusion section>
-
-Do NOT skip any section.
-Do NOT rename tags.
-Do NOT add extra headings.
-
----------------------------------------
-CONTEXT
----------------------------------------
+Write a detailed reflective journal of around 2000-2200 words.
 
 Subject: ${subject}
 Module: Module ${moduleRoman} - ${topic}
 
 Topics Covered:
-${syllabus}
+Class Attributes and Methods:
+- Class attributes
+- Instance attributes and updating attributes
+- Access modifiers
+- Instance methods, class methods, static methods
+- Encapsulation
 
 ---------------------------------------
-WRITING INSTRUCTIONS
----------------------------------------
 
-Write like a real student reflecting on a classroom experience.
-
-The writing MUST:
-- Use FIRST PERSON ("I learned", "I felt")
-- Sound NATURAL and HUMAN (not robotic)
-- Include small imperfections like real thinking flow
-- Avoid textbook definitions
-- Include real-life analogies and classroom situations
-- Include moments of confusion → clarity
-- Include examples in EVERY section
-- Be reflective, not just descriptive
-
----------------------------------------
-SECTION GUIDELINES
----------------------------------------
+STRUCTURE (STRICTLY FOLLOW):
 
 [EXP]
-Describe what happened in class:
-- What teacher explained
-- How concepts were introduced
-- Include examples (e.g., class vs instance attributes using real-life analogy)
+Write about your classroom experience.
+Explain what was taught, how the teacher explained it, and include examples.
+Example: How class attributes differ from instance attributes using real-life analogy like students sharing common vs personal data.
 
 [FEEL]
-Describe your emotions:
-- Confusion, curiosity, interest
-- Struggles in understanding concepts
-- How clarity developed
+Describe your feelings while learning.
+Mention confusion, curiosity, interest.
+Example: Difficulty in understanding static methods initially, then clarity after examples.
 
 [LEARN]
-Explain what you truly understood:
-- Key concepts like encapsulation, methods, attributes
-- Include examples (bank account, student system, etc.)
+Explain key concepts you understood deeply.
+Include examples like:
+- Class vs instance attributes
+- Encapsulation in real-world (bank account example)
+- Access modifiers importance
 
 [APP]
-Explain real-life and coding applications:
-- How you will use this in projects
-- Practical coding scenarios
-- Industry relevance
+Explain how you will apply this knowledge.
+Include practical examples:
+- Building real projects
+- Writing cleaner OOP code
+- Using encapsulation in software
 
 [CONC]
-Summarize:
-- What changed in your thinking
-- Overall learning experience
-- How your understanding improved
+Summarize your overall learning.
+Explain how your thinking improved.
 
 ---------------------------------------
-STYLE RULES (VERY IMPORTANT)
----------------------------------------
 
-- Write ONLY in paragraphs
-- NO bullet points
-- NO markdown
-- Use simple English with clarity
-- Smooth transitions between sections
-- Each section should feel connected
-- Avoid repetitive phrases
-- Avoid generic AI-style sentences
+WRITING STYLE RULES (VERY IMPORTANT):
 
----------------------------------------
-WORD COUNT
----------------------------------------
-
-Total: ~2000-2200 words  
-Each section: ~400-450 words
+- Write in FIRST PERSON (I learned, I felt)
+- Use SIMPLE English
+- Make it HUMAN, not robotic
+- Add small imperfections (like real student writing)
+- Use real-life analogies
+- Avoid textbook definitions
+- Smooth transitions between paragraphs
+- Each section should feel natural and reflective
 
 ---------------------------------------
-ANTI-AI DETECTION RULES
----------------------------------------
 
-- Avoid overly perfect grammar everywhere
-- Vary sentence lengths
-- Use natural flow like human thinking
-- Include personal reflections and examples
-- Avoid generic phrases like "In conclusion, this module..."
+WORD COUNT:
+
+- Total ~2100 words
+- Each section ~420 words
 
 ---------------------------------------
-FINAL INSTRUCTION
----------------------------------------
 
-Return ONLY the structured journal with tags.
+IMPORTANT:
 
-DO NOT include any explanation outside the sections.
+- DO NOT use bullet points
+- DO NOT use markdown or symbols
+- Write only in paragraphs
+- MUST follow section tags: [EXP], [FEEL], [LEARN], [APP], [CONC]
+- Content should feel like written by a real student
 `;
+
 
         try {
             const res = await fetch(endpoint, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ prompt })
+                body: JSON.stringify({ prompt: prompt }) 
             });
-
+        
             if (!res.ok) {
                 const errData = await res.json().catch(() => ({}));
-                throw new Error(errData?.error || "API request failed.");
+                const msg = errData?.error || "API request failed.";
+                throw new Error(msg);
             }
-
+            
             const data = await res.json();
-            const text = data.text;
+            const text = data.candidates[0].content.parts[0].text;
 
-            console.log("RAW AI TEXT:", text);
+            // Parse sections using markers
+            const expMatch  = text.match(/\[EXP\]([\s\S]*?)\[FEEL\]/i);
+            const feelMatch = text.match(/\[FEEL\]([\s\S]*?)\[LEARN\]/i);
+            const learnMatch= text.match(/\[LEARN\]([\s\S]*?)\[APP\]/i);
+            const appMatch  = text.match(/\[APP\]([\s\S]*?)\[CONC\]/i);
+            const concMatch = text.match(/\[CONC\]([\s\S]*?)$/i);
 
-            // Robust parsing
-            const experience  = extractSection(text, "EXP", "FEEL");
-            const feelings    = extractSection(text, "FEEL", "LEARN");
-            const learning    = extractSection(text, "LEARN", "APP");
-            const application = extractSection(text, "APP", "CONC");
-            const conclusion  = extractSection(text, "CONC", "END");
-
-            // Fill safely
-            document.getElementById('experience').value  = experience  || "Regenerate content";
-            document.getElementById('feelings').value    = feelings    || "Regenerate content";
-            document.getElementById('learning').value    = learning    || "Regenerate content";
-            document.getElementById('application').value = application || "Regenerate content";
-            document.getElementById('conclusion').value  = conclusion  || "Regenerate content";
+            if (expMatch)   document.getElementById('experience').value  = expMatch[1].replace(/\*/g, '').trim();
+            if (feelMatch)  document.getElementById('feelings').value    = feelMatch[1].replace(/\*/g, '').trim();
+            if (learnMatch) document.getElementById('learning').value    = learnMatch[1].replace(/\*/g, '').trim();
+            if (appMatch)   document.getElementById('application').value = appMatch[1].replace(/\*/g, '').trim();
+            if (concMatch)  document.getElementById('conclusion').value  = concMatch[1].replace(/\*/g, '').trim();
 
         } catch (error) {
             console.error("AI Generation Error:", error);
-            aiErrorMsg.textContent = "❌ " + error.message;
+            aiErrorMsg.textContent = "Γ¥î " + (error.message || "Failed to connect to AI. Please check your API key or fill the boxes manually.");
             aiErrorMsg.classList.remove('hidden');
         } finally {
             aiSpinner.classList.add('hidden');
@@ -401,7 +348,7 @@ DO NOT include any explanation outside the sections.
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ format: 'a4', orientation: 'portrait' });
 
-            // Build module label e.g. "Module III - Strings & String Operations"
+            // Γ£à Build module label e.g. "Module III - Strings & String Operations"
             const romanNumerals = ["I","II","III","IV","V","VI","VII","VIII","IX","X"];
             const moduleNum = assessSel.value;
             const moduleRoman = romanNumerals[parseInt(moduleNum) - 1] || moduleNum;
