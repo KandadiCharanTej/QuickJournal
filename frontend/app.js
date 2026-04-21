@@ -302,8 +302,9 @@ STYLE RULES (VERY IMPORTANT)
 WORD COUNT
 ---------------------------------------
 
-Total: ~2000-2100 words  
-Each section: ~400-420 words
+Total: Exactly ~2100 words (STRICT MAXIMUM)
+Each section: Exactly ~420 words.
+DO NOT Ramble. Be precise and stop once your points are made.
 
 ---------------------------------------
 ANTI-AI DETECTION RULES
