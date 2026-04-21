@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const prompt = `
 You are a B.Tech student writing a deeply reflective academic journal.
 
-Your task is to write a HIGH-QUALITY, HUMAN-LIKE reflective journal of approximately 2000-2200 words.
+Your task is to write a HIGH-QUALITY, HUMAN-LIKE reflective journal of approximately 2000-2100 words.
 
 ---------------------------------------
 STRICT OUTPUT FORMAT (DO NOT BREAK)
@@ -302,8 +302,8 @@ STYLE RULES (VERY IMPORTANT)
 WORD COUNT
 ---------------------------------------
 
-Total: ~2000-2200 words  
-Each section: ~400-450 words
+Total: ~2000-2100 words  
+Each section: ~400-420 words
 
 ---------------------------------------
 ANTI-AI DETECTION RULES
