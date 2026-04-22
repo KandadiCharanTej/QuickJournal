@@ -196,139 +196,19 @@ document.addEventListener('DOMContentLoaded', () => {
         // Note: Make sure the endpoint points to your live backend url when deployed.
         const endpoint = 'https://quickjournal-backend.onrender.com/api/generate';
 
-        const prompt = `
-You are a B.Tech student writing a deeply reflective academic journal.
-
-Your task is to write a HIGH-QUALITY, HUMAN-LIKE reflective journal of approximately 2000-2200 words.
-
----------------------------------------
-STRICT OUTPUT FORMAT (DO NOT BREAK)
----------------------------------------
-
-You MUST follow this exact structure:
-
-[EXP]
-<Write experience section>
-
-[FEEL]
-<Write feelings section>
-
-[LEARN]
-<Write learning section>
-
-[APP]
-<Write application section>
-
-[CONC]
-<Write conclusion section>
-
-Do NOT skip any section.
-Do NOT change, rename, or omit these bracket tags. You MUST use exactly [EXP], [FEEL], [LEARN], [APP], and [CONC].
-Do NOT add extra headings.
-
----------------------------------------
-CONTEXT
----------------------------------------
-
-Subject: ${subject}
-Module: Module ${moduleRoman} - ${topic}
-
-Topics Covered:
-${syllabus}
-
----------------------------------------
-WRITING INSTRUCTIONS
----------------------------------------
-
-Write like a real student reflecting on a classroom experience.
-
-The writing MUST:
-- Use FIRST PERSON ("I learned", "I felt")
-- Sound NATURAL and HUMAN (not robotic)
-- Include small imperfections like real thinking flow
-- Avoid textbook definitions
-- Include real-life analogies and classroom situations
-- Include moments of confusion → clarity
-- Include examples in EVERY section
-- Be reflective, not just descriptive
-
----------------------------------------
-SECTION GUIDELINES
----------------------------------------
-
-[EXP]
-Describe what happened in class:
-- What teacher explained
-- How concepts were introduced
-- Include examples (e.g., class vs instance attributes using real-life analogy)
-
-[FEEL]
-Describe your emotions:
-- Confusion, curiosity, interest
-- Struggles in understanding concepts
-- How clarity developed
-
-[LEARN]
-Explain what you truly understood:
-- Key concepts like encapsulation, methods, attributes
-- Include examples (bank account, student system, etc.)
-
-[APP]
-Explain real-life and coding applications:
-- How you will use this in projects
-- Practical coding scenarios
-- Industry relevance
-
-[CONC]
-Summarize:
-- What changed in your thinking
-- Overall learning experience
-- How your understanding improved
-
----------------------------------------
-STYLE RULES (VERY IMPORTANT)
----------------------------------------
-
-- Write ONLY in paragraphs
-- NO bullet points
-- NO markdown
-- Use simple English with clarity
-- Smooth transitions between sections
-- Each section should feel connected
-- Avoid repetitive phrases
-- Avoid generic AI-style sentences
-
----------------------------------------
-WORD COUNT
----------------------------------------
-
-Total: Approximately 2000 - 2200 words (STRICT TARGET - MUST BE MET)
-Each section: Approximately 400 - 440 words.
-DO NOT Ramble. Be precise and stop once your points are made.
-
----------------------------------------
-ANTI-AI DETECTION RULES
----------------------------------------
-
-- Avoid overly perfect grammar everywhere
-- Vary sentence lengths
-- Use natural flow like human thinking
-- Include personal reflections and examples
-- Avoid generic phrases like "In conclusion, this module..."
-
----------------------------------------
-FINAL INSTRUCTION
----------------------------------------
-
-Return ONLY the structured journal with EXACT tags. 
-DO NOT include any conversation, intro, or explanation outside the sections.
-`;
+        // Sending structured data to the backend so it can generate 5 separate long sections
+        const payload = {
+            subject,
+            moduleRoman,
+            topic,
+            syllabus
+        };
 
         try {
             const res = await fetch(endpoint, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ prompt })
+                body: JSON.stringify(payload)
             });
 
             if (!res.ok) {

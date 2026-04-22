@@ -61,15 +61,87 @@ async function generateWithAI(prompt) {
 ========================= */
 app.post("/api/generate", async (req, res) => {
     try {
-        const { prompt } = req.body;
+        const { subject, moduleRoman, topic, syllabus } = req.body;
 
-        if (!prompt) {
-            return res.status(400).json({ error: "Prompt required" });
+        if (!subject || !moduleRoman || !topic) {
+            return res.status(400).json({ error: "Missing required fields for journal generation." });
         }
 
-        const text = await generateWithAI(prompt);
+        const sections = [
+            {
+                tag: "EXP",
+                name: "Experience",
+                desc: "Describe what happened in class. What teacher explained, how concepts were introduced, and include examples (e.g. real-life analogies for concepts).",
+                focus: "Write about your classroom experience."
+            },
+            {
+                tag: "FEEL",
+                name: "Feelings",
+                desc: "Describe your emotions during the class. Mention confusion, curiosity, interest, struggles in understanding concepts, and how clarity developed.",
+                focus: "Describe your feelings and emotional reactions."
+            },
+            {
+                tag: "LEARN",
+                name: "Learning",
+                desc: "Explain what you truly understood. Detail key concepts and include concrete examples (like bank account, student system, etc.).",
+                focus: "Explain key insights and concepts you understood deeply."
+            },
+            {
+                tag: "APP",
+                name: "Application",
+                desc: "Explain real-life and coding applications. How you will use this in projects, practical coding scenarios, and industry relevance.",
+                focus: "Explain practical use and how you will apply this knowledge."
+            },
+            {
+                tag: "CONC",
+                name: "Conclusion",
+                desc: "Summarize what changed in your thinking, your overall learning experience, and how your understanding improved.",
+                focus: "Summarize your overall learning and conclude the journal."
+            }
+        ];
 
-        res.json({ text });
+        let fullText = "";
+
+        // Execute sequentially to avoid TPM limits and ensure exact length
+        for (const sec of sections) {
+            const prompt = `
+You are a B.Tech student writing a deeply reflective academic journal.
+Your task is to write ONLY the ${sec.name} section of your journal.
+
+CONTEXT:
+Subject: ${subject}
+Module: Module ${moduleRoman} - ${topic}
+Topics Covered: ${syllabus || "General subject concepts"}
+
+SECTION INSTRUCTIONS:
+${sec.focus}
+${sec.desc}
+
+WRITING STYLE:
+- Use FIRST PERSON ("I learned", "I felt")
+- Sound NATURAL and HUMAN (not robotic)
+- Include small imperfections like real thinking flow
+- Avoid textbook definitions
+- Write ONLY in paragraphs
+- NO bullet points
+- NO markdown
+
+WORD COUNT:
+- Exactly 400 - 450 words for this section alone. DO NOT write less than 400 words.
+
+OUTPUT FORMAT:
+Return ONLY the content for this section. DO NOT include any conversation, intro, or explanation outside the content.
+`;
+            
+            const text = await generateWithAI(prompt);
+            
+            // Append to full text, wrapping in the tags the frontend expects:
+            fullText += `[${sec.tag}]\n${text.trim()}\n\n`;
+        }
+        
+        fullText += "[END]\n"; // To satisfy the "END" tag for the conclusion extraction
+
+        res.json({ text: fullText });
 
     } catch (err) {
         console.error("ROUTE ERROR:", err.message);
