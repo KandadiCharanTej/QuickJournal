@@ -16,11 +16,11 @@ app.use(express.json());
 
 const API_KEY = process.env.GROQ_API_KEY;
 
-// 🔐 STEP 1 & 2: Add Rate Limiter (20 requests per 15 min)
+// 🔐 Relaxed Rate Limiter (100 requests per 15 min)
 const rateLimit = require("express-rate-limit");
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 20,
+    max: 100, 
     message: { error: "Too many requests. Please try later." }
 });
 app.use("/api/", limiter);
@@ -106,7 +106,7 @@ async function generateWithAI(prompt, retries = 4) {
 /* =========================
    ROUTE
 ========================= */
-app.post("/api/generate", cooldown, async (req, res) => {
+app.post("/api/generate", async (req, res) => {
     try {
         const { subject, moduleRoman, topic, syllabus } = req.body;
 
@@ -119,10 +119,10 @@ app.post("/api/generate", cooldown, async (req, res) => {
         }
 
         // 🎲 ADD RANDOM VARIATION
-        const variation = Math.floor(Math.random() * 1000);
+        const variation = Math.floor(Math.random() * 10);
 
         // 📦 LIMIT CACHE SIZE
-        if (cache.size > 50) {
+        if (cache.size > 100) {
             cache.clear();
         }
 
@@ -134,108 +134,84 @@ app.post("/api/generate", cooldown, async (req, res) => {
         }
 
         const sections = [
-            {
-                tag: "EXP",
-                name: "Experience",
-                desc: "Describe what happened in class. What teacher explained, how concepts were introduced, and include examples (e.g. real-life analogies for concepts).",
-                focus: "Write about your classroom experience."
-            },
-            {
-                tag: "FEEL",
-                name: "Feelings",
-                desc: "Describe your emotions during the class. Mention confusion, curiosity, interest, struggles in understanding concepts, and how clarity developed.",
-                focus: "Describe your feelings and emotional reactions."
-            },
-            {
-                tag: "LEARN",
-                name: "Learning",
-                desc: "Explain what you truly understood. Detail key concepts and include concrete examples (like bank account, student system, etc.).",
-                focus: "Explain key insights and concepts you understood deeply."
-            },
-            {
-                tag: "APP",
-                name: "Application",
-                desc: "Explain real-life and coding applications. How you will use this in projects, practical coding scenarios, and industry relevance.",
-                focus: "Explain practical use and how you will apply this knowledge."
-            },
-            {
-                tag: "CONC",
-                name: "Conclusion",
-                desc: "Summarize what changed in your thinking, your overall learning experience, and how your understanding improved.",
-                focus: "Summarize your overall learning and conclude the journal."
-            }
+            { tag: "EXP", name: "Experience", focus: "Write about your classroom experience.", desc: "Describe what happened in class. What teacher explained, how concepts were introduced, and include examples (e.g. real-life analogies for concepts)." },
+            { tag: "FEEL", name: "Feelings", focus: "Describe your feelings and emotional reactions.", desc: "Describe your emotions during the class. Mention confusion, curiosity, interest, struggles in understanding concepts, and how clarity developed." },
+            { tag: "LEARN", name: "Learning", focus: "Explain key insights and concepts you understood deeply.", desc: "Explain what you truly understood. Detail key concepts and include concrete examples (like bank account, student system, etc.)." },
+            { tag: "APP", name: "Application", focus: "Explain practical use and how you will apply this knowledge.", desc: "Explain real-life and coding applications. How you will use this in projects, practical coding scenarios, and industry relevance." },
+            { tag: "CONC", name: "Conclusion", focus: "Summarize your overall learning and conclude the journal.", desc: "Summarize what changed in your thinking, your overall learning experience, and how your understanding improved." }
         ];
 
         let fullText = "";
 
-        // Execute sequentially to avoid TPM limits and ensure exact length
         for (const sec of sections) {
             const prompt = `
 You are a B.Tech student writing a deeply reflective academic journal.
-Your task is to write ONLY the ${sec.name} section of your journal.
+Your task is to write ONLY the ${sec.name} section.
+Subject: ${subject} | Module: ${moduleRoman} | Topic: ${topic}
+Syllabus: ${syllabus || "General subject concepts"}
 
-CONTEXT:
-Subject: ${subject}
-Module: Module ${moduleRoman} - ${topic}
-Topics Covered: ${syllabus || "General subject concepts"}
-
-SECTION INSTRUCTIONS:
-${sec.focus}
-${sec.desc}
-
-WRITING STYLE:
-- Use FIRST PERSON ("I learned", "I felt")
-- Sound NATURAL and HUMAN (not robotic)
-- Include small imperfections like real thinking flow
-- Avoid textbook definitions
-- NEVER invent or use specific names for professors (like Professor Patel, Dr. Smith, etc.). Use generic terms like 'the professor' or 'our instructor'.
-- You may use small paragraphs or bullet points if it makes the journal clearer.
-- DO NOT start the text with a heading or the section name.
-- NO markdown (except for standard text formatting, no bold/italics symbols)
-
-VARIATION REQUIREMENT:
-- Write a completely unique version of this journal.
-- Use different phrasing, examples, and structure.
-- Do not repeat standard textbook definitions.
-- Make it sound like it was written by a different student.
+INSTRUCTIONS:
+${sec.focus} ${sec.desc}
+- Write 400-450 words.
+- Single paragraph, no headings, no professor names.
 - Variation ID: ${variation}
-
-WORD COUNT:
-- Exactly 400 - 450 words for this section alone. DO NOT write less than 400 words.
-
-OUTPUT FORMAT:
-Return ONLY the content for this section. DO NOT include any conversation, intro, or explanation outside the content.
 `;
-            
             let text = await generateWithAI(prompt);
-            
-            // Clean up the text
-            // 1. Remove accidental section headings at the start (e.g. "Experience:", "Feelings\n")
-            const headingRegex = new RegExp(`^\\s*\\**\\s*${sec.name}\\s*\\**\\s*[:\\-]?\\s*\\n*`, "i");
-            text = text.replace(headingRegex, "");
-            
-            // 2. Reduce multiple line breaks (empty lines) to a single line break. 
-            // This allows small paragraphs but removes extra spaces between them.
-            text = text.replace(/\n{2,}/g, "\n");
-            
-            // Append to full text, wrapping in the tags the frontend expects:
+            text = text.replace(new RegExp(`^\\s*${sec.name}.*\\n*`, "i"), "").replace(/\n{2,}/g, "\n");
             fullText += `[${sec.tag}]\n${text.trim()}\n\n`;
         }
         
-        fullText += "[END]\n"; // To satisfy the "END" tag for the conclusion extraction
-
-        // 📦 STEP 5: Save to Cache before responding
+        fullText += "[END]\n";
         cache.set(cacheKey, fullText);
-
         res.json({ text: fullText });
 
     } catch (err) {
         console.error("ROUTE ERROR:", err.message);
+        res.status(500).json({ error: "AI failed", details: err.message });
+    }
+});
 
-        res.status(500).json({
-            error: "AI failed",
-            details: err.message
-        });
+// 🚀 NEW ENDPOINT: Generate a single section for live updates
+app.post("/api/generate-section", async (req, res) => {
+    try {
+        const { subject, moduleRoman, topic, syllabus, sectionTag } = req.body;
+        
+        if (!subject || !moduleRoman || !topic || !sectionTag) {
+            return res.status(400).json({ error: "Missing fields" });
+        }
+
+        const sectionMap = {
+            "EXP": { name: "Experience", focus: "Write about your classroom experience.", desc: "Describe what happened in class. What teacher explained, how concepts were introduced, and include examples." },
+            "FEEL": { name: "Feelings", focus: "Describe your feelings and emotional reactions.", desc: "Describe your emotions during the class. Mention confusion, curiosity, interest, struggles in understanding concepts." },
+            "LEARN": { name: "Learning", focus: "Explain key insights and concepts you understood deeply.", desc: "Explain what you truly understood. Detail key concepts and include concrete examples." },
+            "APP": { name: "Application", focus: "Explain practical use and how you will apply this knowledge.", desc: "Explain real-life and coding applications. How you will use this in projects." },
+            "CONC": { name: "Conclusion", focus: "Summarize your overall learning and conclude the journal.", desc: "Summarize what changed in your thinking, your overall learning experience." }
+        };
+
+        const sec = sectionMap[sectionTag];
+        if (!sec) return res.status(400).json({ error: "Invalid section" });
+
+        const variation = Math.floor(Math.random() * 1000);
+        const prompt = `
+You are a B.Tech student writing the ${sec.name} section of an academic journal.
+Subject: ${subject} | Module: ${moduleRoman} | Topic: ${topic}
+Syllabus: ${syllabus || "General subject concepts"}
+
+INSTRUCTIONS:
+${sec.focus} ${sec.desc}
+- Exactly 400-450 words.
+- Single paragraph, NO headings, NO names like "Professor Patel".
+- Variation ID: ${variation}
+`;
+
+        let text = await generateWithAI(prompt);
+        text = text.replace(new RegExp(`^\\s*${sec.name}.*\\n*`, "i"), "").replace(/\n{2,}/g, "\n");
+
+        res.json({ text: text.trim() });
+
+    } catch (err) {
+        console.error("SECTION ERROR:", err.message);
+        res.status(500).json({ error: "Section generation failed", details: err.message });
     }
 });
 

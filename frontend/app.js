@@ -170,7 +170,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     aiFillBtn.addEventListener('click', async () => {
-        // 🚫 STEP 7: Prevent Multiple Clicks
         if (aiFillBtn.disabled) return;
 
         const topic = topicInp.value;
@@ -192,67 +191,58 @@ document.addEventListener('DOMContentLoaded', () => {
         const aiSpinner = document.getElementById('aiSpinner');
         const aiErrorMsg = document.getElementById('aiErrorMsg');
         
-        // 🖥️ STEP 6: FRONTEND PROTECTION - Disable Button & Update Text
         aiSpinner.classList.remove('hidden');
         aiFillBtn.disabled = true;
-        
-        // Save the original button content to restore later
         const originalBtnHTML = aiFillBtn.innerHTML;
-        aiFillBtn.innerHTML = `<span>Generating...</span> <svg class="animate-spin w-4 h-4 text-violet-600 ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
-        
         aiErrorMsg.classList.add('hidden');
 
-        // Note: Make sure the endpoint points to your live backend url when deployed.
-        const endpoint = 'https://quickjournal-backend.onrender.com/api/generate';
-
-        // Sending structured data to the backend so it can generate 5 separate long sections
-        const payload = {
-            subject,
-            moduleRoman,
-            topic,
-            syllabus
-        };
+        const sections = [
+            { tag: "EXP", id: "experience", name: "Experience" },
+            { tag: "FEEL", id: "feelings", name: "Feelings" },
+            { tag: "LEARN", id: "learning", name: "Learning" },
+            { tag: "APP", id: "application", name: "Application" },
+            { tag: "CONC", id: "conclusion", name: "Conclusion" }
+        ];
 
         try {
-            const res = await fetch(endpoint, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
+            // Update button to show it's working
+            aiFillBtn.innerHTML = `<span>Generating Entire Journal...</span> <svg class="animate-spin w-4 h-4 text-violet-600 ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
 
-            if (!res.ok) {
-                const errData = await res.json().catch(() => ({}));
-                throw new Error(errData?.error || "API request failed.");
-            }
+            // 🚀 PARALLEL GENERATION: Request all sections at once for 5x speed
+            await Promise.all(sections.map(async (sec) => {
+                const res = await fetch('https://quickjournal-backend.onrender.com/api/generate-section', {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ subject, moduleRoman, topic, syllabus, sectionTag: sec.tag })
+                });
 
-            const data = await res.json();
-            const text = data.text;
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData?.error || `Failed to generate ${sec.name} section.`);
+                }
 
-            console.log("RAW AI TEXT:", text);
-
-            // Robust parsing
-            const experience  = extractSection(text, "EXP", "FEEL");
-            const feelings    = extractSection(text, "FEEL", "LEARN");
-            const learning    = extractSection(text, "LEARN", "APP");
-            const application = extractSection(text, "APP", "CONC");
-            const conclusion  = extractSection(text, "CONC", "END");
-
-            // Fill safely
-            document.getElementById('experience').value  = experience  || "Regenerate content";
-            document.getElementById('feelings').value    = feelings    || "Regenerate content";
-            document.getElementById('learning').value    = learning    || "Regenerate content";
-            document.getElementById('application').value = application || "Regenerate content";
-            document.getElementById('conclusion').value  = conclusion  || "Regenerate content";
+                const data = await res.json();
+                document.getElementById(sec.id).value = data.text;
+            }));
 
         } catch (error) {
             console.error("AI Generation Error:", error);
             aiErrorMsg.textContent = "❌ " + error.message;
             aiErrorMsg.classList.remove('hidden');
         } finally {
-            // Restore original state
-            aiFillBtn.innerHTML = originalBtnHTML;
-            aiSpinner.classList.add('hidden');
-            aiFillBtn.disabled = false;
+            // Restore button with a 10-second countdown cooldown
+            let timeLeft = 10;
+            const timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    aiFillBtn.innerHTML = originalBtnHTML;
+                    aiSpinner.classList.add('hidden');
+                    aiFillBtn.disabled = false;
+                } else {
+                    aiFillBtn.innerHTML = `<span>Wait ${timeLeft}s...</span>`;
+                    timeLeft--;
+                }
+            }, 1000);
         }
     });
 
