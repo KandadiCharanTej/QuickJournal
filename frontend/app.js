@@ -223,7 +223,7 @@ You MUST follow this exact structure:
 <Write conclusion section>
 
 Do NOT skip any section.
-Do NOT rename tags.
+Do NOT change, rename, or omit these bracket tags. You MUST use exactly [EXP], [FEEL], [LEARN], [APP], and [CONC].
 Do NOT add extra headings.
 
 ---------------------------------------
@@ -302,8 +302,8 @@ STYLE RULES (VERY IMPORTANT)
 WORD COUNT
 ---------------------------------------
 
-Total: Exactly ~2100 words (STRICT MAXIMUM)
-Each section: Exactly ~420 words.
+Total: Approximately 1200 - 1500 words (STRICT MAXIMUM - DO NOT EXCEED)
+Each section: Approximately 250 - 300 words.
 DO NOT Ramble. Be precise and stop once your points are made.
 
 ---------------------------------------
@@ -320,9 +320,8 @@ ANTI-AI DETECTION RULES
 FINAL INSTRUCTION
 ---------------------------------------
 
-Return ONLY the structured journal with tags.
-
-DO NOT include any explanation outside the sections.
+Return ONLY the structured journal with EXACT tags. 
+DO NOT include any conversation, intro, or explanation outside the sections.
 `;
 
         try {
