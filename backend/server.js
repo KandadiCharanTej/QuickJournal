@@ -131,7 +131,9 @@ WRITING STYLE:
 - Sound NATURAL and HUMAN (not robotic)
 - Include small imperfections like real thinking flow
 - Avoid textbook definitions
-- Write ONLY in paragraphs
+- NEVER invent or use specific names for professors (like Professor Patel, Dr. Smith, etc.). Use generic terms like 'the professor' or 'our instructor'.
+- Write the entire section as ONE single continuous paragraph. DO NOT use any line breaks or empty lines.
+- DO NOT start the text with a heading or the section name.
 - NO bullet points
 - NO markdown
 
@@ -142,7 +144,15 @@ OUTPUT FORMAT:
 Return ONLY the content for this section. DO NOT include any conversation, intro, or explanation outside the content.
 `;
             
-            const text = await generateWithAI(prompt);
+            let text = await generateWithAI(prompt);
+            
+            // Clean up the text
+            // 1. Remove accidental section headings at the start (e.g. "Experience:", "Feelings\n")
+            const headingRegex = new RegExp(`^\\s*\\**\\s*${sec.name}\\s*\\**\\s*[:\\-]?\\s*\\n*`, "i");
+            text = text.replace(headingRegex, "");
+            
+            // 2. Remove all line breaks to force a single paragraph without spaces between paragraphs
+            text = text.replace(/\n+/g, " ");
             
             // Append to full text, wrapping in the tags the frontend expects:
             fullText += `[${sec.tag}]\n${text.trim()}\n\n`;
