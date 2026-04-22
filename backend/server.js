@@ -51,7 +51,7 @@ function cooldown(req, res, next) {
 ========================= */
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
-async function generateWithAI(prompt, retries = 2) {
+async function generateWithAI(prompt, retries = 4) {
     for (let attempt = 1; attempt <= retries; attempt++) {
         try {
             const response = await fetch(
@@ -75,8 +75,14 @@ async function generateWithAI(prompt, retries = 2) {
             if (!response.ok) {
                 // If it's a rate limit error (429) and we have retries left, wait and retry
                 if (response.status === 429 && attempt < retries) {
-                    console.log(`Rate limit hit, retrying attempt ${attempt}...`);
-                    await delay(2000); // Wait 2 seconds
+                    let waitTime = 3000; // Default wait 3s
+                    const errMsg = data.error?.message || "";
+                    const match = errMsg.match(/Please try again in ([0-9.]+)s/);
+                    if (match && match[1]) {
+                        waitTime = parseFloat(match[1]) * 1000 + 1500; // Add 1.5s buffer
+                    }
+                    console.log(`Rate limit hit! Waiting ${waitTime}ms before attempt ${attempt + 1}...`);
+                    await delay(waitTime);
                     continue;
                 }
                 throw new Error(data.error?.message || "API failed");
