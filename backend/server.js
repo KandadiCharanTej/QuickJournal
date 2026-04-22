@@ -9,10 +9,42 @@ const fetch = require("node-fetch");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+app.set('trust proxy', 1); // Essential for rate limiting to work behind Render/Heroku proxies
+
 app.use(cors());
 app.use(express.json());
 
 const API_KEY = process.env.GROQ_API_KEY;
+
+// 🔐 STEP 1 & 2: Add Rate Limiter (20 requests per 15 min)
+const rateLimit = require("express-rate-limit");
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20,
+    message: { error: "Too many requests. Please try later." }
+});
+app.use("/api/", limiter);
+
+// ⏱️ STEP 3: Add Cooldown Map (Anti-spam)
+const lastRequestTime = new Map();
+
+// 📦 STEP 5: Add Cache Map
+const cache = new Map();
+
+function cooldown(req, res, next) {
+    const ip = req.ip;
+    const now = Date.now();
+
+    if (lastRequestTime.has(ip)) {
+        const diff = now - lastRequestTime.get(ip);
+        if (diff < 30000) { // 30 seconds
+            return res.status(429).json({ error: "Wait 30 seconds before next request" });
+        }
+    }
+
+    lastRequestTime.set(ip, now);
+    next();
+}
 
 /* =========================
    AI FUNCTION
@@ -68,12 +100,23 @@ async function generateWithAI(prompt, retries = 2) {
 /* =========================
    ROUTE
 ========================= */
-app.post("/api/generate", async (req, res) => {
+app.post("/api/generate", cooldown, async (req, res) => {
     try {
         const { subject, moduleRoman, topic, syllabus } = req.body;
 
+        // ⚡ STEP 4: Validate inputs and length
         if (!subject || !moduleRoman || !topic) {
             return res.status(400).json({ error: "Missing required fields for journal generation." });
+        }
+        if (JSON.stringify(req.body).length > 2000) {
+            return res.status(400).json({ error: "Input too long or invalid" });
+        }
+
+        // 📦 STEP 5: Check Cache
+        const cacheKey = JSON.stringify({ subject, moduleRoman, topic, syllabus });
+        if (cache.has(cacheKey)) {
+            console.log("Serving from cache!");
+            return res.json({ text: cache.get(cacheKey) });
         }
 
         const sections = [
@@ -159,6 +202,9 @@ Return ONLY the content for this section. DO NOT include any conversation, intro
         }
         
         fullText += "[END]\n"; // To satisfy the "END" tag for the conclusion extraction
+
+        // 📦 STEP 5: Save to Cache before responding
+        cache.set(cacheKey, fullText);
 
         res.json({ text: fullText });
 
