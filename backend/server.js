@@ -30,7 +30,7 @@ async function generateWithAI(prompt) {
                 body: JSON.stringify({
                     model: "llama-3.3-70b-versatile",
                     messages: [{ role: "user", content: prompt }],
-                    max_tokens: 2800
+                    max_tokens: 3500
                 })
             }
         );
