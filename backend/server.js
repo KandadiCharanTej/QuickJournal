@@ -132,10 +132,9 @@ WRITING STYLE:
 - Include small imperfections like real thinking flow
 - Avoid textbook definitions
 - NEVER invent or use specific names for professors (like Professor Patel, Dr. Smith, etc.). Use generic terms like 'the professor' or 'our instructor'.
-- Write the entire section as ONE single continuous paragraph. DO NOT use any line breaks or empty lines.
+- You may use small paragraphs or bullet points if it makes the journal clearer.
 - DO NOT start the text with a heading or the section name.
-- NO bullet points
-- NO markdown
+- NO markdown (except for standard text formatting, no bold/italics symbols)
 
 WORD COUNT:
 - Exactly 400 - 450 words for this section alone. DO NOT write less than 400 words.
@@ -151,8 +150,9 @@ Return ONLY the content for this section. DO NOT include any conversation, intro
             const headingRegex = new RegExp(`^\\s*\\**\\s*${sec.name}\\s*\\**\\s*[:\\-]?\\s*\\n*`, "i");
             text = text.replace(headingRegex, "");
             
-            // 2. Remove all line breaks to force a single paragraph without spaces between paragraphs
-            text = text.replace(/\n+/g, " ");
+            // 2. Reduce multiple line breaks (empty lines) to a single line break. 
+            // This allows small paragraphs but removes extra spaces between them.
+            text = text.replace(/\n{2,}/g, "\n");
             
             // Append to full text, wrapping in the tags the frontend expects:
             fullText += `[${sec.tag}]\n${text.trim()}\n\n`;
