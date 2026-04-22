@@ -217,7 +217,7 @@ For major changes, please open an issue first.
 
 * GitHub: https://github.com/KandadiCharanTej
 * Email: kandadicharantej21@gmail.com
-
+* Linkedin : https://www.linkedin.com/in/kandadicharantej
 
 ---
 
