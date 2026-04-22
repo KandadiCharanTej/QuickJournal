@@ -112,8 +112,16 @@ app.post("/api/generate", cooldown, async (req, res) => {
             return res.status(400).json({ error: "Input too long or invalid" });
         }
 
-        // 📦 STEP 5: Check Cache
-        const cacheKey = JSON.stringify({ subject, moduleRoman, topic, syllabus });
+        // 🎲 ADD RANDOM VARIATION
+        const variation = Math.floor(Math.random() * 1000);
+
+        // 📦 LIMIT CACHE SIZE
+        if (cache.size > 50) {
+            cache.clear();
+        }
+
+        // 📦 STEP 5: Check Cache (Updated Key)
+        const cacheKey = JSON.stringify({ subject, moduleRoman, topic, syllabus }) + "_" + variation;
         if (cache.has(cacheKey)) {
             console.log("Serving from cache!");
             return res.json({ text: cache.get(cacheKey) });
@@ -178,6 +186,13 @@ WRITING STYLE:
 - You may use small paragraphs or bullet points if it makes the journal clearer.
 - DO NOT start the text with a heading or the section name.
 - NO markdown (except for standard text formatting, no bold/italics symbols)
+
+VARIATION REQUIREMENT:
+- Write a completely unique version of this journal.
+- Use different phrasing, examples, and structure.
+- Do not repeat standard textbook definitions.
+- Make it sound like it was written by a different student.
+- Variation ID: ${variation}
 
 WORD COUNT:
 - Exactly 400 - 450 words for this section alone. DO NOT write less than 400 words.
