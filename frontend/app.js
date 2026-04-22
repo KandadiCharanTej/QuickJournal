@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
 
         // ⏱️ PRE-GENERATION COUNTDOWN (To relieve AI pressure)
-        let countdown = 10;
+        let countdown = 3;
         const timerInterval = setInterval(async () => {
             if (countdown <= 0) {
                 clearInterval(timerInterval);
@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     aiSpinner.classList.add('hidden');
                 }
             } else {
-                aiFillBtn.innerHTML = `<span>Starting in ${countdown}s...</span>`;
+                aiFillBtn.innerHTML = `<span>Generating in ${countdown}s...</span>`;
                 countdown--;
             }
         }, 1000);
