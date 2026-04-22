@@ -17,42 +17,51 @@ const API_KEY = process.env.GROQ_API_KEY;
 /* =========================
    AI FUNCTION
 ========================= */
-async function generateWithAI(prompt) {
-    try {
-        const response = await fetch(
-            "https://api.groq.com/openai/v1/chat/completions",
-            {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${API_KEY}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    model: "llama-3.1-8b-instant",
-                    messages: [{ role: "user", content: prompt }],
-                    max_tokens: 900
-                })
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
+async function generateWithAI(prompt, retries = 2) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            const response = await fetch(
+                "https://api.groq.com/openai/v1/chat/completions",
+                {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${API_KEY}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: "llama3-8b-8192",
+                        messages: [{ role: "user", content: prompt }],
+                        max_tokens: 1200
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                // If it's a rate limit error (429) and we have retries left, wait and retry
+                if (response.status === 429 && attempt < retries) {
+                    console.log(`Rate limit hit, retrying attempt ${attempt}...`);
+                    await delay(2000); // Wait 2 seconds
+                    continue;
+                }
+                throw new Error(data.error?.message || "API failed");
             }
-        );
 
-        const data = await response.json();
+            if (!data?.choices?.[0]?.message?.content) {
+                throw new Error("No content returned from AI");
+            }
 
-        // 🔥 IMPORTANT DEBUG
-        console.log("GROQ RESPONSE:", JSON.stringify(data, null, 2));
+            return data.choices[0].message.content;
 
-        if (!response.ok) {
-            throw new Error(data.error?.message || "API failed");
+        } catch (err) {
+            if (attempt === retries) {
+                console.error("AI ERROR:", err.message);
+                throw err;
+            }
         }
-
-        if (!data?.choices?.[0]?.message?.content) {
-            throw new Error("No content returned from AI");
-        }
-
-        return data.choices[0].message.content;
-
-    } catch (err) {
-        console.error("AI ERROR:", err.message);
-        throw err;
     }
 }
 
