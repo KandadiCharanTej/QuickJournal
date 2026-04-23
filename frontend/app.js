@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     aiSpinner.classList.add('hidden');
                 }
             } else {
-                aiFillBtn.innerHTML = `<span>Generating in ${countdown}s...</span>`;
+                aiFillBtn.innerHTML = `<span>Generating Matter in ${countdown}s...</span>`;
                 countdown--;
             }
         }, 1000);
