@@ -146,17 +146,17 @@ const academicData = {
                 "9": { title: "Joins & Multi-Table Queries", syllabus: "Types of Joins: Inner, Left, Natural, Right, Full, Cross, and Self Join [cite: 921-922]." },
                 "10": { title: "View, Subqueries, & Index", syllabus: "Views in DBMS, Querying Using Views, Sub Queries, Introduction to Indexes In SQL [cite: 923-924]." }
             },
-            "Engineering Practice": {
-                "1": { title: "Carpentry", syllabus: "Carpentry tools and safety; Measuring, marking, sawing, chiselling, and finishing; Fabrication of a basic wooden joint [cite: 1037-1039]." },
-                "2": { title: "Fitting", syllabus: "Fitting tools and shop practices; Marking, hacksaw cutting, and filing; Fabrication of a simple metal joint [cite: 1040-1042]." },
-                "3": { title: "Welding", syllabus: "Welding processes and safety; Equipment and electrodes; Fabrication of a simple welded joint [cite: 1043-1045]." },
-                "4": { title: "Machine Shop", syllabus: "Machine shop practices; Lathe machine parts and cutting tools; Basic turning operations [cite: 1046-1048]." },
-                "5": { title: "Plumbing", syllabus: "Domestic plumbing systems; PVC pipes, fittings, and joining methods; Layout fabrication and leak testing [cite: 1049-1051]." },
-                "6": { title: "Pick and Place Robot", syllabus: "Mechanical Setup, Electronic Components, Rover Motion Control, Gripper/Arm Control, Bluetooth/ESP32 interface [cite: 1052-1053]." },
-                "7": { title: "Mobile Robot", syllabus: "Basics of robotics (2WD vs 4WD), Chassis assembly, L298N dual motor control, Motion controls [cite: 1054-1055]." },
-                "8": { title: "UAV Basics & Safety", syllabus: "Quadcopter frame, motors, and propellers; ESC basics; Battery management; Microcontroller/Flight Controller role; Safety precautions [cite: 1056-1057]." },
-                "9": { title: "Drone Assembly & Control", syllabus: "Frame setup, motor fitting, wiring ESCs and power distribution; Mobile phone control setup (BT/Wi-Fi); Throttle tests [cite: 1058-1060]." },
-                "10": { title: "3D Printing", syllabus: "Additive manufacturing concepts; Tinkercad for 3D modeling; Preparation and fabrication of 3D printed components [cite: 1061-1063]." }
+            "Engineering Physics": {
+                "1": { title: "Fundamentals of Quantum Physics", syllabus: "Planck’s theory, photoelectric effect, wave-particle duality, Schrödinger’s equation, Particle in 1 D potential box, Quantum tunnelling (Transmission and Reflection coefficients)" },
+                "2": { title: "Introduction to Quantum Computing", syllabus: "Foundation for quantum computing, Qubits, Superposition, Quantum entanglement, Quantum gates, Quantum circuits" },
+                "3": { title: "Semiconductor Physics and Device Applications", syllabus: "Energy bands in solids, intrinsic & extrinsic semiconductors, PN junction diodes, transistors (Qualitative)– operation and switching, Relevance in CPUs, GPUs, SSDs" },
+                "4": { title: "Optoelectronics and Display Technologies", syllabus: "Light-matter interaction, LEDs, photodiodes, laser diodes, Display technologies: LCD, LED, OLED, Applications - optical sensors, monitors, communication hardware" },
+                "5": { title: "Magnetism in Data Storage", syllabus: "Magnetic materials – classification, Domain theory, Hysteresis, Soft and Hard Magnetic materials, magnetic shielding, Magnetic domains in HDDs, Working of HDDs, MRAM" },
+                "6": { title: "Ferro Electricity and Memory Technologies", syllabus: "Dielectric Materials, Ferroelectricity, Charge storage in capacitors, Ferro electric capacitors, Ferro electric transistors, Ferro electric Memristors, Dielectric tunnelling, Emerging memory: FeRAM." },
+                "7": { title: "Electromagnetic Waves and Light Interference in Imaging", syllabus: "Light as an Electromagnetic Wave, Principle of Superposition, and Interference, Wave Intensity and Mathematical Representation, Digital Sensors and Image Capture" },
+                "8": { title: "Matrix Representation in Optical Imaging", syllabus: "Mathematical Modelling of Interference, Intensity Computation in a Matrix Format, Image as a Matrix: Bridging Physics and Computing, Interdisciplinary Applications" },
+                "9": { title: "Photonics and Fiber Optic Communication", syllabus: "Total internal reflection, optical fibers, acceptance angle, Numerical Aperture (Qualitative), Signal loss mechanisms: attenuation, dispersion, Fiber Optic Communication - Applications in high-speed internet and cloud data transfer" },
+                "10": { title: "Sensors and its Applications", syllabus: "Sensors, Sensor characteristics: sensitivity, precision, accuracy, Principles of mechanical, optical, and thermal sensors, Applications in robotics, automation, IoT, and smart systems" }
             }
         }
     }
