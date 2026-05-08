@@ -457,6 +457,60 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // ---------------- MILESTONE CELEBRATION ----------------
+    const milestoneBadge = document.getElementById('milestoneBadge');
+    const milestoneModal = document.getElementById('milestoneModal');
+    const closeMilestone = document.getElementById('closeMilestone');
+    const modalOverlay = document.getElementById('modalOverlay');
+
+    if (milestoneBadge && milestoneModal) {
+        const showModal = () => {
+            milestoneModal.classList.remove('hidden');
+            setTimeout(() => {
+                milestoneModal.classList.add('active');
+            }, 10);
+        };
+
+        const hideModal = () => {
+            milestoneModal.classList.remove('active');
+            setTimeout(() => {
+                milestoneModal.classList.add('hidden');
+            }, 500);
+        };
+
+        milestoneBadge.addEventListener('click', showModal);
+        closeMilestone.addEventListener('click', hideModal);
+        modalOverlay.addEventListener('click', hideModal);
+
+        // AUTO-SHOW LOGIC (Every 3 days for 1 month)
+        const checkMilestoneAutoShow = () => {
+            const now = Date.now();
+            let firstSeen = localStorage.getItem('milestone_first_seen');
+            let lastShown = localStorage.getItem('milestone_last_shown');
+            
+            const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
+            const threeDaysInMs = 3 * 24 * 60 * 60 * 1000;
+
+            if (!firstSeen) {
+                localStorage.setItem('milestone_first_seen', now);
+                firstSeen = now;
+            }
+
+            // Stop auto-showing after 1 month
+            if (now - firstSeen > thirtyDaysInMs) return;
+
+            // Show if it's the first time OR 3 days have passed since last auto-show
+            if (!lastShown || (now - lastShown > threeDaysInMs)) {
+                setTimeout(() => {
+                    showModal();
+                    localStorage.setItem('milestone_last_shown', Date.now());
+                }, 2500); // Wait 2.5s after load to not overwhelm the user
+            }
+        };
+
+        checkMilestoneAutoShow();
+    }
+
     // Initialize UI on load
     updateUI();
 });
