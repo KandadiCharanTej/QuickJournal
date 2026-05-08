@@ -5,9 +5,36 @@ console.log("API KEY STATUS:", process.env.GROQ_API_KEY ? "FOUND" : "MISSING");
 const express = require("express");
 const cors = require("cors");
 const fetch = require("node-fetch");
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// 📂 PERSISTENT CACHE SETUP
+const CACHE_FILE = path.join(__dirname, "journal_cache.json");
+let cache = new Map();
+
+// Load cache from file on startup
+try {
+    if (fs.existsSync(CACHE_FILE)) {
+        const data = JSON.parse(fs.readFileSync(CACHE_FILE, "utf-8"));
+        cache = new Map(Object.entries(data));
+        console.log(`Loaded ${cache.size} cached journals from disk.`);
+    }
+} catch (e) {
+    console.error("Failed to load cache file:", e.message);
+}
+
+// Helper to save cache
+function saveCache() {
+    try {
+        const obj = Object.fromEntries(cache);
+        fs.writeFileSync(CACHE_FILE, JSON.stringify(obj, null, 2));
+    } catch (e) {
+        console.error("Failed to save cache:", e.message);
+    }
+}
 
 app.set('trust proxy', 1); // Essential for rate limiting to work behind Render/Heroku proxies
 
@@ -18,16 +45,14 @@ const GROQ_KEYS = [
     process.env.GROQ_API_KEY_1,
     process.env.GROQ_API_KEY_2,
     process.env.GROQ_API_KEY_3
-].filter(k => k && !k.includes("PASTE_YOUR"));
+].filter(k => k && k.length > 10 && !k.includes("PASTE_YOUR"));
 
-// 🔐 Relaxed Rate Limiter (500 requests per 15 min)
-const rateLimit = require("express-rate-limit");
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 500, 
-    message: { error: "Too many requests. Please try later." }
-});
-app.use("/api/", limiter);
+const GROQ_MODELS = [
+    "llama-3.1-8b-instant",
+    "gemma2-9b-it",
+    "llama-3.3-70b-versatile",
+    "mixtral-8x7b-32768"
+];
 
 // ⏱️ STEP 3: Add Cooldown Map (Anti-spam)
 const lastRequestTime = new Map();
@@ -51,87 +76,92 @@ function cooldown(req, res, next) {
 }
 
 /* =========================
-   AI FUNCTION (Multi-Key Rotation)
+   AI FUNCTION (Hyper-Robust Rotation)
 ========================= */
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 async function generateWithAI(prompt) {
+    if (GROQ_KEYS.length === 0) {
+        throw new Error("No valid API keys found in .env. Please check your setup.");
+    }
+
     let lastError = null;
 
-    // Iterate through all available Groq keys
-    for (let i = 0; i < GROQ_KEYS.length; i++) {
-        const currentKey = GROQ_KEYS[i];
-        console.log(`Using Groq Key ${i + 1}/${GROQ_KEYS.length}...`);
+    // TRY EVERY KEY
+    for (let kIndex = 0; kIndex < GROQ_KEYS.length; kIndex++) {
+        const currentKey = GROQ_KEYS[kIndex];
 
-        // Each key gets its own retry attempts for small wait times
-        for (let attempt = 1; attempt <= 2; attempt++) {
-            try {
-                const response = await fetch(
-                    "https://api.groq.com/openai/v1/chat/completions",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Authorization": `Bearer ${currentKey}`,
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            model: "llama-3.1-8b-instant",
-                            messages: [{ role: "user", content: prompt }],
-                            max_tokens: 600
-                        })
-                    }
-                );
+        // TRY EVERY MODEL
+        for (let mIndex = 0; mIndex < GROQ_MODELS.length; mIndex++) {
+            const currentModel = GROQ_MODELS[mIndex];
+            
+            console.log(`Trying Key ${kIndex + 1} with Model ${currentModel}...`);
 
-                const data = await response.json();
-
-                if (!response.ok) {
-                    const errMsg = data.error?.message || "";
-                    
-                    // If it's a rate limit error (429)
-                    if (response.status === 429) {
-                        console.warn(`Key ${i + 1} Rate Limited!`);
-                        
-                        // Check if we can wait (if it's just a few seconds)
-                        const matchSecs = errMsg.match(/Please try again in ([0-9.]+)s/);
-                        if (matchSecs && matchSecs[1]) {
-                            const seconds = parseFloat(matchSecs[1]);
-                            if (seconds <= 5 && attempt < 2) {
-                                console.log(`Waiting ${seconds}s for Key ${i + 1}...`);
-                                await delay(seconds * 1000 + 500);
-                                continue; // Retry with same key
-                            }
+            for (let attempt = 1; attempt <= 2; attempt++) {
+                try {
+                    const response = await fetch(
+                        "https://api.groq.com/openai/v1/chat/completions",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Authorization": `Bearer ${currentKey}`,
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                model: currentModel,
+                                messages: [{ role: "user", content: prompt }],
+                                max_tokens: 600,
+                                temperature: 0.7
+                            })
                         }
+                    );
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        const errMsg = data.error?.message || "";
                         
-                        // Otherwise, break inner loop to try next key
-                        lastError = new Error(errMsg || "Rate limit reached");
-                        break; 
+                        // Handle Rate Limits (429)
+                        if (response.status === 429) {
+                            console.warn(`[429] Key ${kIndex + 1} + ${currentModel} limited.`);
+                            
+                            // If it's a short wait, just wait it out
+                            const matchSecs = errMsg.match(/Please try again in ([0-9.]+)s/);
+                            if (matchSecs && parseFloat(matchSecs[1]) <= 3 && attempt < 2) {
+                                await delay(parseFloat(matchSecs[1]) * 1000 + 500);
+                                continue;
+                            }
+                            
+                            // Otherwise, move to next model/key
+                            break; 
+                        }
+
+                        // Handle Server Errors (500, 503)
+                        if (response.status >= 500) {
+                            console.warn(`[${response.status}] Server error, retrying...`);
+                            await delay(1000);
+                            continue;
+                        }
+
+                        throw new Error(errMsg || `Status ${response.status}`);
                     }
 
-                    // If it's a server error, try one retry or move on
-                    if (response.status >= 500 && attempt < 2) {
-                        await delay(2000);
-                        continue;
+                    if (data?.choices?.[0]?.message?.content) {
+                        return data.choices[0].message.content.trim();
                     }
+                    
+                    throw new Error("Empty response from AI");
 
-                    throw new Error(errMsg || `API failed with status ${response.status}`);
+                } catch (err) {
+                    lastError = err;
+                    console.error(`Attempt Failed:`, err.message);
+                    if (attempt === 2) break;
                 }
-
-                if (!data?.choices?.[0]?.message?.content) {
-                    throw new Error("No content returned from AI");
-                }
-
-                return data.choices[0].message.content;
-
-            } catch (err) {
-                lastError = err;
-                console.error(`Error with Key ${i + 1}:`, err.message);
-                if (attempt === 2) break; // Move to next key
             }
         }
     }
 
-    // If we reached here, all keys failed
-    throw new Error(`All Groq keys exhausted or failed. Last error: ${lastError?.message}`);
+    throw new Error(`CRITICAL: All ${GROQ_KEYS.length} keys and ${GROQ_MODELS.length} models failed. Error: ${lastError?.message}`);
 }
 
 
@@ -196,6 +226,7 @@ ${sec.focus} ${sec.desc}
         
         fullText += "[END]\n";
         cache.set(cacheKey, fullText);
+        saveCache(); // PERSIST TO DISK
         res.json({ text: fullText });
 
     } catch (err) {
@@ -245,6 +276,11 @@ ${sec.focus} ${sec.desc}
         text = text.replace(new RegExp(`^\\s*${sec.name}.*\\n*`, "i"), "").replace(/\n{2,}/g, "\n");
 
         res.json({ text: text.trim() });
+        
+        // Cache single sections too if needed, but for now we focus on saving the whole journal
+        const cacheKey = JSON.stringify({ subject, moduleRoman, topic, syllabus, sectionTag }) + "_" + variation;
+        cache.set(cacheKey, text.trim());
+        saveCache();
 
     } catch (err) {
         console.error("SECTION ERROR:", err.message);

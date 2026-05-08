@@ -234,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // SEQUENTIAL GENERATION TO PREVENT RATE LIMITS
                     for (const sec of sections) {
                         aiFillBtn.innerHTML = `<span>✨ Generating ${sec.name}...</span>`;
-                        let retries = 3;
+                        let retries = 5; // Increased retries
                         let success = false;
                         let lastError = "";
                         let retryAfter = 0;
@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 // If the backend told us to wait, start the visual timer
                                 if (retryAfter > 0) {
                                     aiSpinner.classList.add('hidden');
-                                    aiErrorMsg.textContent = "❌ " + lastError;
+                                    aiErrorMsg.innerHTML = `❌ <b>Limit Hit:</b> ${lastError}. <br> Please wait for the timer below and click again.`;
                                     aiErrorMsg.classList.remove('hidden');
                                     startCooldownTimer(retryAfter);
                                     return; // Stop everything
@@ -270,8 +270,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                                 retries--;
                                 if (retries > 0) {
-                                    aiFillBtn.innerHTML = `<span>⚠️ Retrying ${sec.name}...</span>`;
-                                    await new Promise(resolve => setTimeout(resolve, 2000));
+                                    aiFillBtn.innerHTML = `<span>⚠️ Retrying ${sec.name} (${retries} left)...</span>`;
+                                    await new Promise(resolve => setTimeout(resolve, 3000)); // Longer wait
                                 }
                             }
                         }
