@@ -231,9 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     aiFillBtn.innerHTML = `<span>✨ Generating Content...</span>`;
                     aiSpinner.classList.remove('hidden');
 
-                    // SEQUENTIAL GENERATION (To preserve API stability and ensure full-length output)
-                    aiFillBtn.innerHTML = `<span>✨ Generating Content...</span>`;
-                    
+                    // SEQUENTIAL GENERATION
                     for (const sec of sections) {
                         aiFillBtn.innerHTML = `<span>✨ Generating ${sec.name}...</span>`;
                         let retries = 3;
@@ -257,33 +255,39 @@ document.addEventListener('DOMContentLoaded', () => {
                                     throw new Error(data.error || `Failed to generate ${sec.name}`);
                                 }
 
-                                document.getElementById(sec.id).value = data.text;
+                                const textarea = document.getElementById(sec.id);
+                                textarea.value = data.text;
+                                
+                                // Trigger an input event to update any listeners
+                                textarea.dispatchEvent(new Event('input'));
+                                
                                 success = true;
                                 
-                                // Wait 10 seconds before the next section to prevent API overload and ensure quality
-                                await new Promise(r => setTimeout(r, 3000)); 
+                                // Small pause to prevent burst limits
+                                await new Promise(r => setTimeout(r, 1000)); 
 
                             } catch (err) {
                                 lastError = err.message;
                                 if (lastError.startsWith("RATELIMIT:")) {
-                                    throw err; // Throw immediately to trigger visual timer
+                                    throw err; 
                                 }
                                 retries--;
                                 if (retries > 0) {
-                                    aiFillBtn.innerHTML = `<span>⚠️ Retrying ${sec.name} (${retries} left)...</span>`;
+                                    aiFillBtn.innerHTML = `<span>⚠️ Retrying ${sec.name} (${retries})...</span>`;
                                     await new Promise(r => setTimeout(r, 2000));
                                 }
                             }
                         }
-                        if (!success) {
-                            throw new Error(lastError);
-                        }
+                        if (!success) throw new Error(lastError);
                     }
 
-                    aiFillBtn.innerHTML = `<span>✅ Auto-Fill Completed!</span>`;
+                    aiFillBtn.innerHTML = `<span>✅ All Sections Generated!</span>`;
                     aiSpinner.classList.add('hidden');
                     
-                    // Reset button after 3 seconds
+                    // Final word count check
+                    const totalWords = sections.reduce((sum, s) => sum + document.getElementById(s.id).value.split(/\s+/).length, 0);
+                    console.log("Total word count:", totalWords);
+
                     setTimeout(() => {
                         aiFillBtn.disabled = false;
                         aiFillBtn.innerHTML = originalBtnHTML;
@@ -297,7 +301,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const parts = error.message.split(":");
                         const retryAfter = parseInt(parts[1]);
                         const msg = parts.slice(2).join(":");
-                        aiErrorMsg.innerHTML = `❌ <b>Limit Hit:</b> ${msg}. <br> Please wait for the timer.`;
+                        aiErrorMsg.innerHTML = `❌ <b>Limit Hit:</b> ${msg}. <br> Wait for the timer.`;
                         aiErrorMsg.classList.remove('hidden');
                         startCooldownTimer(retryAfter);
                     } else {
@@ -308,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             } else {
-                aiFillBtn.innerHTML = `<span>Generating Content in ${countdown}s...</span>`;
+                aiFillBtn.innerHTML = `<span>Generating in ${countdown}s...</span>`;
                 countdown--;
             }
         }, 1000);
@@ -542,6 +546,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
         checkMilestoneAutoShow();
     }
+
+    // ---------------- WORD COUNT TRACKING ----------------
+    const textareas = ['experience', 'feelings', 'learning', 'application', 'conclusion'];
+    textareas.forEach(id => {
+        const area = document.getElementById(id);
+        const badge = document.getElementById(`wc-${id}`);
+        
+        const updateCount = () => {
+            const text = area.value.trim();
+            const words = text ? text.split(/\s+/).length : 0;
+            badge.innerText = `${words} words`;
+            
+            // Color feedback (Green at 450+ words)
+            if (words >= 450) {
+                badge.className = "text-[10px] bg-emerald-100 px-2 py-0.5 rounded text-emerald-600 font-bold";
+            } else if (words >= 350) {
+                badge.className = "text-[10px] bg-amber-100 px-2 py-0.5 rounded text-amber-600 font-bold";
+            } else {
+                badge.className = "text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-bold";
+            }
+        };
+
+        area.addEventListener('input', updateCount);
+        // Initial count if needed
+        updateCount();
+    });
 
     // Initialize UI on load
     updateUI();

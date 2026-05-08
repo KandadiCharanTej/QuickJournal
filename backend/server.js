@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-console.log("API KEY STATUS:", process.env.GROQ_API_KEY ? "FOUND" : "MISSING");
+console.log("API KEY STATUS:", process.env.GROQ_API_KEY_1 ? "FOUND" : "MISSING");
 
 const express = require("express");
 const cors = require("cors");
@@ -36,7 +36,7 @@ function saveCache() {
     }
 }
 
-app.set('trust proxy', 1); // Essential for rate limiting to work behind Render/Heroku proxies
+app.set('trust proxy', 1);
 
 app.use(cors());
 app.use(express.json());
@@ -44,29 +44,28 @@ app.use(express.json());
 const GROQ_KEYS = [
     process.env.GROQ_API_KEY_1,
     process.env.GROQ_API_KEY_2,
-    process.env.GROQ_API_KEY_3
+    process.env.GROQ_API_KEY_3,
+    process.env.GROQ_API_KEY_4,
+    process.env.GROQ_API_KEY_5
 ].filter(k => k && k.length > 10 && !k.includes("PASTE_YOUR"));
 
+// 🚀 USING ONLY THE MOST POWERFUL MODELS FOR 2200+ WORD CAPACITY
 const GROQ_MODELS = [
-    "llama-3.1-8b-instant",
-    "gemma2-9b-it",
     "llama-3.3-70b-versatile",
     "mixtral-8x7b-32768"
 ];
 
-// ⏱️ STEP 3: Add Cooldown Map (Anti-spam)
+// ⏱️ Anti-spam
 const lastRequestTime = new Map();
 
-// 📦 STEP 5: Add Cache Map
-// (Cache is now defined at the top of the file for persistence)
 function cooldown(req, res, next) {
     const ip = req.ip;
     const now = Date.now();
 
     if (lastRequestTime.has(ip)) {
         const diff = now - lastRequestTime.get(ip);
-        if (diff < 30000) { // 30 seconds
-            return res.status(429).json({ error: "Wait 30 seconds before next request" });
+        if (diff < 15000) { 
+            return res.status(429).json({ error: "Wait 15 seconds before next request" });
         }
     }
 
@@ -75,18 +74,14 @@ function cooldown(req, res, next) {
 }
 
 /* =========================
-   AI FUNCTION (Lightning Fast Rotation)
+   AI FUNCTION
 ========================= */
-const delay = ms => new Promise(res => setTimeout(res, ms));
-
 async function generateWithAI(prompt) {
     if (GROQ_KEYS.length === 0) {
-        throw new Error("No valid API keys found in .env.");
+        throw new Error("No valid API keys found. Please add GROQ_API_KEY_1 to 5 in your .env file.");
     }
 
     let lastError = null;
-
-    // Create all possible combinations of Keys + Models
     let combos = [];
     for (let k = 0; k < GROQ_KEYS.length; k++) {
         for (let m = 0; m < GROQ_MODELS.length; m++) {
@@ -94,12 +89,11 @@ async function generateWithAI(prompt) {
         }
     }
     
-    // Shuffle the combinations to spread the load randomly and avoid hammering one key
     combos = combos.sort(() => Math.random() - 0.5);
 
     for (const combo of combos) {
         try {
-            console.log(`Trying Key ${combo.kIdx + 1} with Model ${combo.model}...`);
+            console.log(`[AI] Attempting ${combo.model} (Key ${combo.kIdx + 1})...`);
             const response = await fetch(
                 "https://api.groq.com/openai/v1/chat/completions",
                 {
@@ -111,8 +105,8 @@ async function generateWithAI(prompt) {
                     body: JSON.stringify({
                         model: combo.model,
                         messages: [{ role: "user", content: prompt }],
-                        max_tokens: 1500,
-                        temperature: 0.9
+                        max_tokens: 3000, // Increased for extreme length
+                        temperature: 0.7 // Lower temperature for more focused long output
                     })
                 }
             );
@@ -120,113 +114,29 @@ async function generateWithAI(prompt) {
             const data = await response.json();
 
             if (!response.ok) {
-                const errMsg = data.error?.message || "";
-                
-                // If Rate Limited, DO NOT WAIT. Instantly skip to the next combo!
-                if (response.status === 429) {
-                    lastError = new Error(errMsg);
-                    continue; 
-                }
-
-                // If Server Error, skip to the next combo!
-                if (response.status >= 500) {
-                    continue;
-                }
-
-                throw new Error(errMsg || `Status ${response.status}`);
+                const isRetryable = response.status === 429 || response.status >= 500;
+                if (isRetryable) continue;
+                throw new Error(data.error?.message || `Status ${response.status}`);
             }
 
             if (data?.choices?.[0]?.message?.content) {
+                console.log(`[AI] Success with ${combo.model}!`);
                 return data.choices[0].message.content.trim();
             }
-            
-            throw new Error("Empty response from AI");
-
         } catch (err) {
+            console.error(`[AI] Error with ${combo.model}:`, err.message);
             lastError = err;
-            // Instantly try next combo on network errors
         }
     }
 
-    throw new Error(`CRITICAL: All APIs busy. Last error: ${lastError?.message}`);
+    throw new Error(`CRITICAL: All AI services busy. Fallback activated.`);
 }
 
 
 /* =========================
-   ROUTE
+   ROUTES
 ========================= */
-app.post("/api/generate", async (req, res) => {
-    try {
-        const { subject, moduleRoman, topic, syllabus } = req.body;
 
-        // ⚡ STEP 4: Validate inputs and length
-        if (!subject || !moduleRoman || !topic) {
-            return res.status(400).json({ error: "Missing required fields for journal generation." });
-        }
-        if (JSON.stringify(req.body).length > 2000) {
-            return res.status(400).json({ error: "Input too long or invalid" });
-        }
-
-        // 🎲 OPTIMIZED CACHE: Only 6 variations allowed per topic.
-        // This ensures that if 10 students request the same topic, 4 will likely get a cached version.
-        const variation = Math.floor(Math.random() * 6);
-
-        // 📦 LIMIT CACHE SIZE
-        if (cache.size > 200) {
-            cache.clear();
-        }
-
-        // 📦 STEP 5: Check Cache (Updated Key)
-        const cacheKey = JSON.stringify({ subject, moduleRoman, topic, syllabus }) + "_" + variation;
-        if (cache.has(cacheKey)) {
-            console.log(`Serving cached variation ${variation} for ${topic}`);
-            return res.json({ text: cache.get(cacheKey) });
-        }
-
-        const sections = [
-            { tag: "EXP", name: "Experience", focus: "Write about your classroom experience.", desc: "Describe what happened in class. What teacher explained, how concepts were introduced, and include examples (e.g. real-life analogies for concepts)." },
-            { tag: "FEEL", name: "Feelings", focus: "Describe your feelings and emotional reactions.", desc: "Describe your emotions during the class. Mention confusion, curiosity, interest, struggles in understanding concepts, and how clarity developed." },
-            { tag: "LEARN", name: "Learning", focus: "Explain key insights and concepts you understood deeply.", desc: "Explain what you truly understood. Detail key concepts and include concrete examples (like bank account, student system, etc.)." },
-            { tag: "APP", name: "Application", focus: "Explain practical use and how you will apply this knowledge.", desc: "Explain real-life and coding applications. How you will use this in projects, practical coding scenarios, and industry relevance." },
-            { tag: "CONC", name: "Conclusion", focus: "Summarize your overall learning and conclude the journal.", desc: "Summarize what changed in your thinking, your overall learning experience, and how your understanding improved." }
-        ];
-
-        let fullText = "";
-
-        for (const sec of sections) {
-            const prompt = `
-You are a B.Tech student writing a deeply reflective academic journal.
-Your task is to write ONLY the ${sec.name} section.
-Subject: ${subject} | Module: ${moduleRoman} | Topic: ${topic}
-Syllabus: ${syllabus || "General subject concepts"}
-
-INSTRUCTIONS:
-${sec.focus} ${sec.desc}
-- Write 400-450 words.
-- Single paragraph, no headings, no professor names.
-- Variation ID: ${variation}
-`;
-            let text = await generateWithAI(prompt);
-            text = text.replace(new RegExp(`^\\s*${sec.name}.*\\n*`, "i"), "").replace(/\n{2,}/g, "\n");
-            fullText += `[${sec.tag}]\n${text.trim()}\n\n`;
-        }
-        
-        fullText += "[END]\n";
-        cache.set(cacheKey, fullText);
-        saveCache(); // PERSIST TO DISK
-        res.json({ text: fullText });
-
-    } catch (err) {
-        console.error("ROUTE ERROR:", err.message);
-        const isRateLimit = err.message.includes("wait") || err.message.includes("Limit");
-        res.status(isRateLimit ? 429 : 500).json({ 
-            error: isRateLimit ? err.message : "AI failed", 
-            details: err.message 
-        });
-    }
-});
-
-// 🚀 NEW ENDPOINT: Generate a single section for live updates
 app.post("/api/generate-section", async (req, res) => {
     try {
         const { subject, moduleRoman, topic, syllabus, sectionTag } = req.body;
@@ -236,74 +146,77 @@ app.post("/api/generate-section", async (req, res) => {
         }
 
         const sectionMap = {
-            "EXP": { name: "Experience", focus: "Write about your classroom experience.", desc: "Describe what happened in class. What teacher explained, how concepts were introduced, and include examples." },
-            "FEEL": { name: "Feelings", focus: "Describe your feelings and emotional reactions.", desc: "Describe your emotions during the class. Mention confusion, curiosity, interest, struggles in understanding concepts." },
-            "LEARN": { name: "Learning", focus: "Explain key insights and concepts you understood deeply.", desc: "Explain what you truly understood. Detail key concepts and include concrete examples." },
-            "APP": { name: "Application", focus: "Explain practical use and how you will apply this knowledge.", desc: "Explain real-life and coding applications. How you will use this in projects." },
-            "CONC": { name: "Conclusion", focus: "Summarize your overall learning and conclude the journal.", desc: "Summarize what changed in your thinking, your overall learning experience." }
+            "EXP": { name: "Experience", focus: "Classroom experience, lecture flow, and pedagogical methods.", desc: "Describe the atmosphere, the specific sequence of concepts taught, the professor's engagement, and the interactive elements." },
+            "FEEL": { name: "Feelings", focus: "Emotional and psychological journey during the class.", desc: "Detail initial curiosity, specific moments of complexity, the feeling of 'aha' breakthroughs, and overall academic confidence." },
+            "LEARN": { name: "Learning", focus: "Technical insights and conceptual breakthroughs.", desc: "Break down 4-5 core technical principles in extreme detail with code-like logic or theoretical proofs." },
+            "APP": { name: "Application", focus: "Professional, industrial, and personal applications.", desc: "Describe 3 specific real-world industry use cases and how you will implement this in a major capstone project." },
+            "CONC": { name: "Conclusion", focus: "Overall transformation and readiness for next steps.", desc: "Summarize how your mindset changed, the value of the knowledge, and your roadmap for mastering advanced sub-topics." }
         };
 
         const sec = sectionMap[sectionTag];
         if (!sec) return res.status(400).json({ error: "Invalid section" });
 
-        const variation = Math.floor(Math.random() * 1000);
+        const variation = Math.floor(Math.random() * 20); 
+        
         const prompt = `
-You are a highly articulate university scholar writing the ${sec.name} section of a deep reflective journal.
+You are a top-tier B.Tech scholar writing the ${sec.name} section of a deep reflective journal.
 Subject: ${subject} | Module: ${moduleRoman} | Topic: ${topic}
+Syllabus Context: ${syllabus || topic}
 
-INSTRUCTIONS:
-${sec.focus} ${sec.desc}
-- You MUST write a MINIMUM of 450 words. Do NOT stop writing early. If you write less than 450 words, you fail.
-- To reach this length, you must extensively describe 3 specific real-world examples, 2 theoretical breakdowns, and your deep personal analysis.
-- Write everything as ONE massive, unbroken paragraph.
-- NO headings, NO bullet points, NO names.
-- Variation ID: ${variation}
+TASK:
+Write a MINIMUM of 500 words for this section. You MUST be extremely verbose and detailed.
+
+STRUCTURE TO REACH WORD COUNT (All in ONE massive paragraph):
+1. [Deep Intro]: Start with a highly academic introduction to the topic's relevance (100 words).
+2. [Detailed Breakdown]: Elaborate on 4-5 specific sub-points or technical nuances in extreme detail (250 words).
+3. [Personal Analysis]: Provide a deep, thoughtful analysis of your own perspective and understanding (100 words).
+4. [Concluding Reflection]: End with a strong, forward-looking statement (50 words).
+
+CONSTRAINTS:
+- Write as ONE massive, cohesive, and unbroken paragraph.
+- DO NOT use headings, bullet points, or listicles.
+- DO NOT mention professor names.
+- USE sophisticated, high-level academic vocabulary.
+- BE EXTREMELY DESCRIPTIVE. If you find yourself finishing early, go back and expand on the technical details.
+
+Variation ID: ${variation}
 `;
 
         let text = await generateWithAI(prompt);
         
-        // Force the AI to expand if it's too short (under 200 words)
-        if (text.split(" ").length < 200) {
-            console.log("AI response too short, retrying for longer text...");
-            text = await generateWithAI(prompt + "\n\nCRITICAL: Your previous attempt was too short. You MUST double the length and write at least 450 words this time.");
+        // STRICT LENGTH CHECK: If less than 400 words, force a retry with extreme pressure
+        let wordCount = text.split(/\s+/).length;
+        if (wordCount < 400) {
+            console.log(`[${sectionTag}] Content too short (${wordCount} words). Retrying with expansion pressure...`);
+            const expansionPrompt = prompt + `\n\nCRITICAL: Your previous response was only ${wordCount} words. This is UNACCEPTABLE. You MUST expand this to at least 500 words. Add much more technical detail, more descriptive adjectives, and deeper philosophical reflections. DO NOT STOP until you hit 500 words.`;
+            text = await generateWithAI(expansionPrompt);
         }
-        text = text.replace(new RegExp(`^\\s*${sec.name}.*\\n*`, "i"), "").replace(/\n{2,}/g, "\n");
+
+        text = text.replace(new RegExp(`^\\s*(${sec.name}|Section|${sec.tag}).*\\n*`, "i"), "").replace(/\n{2,}/g, "\n");
 
         res.json({ text: text.trim() });
         
-        // Cache single sections too if needed, but for now we focus on saving the whole journal
-        const cacheKey = JSON.stringify({ subject, moduleRoman, topic, syllabus, sectionTag }) + "_" + variation;
+        const cacheKey = Buffer.from(`${topic}_${sectionTag}_${variation}`).toString('base64');
         cache.set(cacheKey, text.trim());
+        if (cache.size > 500) cache.delete(cache.keys().next().value);
         saveCache();
 
     } catch (err) {
-        console.error("SECTION ERROR (Using Fallback):", err.message);
+        console.error("SECTION ERROR:", err.message);
         
-        // 🛡️ 100% FAIL-SAFE FALLBACK SYSTEM 🛡️
-        // If ALL APIs fail (1000+ simultaneous requests), we NEVER show an error to the user.
-        // We gracefully return a highly academic generic template.
-        
+        const topicName = req.body.topic || "this subject";
         const fallbackTemplates = {
-            "EXP": `The classroom experience covering ${req.body.topic || 'this topic'} was an incredibly deep and comprehensive session that completely transformed my understanding of the subject. From the very beginning of the lecture, the professor ensured that the foundational concepts were laid out with absolute clarity. We started by exploring the theoretical framework that underpins the entire topic, discussing not just how these systems work, but the historical context and the core problems they were designed to solve. As the session progressed, the theoretical concepts were systematically broken down into highly detailed, practical examples. The professor utilized excellent visual aids, diagrams, and real-time demonstrations on the board, which served as powerful analogies for complex mechanisms. I made sure to actively take notes, capturing not only the definitions and formulas but also the nuanced explanations of edge cases and exceptions. The interactive nature of the class was a significant highlight; whenever a complex sub-topic was introduced, the professor paused to engage the class, asking probing questions that forced us to think critically rather than just passively absorb information. This pedagogical approach maintained my complete focus throughout the entire duration of the lecture. One of the most effective parts of the experience was the collaborative discussion towards the end, where we analyzed real-world scenarios and industry-standard applications. The pacing of the class was meticulously balanced—fast enough to cover a vast amount of critical material, yet slow enough to ensure that the more difficult and abstract concepts were fully digested by the students. I found myself frequently nodding along as previously fragmented pieces of knowledge from previous classes finally started to connect into a cohesive mental model. Overall, this specific classroom session was highly engaging, exceptionally informative, and perfectly structured to maximize our retention and understanding of the material.`,
-            "FEEL": `Reflecting on my emotional journey throughout this lecture, I experienced a significant and positive shift in my overall confidence regarding this subject material. Initially, when the topic was first introduced, I felt a distinct sense of apprehension mixed with curiosity. The sheer volume of new terminology, complex architectures, and advanced theories seemed overwhelming, and I was genuinely concerned about my ability to keep pace with the discussion. I felt moments of slight confusion as the professor dove into the more abstract layers of the topic, causing me to question my foundational knowledge. However, this anxiety was short-lived. As the lecture progressed and the professor seamlessly transitioned from abstract theory into concrete, relatable examples, my initial confusion began to rapidly dissolve. I felt a surge of intellectual excitement and genuine intrigue as the practical applications of these theoretical concepts were revealed. I found myself becoming highly invested in the logical flow of the arguments being presented. When the professor walked us through the step-by-step problem-solving process, I experienced several 'aha!' moments that replaced my self-doubt with a profound sense of clarity and empowerment. I felt deeply satisfied when I was able to correctly anticipate the next step in the examples before it was explicitly stated. By the conclusion of the session, my emotional state had completely transformed from anxious uncertainty to enthusiastic confidence. I felt a strong sense of academic accomplishment in having successfully grasped such intricate material. This positive emotional shift has left me feeling highly motivated and eager to explore the subject further on my own time, completely replacing any prior trepidation with a genuine passion for the coursework.`,
-            "LEARN": `The core learning outcomes from this session were extensive and deeply foundational for my ongoing academic progress. My primary takeaway was a robust, comprehensive understanding of the mechanics, rules, and underlying philosophy behind ${req.body.topic || 'this critical topic'}. I moved beyond mere rote memorization and truly internalized the fundamental principles that govern this area of study. I learned the specific syntax, structural requirements, and precise methodologies necessary to implement these ideas correctly and efficiently. More importantly, the analogies provided during the lecture illuminated the abstract concepts, making them highly concrete and logical. I now possess a deep understanding of not just the 'how', but the 'why'—why certain techniques are preferred over others, why specific rules exist, and how these individual components interact to form a larger, cohesive system. I also learned how to identify common pitfalls, errors, and inefficiencies that frequently occur when applying these concepts, which will save me countless hours of troubleshooting in the future. The lecture effectively bridged the gap between theoretical knowledge and practical execution. I am now capable of breaking down complex problems within this domain into manageable, sequential steps. This deep theoretical and practical understanding is absolutely crucial for my upcoming technical assessments, major projects, and laboratory work. Furthermore, I learned how this specific topic integrates with the broader themes of the entire course syllabus. This holistic understanding has significantly sharpened my analytical thinking and critical evaluation skills. I feel completely confident in my ability to explain these concepts to a peer, which is the ultimate test of true comprehension.`,
-            "APP": `The practical application of this newly acquired knowledge is where I see the most immense value for my academic and professional future. I plan to aggressively apply these concepts directly in my upcoming major projects, assignments, and intensive practical lab sessions. Understanding ${req.body.topic || 'these core mechanisms'} is absolutely essential for architecting, building, and maintaining robust, scalable, and efficient systems in my future career. By mastering these principles at this stage, I am strategically laying an unshakeable foundation for the highly advanced topics I will encounter in subsequent semesters. My immediate plan of action is to start writing extensive practice programs, designing comprehensive diagrams, and simulating complex scenarios to pressure-test my understanding. I will intentionally create edge cases and challenging environments to see how these concepts hold up under stress, which will dramatically improve my troubleshooting and debugging skills. Furthermore, I recognize that the concepts covered today are not just academic exercises; they are industry-standard practices utilized by top professionals worldwide. By aligning my current academic work with these real-world applications, I am actively bridging the gap between being a student and becoming a competent, industry-ready professional. I will use this knowledge to optimize my existing projects, making them more efficient and structurally sound. In technical interviews and future professional roles, the ability to clearly articulate and practically apply these exact principles will be a significant competitive advantage. I am committed to continuously practicing these techniques until they become second nature, ensuring that I can rely on them instinctively when solving complex engineering problems in a real-world setting.`,
-            "CONC": `In conclusion, this specific module and lecture session represented a monumental step forward in my overall academic journey and technical development. The intensive deep dive into this subject completely clarified numerous doubts and misconceptions I had previously held. It successfully connected several disparate dots from previous lectures, unifying them into a single, comprehensive framework of understanding. I now feel exceptionally well-prepared and highly motivated to tackle the significantly more complex and demanding challenges that lie ahead in this subject area. This profound learning experience has not only drastically improved my technical knowledge base and practical skill set, but it has also fundamentally refined my analytical, problem-solving mindset. I have learned to approach complex, intimidating problems with a structured, logical methodology rather than feeling overwhelmed. The combination of excellent pedagogical instruction, detailed practical examples, and my own active engagement resulted in a highly successful educational outcome. I will carry the insights, techniques, and confidence gained from this session forward into the remainder of the semester and ultimately into my professional career. The time and effort invested in mastering this specific topic will undoubtedly yield massive returns in my future academic performance and career trajectory. This session has perfectly exemplified the value of deep, focused academic study and has reignited my overarching passion for my chosen field of engineering.`
+            "EXP": `The classroom experience centered around the discussion of ${topicName} was an exceptionally profound and intellectually stimulating session that offered a comprehensive overview of the fundamental principles and advanced applications of the subject matter. From the very inception of the lecture, the atmosphere in the room was one of intense academic focus, as the professor meticulously laid the groundwork for the complex theories we were about to navigate. We began with a rigorous exploration of the historical and theoretical frameworks that underpin ${topicName}, dissecting the core problems that these methodologies were designed to address in a real-world engineering context. The pedagogical approach was remarkably effective, utilizing a blend of high-level theoretical discourse and grounded, practical demonstrations that served to bridge the gap between abstract concepts and tangible execution. I found myself deeply engaged as the lecture transitioned into a series of detailed case studies, where each component of the system was isolated and analyzed for its specific contribution to the overarching architecture. The use of sophisticated visual aids, including multi-layered diagrams and live technical demonstrations, provided a multi-dimensional perspective that made even the most intricate sub-topics accessible. I made a concerted effort to capture every nuance in my notes, documenting not only the primary formulas and definitions but also the critical edge cases and potential failure points that were highlighted throughout the discussion. The interactive elements of the session, such as the spontaneous Q&A segments and the collaborative problem-solving exercises, forced us to think critically and apply our knowledge in real-time, rather than merely acting as passive recipients of information. By the conclusion of the lecture, the previously disparate elements of the syllabus had begun to coalesce into a unified mental model, providing me with a sense of clarity and technical confidence that I had not previously possessed. This session was a masterclass in effective instruction, leaving me with a deep appreciation for the complexities of ${topicName} and a strong desire to explore its further reaches. This was followed by a deeper dive into the specific algorithms that govern the system's efficiency, where we spent a significant amount of time analyzing time complexity and space requirements in various deployment scenarios, ensuring that our theoretical understanding was firmly rooted in practical engineering constraints.`,
+            "FEEL": `Reflecting upon my emotional and psychological journey during the course of this intensive lecture on ${topicName}, I can identify a significant and highly positive transformation in my internal state, moving from a position of initial trepidation to one of profound intellectual empowerment. When the topic was first introduced, I must admit to feeling a distinct sense of academic anxiety, as the sheer scale and complexity of the material seemed, at first glance, to be almost insurmountable. The introduction of advanced terminology and abstract structural concepts initially triggered a feeling of cognitive overload, causing me to question the depth of my foundational preparation for such a rigorous module. However, as the professor began to systematically deconstruct these formidable concepts into more manageable, logical segments, my initial apprehension started to dissipate, replaced by a growing sense of curiosity and intellectual intrigue. I felt a genuine surge of excitement during the moments of conceptual breakthrough—those 'aha!' moments where the logic of the system finally clicked into place and the underlying elegance of the theory was revealed. These instances of clarity were incredibly rewarding, providing a much-needed boost to my academic self-esteem and reinforcing my passion for the subject. I found myself becoming increasingly invested in the logical progression of the lecture, experiencing a deep sense of satisfaction as I successfully anticipated the next steps in complex derivations. By the time the session reached its conclusion, the earlier feelings of uncertainty had been entirely supplanted by a robust sense of accomplishment and a heightened state of motivation. I left the classroom feeling not just informed, but genuinely inspired, possessing a newfound confidence in my ability to master even the most challenging aspects of the curriculum. This emotional shift has fundamentally altered my approach to the subject, turning what was once a source of stress into a source of genuine intellectual pleasure and academic pride. I now view these complex technical challenges not as obstacles, but as opportunities for profound intellectual growth and development, which has significantly enhanced my overall academic resilience and my commitment to achieving excellence in my chosen field of engineering.`,
+            "LEARN": `The technical insights and conceptual breakthroughs achieved during this session on ${topicName} have provided me with an exceptionally robust and multi-faceted understanding of the core mechanics that govern this critical area of study. My learning progressed far beyond the superficial layer of rote memorization, moving instead into a deep, internalized comprehension of the fundamental principles and the underlying logic that dictates how these systems operate in high-pressure, real-world environments. I gained a precise understanding of the structural requirements, the specific syntax, and the rigorous methodologies that are essential for the successful implementation of ${topicName} in a professional engineering context. One of the most significant aspects of my learning was the realization of the 'why' behind the 'how'—the strategic reasoning that informs the choice of one technique over another and the critical importance of adhering to industry-standard best practices. We explored the intricate relationship between various components, learning how small changes in one area can have significant, cascading effects on the performance and stability of the entire system. I also learned to identify and mitigate common pitfalls, architectural flaws, and performance bottlenecks that often plague less experienced practitioners in this field. The lecture effectively bridged the theoretical-practical divide by providing multiple concrete examples, such as the optimization of data structures, the implementation of scalable algorithms, and the rigorous testing of edge-case scenarios. I now feel equipped with a comprehensive toolkit of analytical skills and technical knowledge that will be indispensable for my upcoming projects, laboratory assessments, and future career challenges. This session has not only sharpened my technical proficiency but has also enhanced my ability to think like a professional engineer, prioritizing efficiency, reliability, and logical consistency in all my academic and professional endeavors. Furthermore, the deep dive into the underlying mathematical models has given me a much clearer perspective on how to architect systems that are both computationally efficient and highly resilient to changing environmental conditions.`,
+            "APP": `The practical and professional applications of the knowledge I have acquired regarding ${topicName} are both vast and immediately relevant to my trajectory as a future leader in the field of technology and engineering. I recognize that the concepts mastered today are not merely academic abstractions, but are the very building blocks used by industry professionals to architect and maintain the sophisticated systems that power our modern world. My immediate plan of action involves a rigorous application of these principles within my own personal development projects and upcoming university assignments, where I intend to implement the advanced methodologies we discussed to ensure maximum scalability and efficiency. I am particularly eager to apply these concepts to solve complex optimization problems, utilizing the specific frameworks and logical structures that were highlighted during the lecture. Furthermore, I see immense value in using this knowledge to pressure-test my existing codebase, identifying areas for improvement and refactoring my work to meet higher professional standards. In the broader context of my future career, the ability to articulate and implement ${topicName} with such a high degree of technical precision will be a definitive competitive advantage during technical interviews and in my eventual professional roles. I plan to continue my exploration of this topic by engaging with industry-standard documentation, contributing to open-source initiatives that utilize these technologies, and staying abreast of the latest research and developments in the field. By treating these academic concepts as professional tools, I am actively narrowing the gap between my current status as a student and my ultimate goal of becoming a highly competent, innovative engineer. The long-term benefits of this deep dive into ${topicName} are clear: it provides me with the technical foundation, the analytical mindset, and the practical skills necessary to excel in a rapidly evolving and highly demanding global industry. I am committed to continuous practice and experimentation, ensuring that my understanding remains current and that I am prepared to lead in the development of next-generation technological solutions.`,
+            "CONC": `In conclusion, this comprehensive session on ${topicName} has represented a significant milestone in my academic development, fundamentally reshaping my understanding of the subject and solidifying my technical foundation for the remainder of the semester. The intensive exploration of both theoretical frameworks and practical applications has successfully resolved numerous lingering doubts and has provided a clear, logical path forward for my continued studies. I now possess a unified and highly sophisticated mental model of ${topicName}, one that integrates seamlessly with the broader themes of the syllabus and provides a robust framework for approaching even more advanced modules in the future. The transformation in my perspective has been profound; I have moved from a fragmented understanding of individual concepts to a holistic appreciation of how these elements interact to form a cohesive, powerful system. This learning experience has not only augmented my technical skill set but has also refined my overall analytical approach, teaching me to prioritize logical structure, technical rigor, and practical efficiency in all my work. I feel exceptionally well-prepared for the challenges of upcoming assessments and projects, possessing both the confidence and the competence required to excel at the highest academic levels. The value of the time and effort invested in this session cannot be overstated, as the insights and techniques gained here will continue to yield dividends throughout my university career and well into my professional life. I leave this module with a renewed sense of purpose, a deepened passion for engineering, and an unshakeable commitment to achieving excellence in all my future academic and professional pursuits. The session has been a transformative experience, one that has significantly elevated my standards of performance and has prepared me to meet the demands of the modern engineering landscape with confidence and expertise. I am now more ready than ever to tackle the increasingly complex challenges that define the cutting edge of modern technology and engineering practice.`
         };
 
-        const fallbackText = fallbackTemplates[req.body.sectionTag] || fallbackTemplates["CONC"];
-        
-        res.json({ text: fallbackText });
+        res.json({ text: fallbackTemplates[sectionTag] || fallbackTemplates["CONC"] });
     }
 });
 
-/* =========================
-   HEALTH CHECK
-========================= */
-app.get("/", (req, res) => {
-    res.send("QuickJournal API running 🚀");
-});
+app.get("/", (req, res) => res.send("QuickJournal Engine Active 🚀"));
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
