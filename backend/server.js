@@ -58,8 +58,7 @@ const GROQ_MODELS = [
 const lastRequestTime = new Map();
 
 // 📦 STEP 5: Add Cache Map
-const cache = new Map();
-
+// (Cache is now defined at the top of the file for persistence)
 function cooldown(req, res, next) {
     const ip = req.ip;
     const now = Date.now();
