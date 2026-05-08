@@ -1,5 +1,17 @@
 require("dotenv").config();
 
+// 🐛 DEBUGGING HANDLERS (To find why it's crashing with Status 1)
+process.on('uncaughtException', (err) => {
+    console.error('FATAL: Uncaught Exception:', err.message);
+    console.error(err.stack);
+    process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('FATAL: Unhandled Rejection at:', promise, 'reason:', reason);
+    process.exit(1);
+});
+
 console.log("-----------------------------------------");
 console.log("QuickJournal Backend Starting...");
 console.log("Node Version:", process.version);
