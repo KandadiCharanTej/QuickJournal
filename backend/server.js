@@ -19,8 +19,22 @@ const PORT = process.env.PORT || 5000;
 let cache = new Map();
 
 app.set('trust proxy', 1);
-app.use(cors());
+
+// 🛡️ MORE ROBUST CORS
+const corsOptions = {
+    origin: '*', // Allow all for now to fix Failed to Fetch
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+};
+app.use(cors(corsOptions));
 app.use(express.json());
+
+// 📝 REQUEST LOGGER
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url} from ${req.headers.origin || 'unknown'}`);
+    next();
+});
 
 const GROQ_KEYS = [
     process.env.GROQ_API_KEY_1,

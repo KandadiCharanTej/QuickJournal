@@ -305,7 +305,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         aiErrorMsg.classList.remove('hidden');
                         startCooldownTimer(retryAfter);
                     } else {
-                        aiErrorMsg.textContent = "❌ " + error.message;
+                        if (error.message === "Failed to fetch") {
+                            aiErrorMsg.innerHTML = "❌ <b>Connection Error:</b> Could not reach the backend. <br>Please ensure your backend is live at Render and check console for details.";
+                        } else {
+                            aiErrorMsg.textContent = "❌ " + error.message;
+                        }
                         aiErrorMsg.classList.remove('hidden');
                         aiFillBtn.disabled = false;
                         aiFillBtn.innerHTML = originalBtnHTML;
