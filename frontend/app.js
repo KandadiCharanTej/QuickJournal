@@ -228,11 +228,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 clearInterval(timerInterval);
                 
                 try {
-                    aiFillBtn.innerHTML = `<span>✨ Generating Matters...</span>`;
+                    aiFillBtn.innerHTML = `<span>✨ Generating Content...</span>`;
                     aiSpinner.classList.remove('hidden');
 
                     // SEQUENTIAL GENERATION (To preserve API stability and ensure full-length output)
-                    aiFillBtn.innerHTML = `<span>✨ Generating Matters...</span>`;
+                    aiFillBtn.innerHTML = `<span>✨ Generating Content...</span>`;
                     
                     for (const sec of sections) {
                         aiFillBtn.innerHTML = `<span>✨ Generating ${sec.name}...</span>`;
@@ -260,8 +260,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                 document.getElementById(sec.id).value = data.text;
                                 success = true;
                                 
-                                // Wait 1 second before the next section to let the API breathe
-                                await new Promise(r => setTimeout(r, 1000)); 
+                                // Wait 10 seconds before the next section to prevent API overload and ensure quality
+                                await new Promise(r => setTimeout(r, 10000)); 
 
                             } catch (err) {
                                 lastError = err.message;

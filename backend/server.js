@@ -248,14 +248,16 @@ app.post("/api/generate-section", async (req, res) => {
 
         const variation = Math.floor(Math.random() * 1000);
         const prompt = `
-You are a B.Tech student writing the ${sec.name} section of an academic journal.
+You are a highly articulate B.Tech student writing the ${sec.name} section of an academic reflective journal.
 Subject: ${subject} | Module: ${moduleRoman} | Topic: ${topic}
 Syllabus: ${syllabus || "General subject concepts"}
 
 INSTRUCTIONS:
 ${sec.focus} ${sec.desc}
-- Exactly 400-450 words.
-- Single paragraph, NO headings, NO names like "Professor Patel".
+- Write an EXTREMELY DETAILED, LONG, AND COMPREHENSIVE single paragraph.
+- You MUST write a MINIMUM of 450 words. Be highly verbose. Expand on every single point deeply. 
+- Use complex vocabulary, deep technical analysis, and extensive analogies.
+- Single paragraph only. NO headings, NO bullet points, NO names like "Professor Patel".
 - Variation ID: ${variation}
 `;
 
