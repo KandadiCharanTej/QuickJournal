@@ -261,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 success = true;
                                 
                                 // Wait 10 seconds before the next section to prevent API overload and ensure quality
-                                await new Promise(r => setTimeout(r, 10000)); 
+                                await new Promise(r => setTimeout(r, 3000)); 
 
                             } catch (err) {
                                 lastError = err.message;
@@ -308,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             } else {
-                aiFillBtn.innerHTML = `<span>Generating Matter in ${countdown}s...</span>`;
+                aiFillBtn.innerHTML = `<span>Generating Content in ${countdown}s...</span>`;
                 countdown--;
             }
         }, 1000);
