@@ -112,7 +112,7 @@ async function generateWithAI(prompt) {
                         model: combo.model,
                         messages: [{ role: "user", content: prompt }],
                         max_tokens: 1500,
-                        temperature: 0.7
+                        temperature: 0.9
                     })
                 }
             );
@@ -248,20 +248,25 @@ app.post("/api/generate-section", async (req, res) => {
 
         const variation = Math.floor(Math.random() * 1000);
         const prompt = `
-You are a highly articulate B.Tech student writing the ${sec.name} section of an academic reflective journal.
+You are a highly articulate university scholar writing the ${sec.name} section of a deep reflective journal.
 Subject: ${subject} | Module: ${moduleRoman} | Topic: ${topic}
-Syllabus: ${syllabus || "General subject concepts"}
 
 INSTRUCTIONS:
 ${sec.focus} ${sec.desc}
-- Write an EXTREMELY DETAILED, LONG, AND COMPREHENSIVE single paragraph.
-- You MUST write a MINIMUM of 450 words. Be highly verbose. Expand on every single point deeply. 
-- Use complex vocabulary, deep technical analysis, and extensive analogies.
-- Single paragraph only. NO headings, NO bullet points, NO names like "Professor Patel".
+- You MUST write a MINIMUM of 450 words. Do NOT stop writing early. If you write less than 450 words, you fail.
+- To reach this length, you must extensively describe 3 specific real-world examples, 2 theoretical breakdowns, and your deep personal analysis.
+- Write everything as ONE massive, unbroken paragraph.
+- NO headings, NO bullet points, NO names.
 - Variation ID: ${variation}
 `;
 
         let text = await generateWithAI(prompt);
+        
+        // Force the AI to expand if it's too short (under 200 words)
+        if (text.split(" ").length < 200) {
+            console.log("AI response too short, retrying for longer text...");
+            text = await generateWithAI(prompt + "\n\nCRITICAL: Your previous attempt was too short. You MUST double the length and write at least 450 words this time.");
+        }
         text = text.replace(new RegExp(`^\\s*${sec.name}.*\\n*`, "i"), "").replace(/\n{2,}/g, "\n");
 
         res.json({ text: text.trim() });
