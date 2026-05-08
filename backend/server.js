@@ -65,7 +65,7 @@ const GROQ_MODELS = [
 const lastRequestTime = new Map();
 
 function cooldown(req, res, next) {
-    const ip = req.ip;
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || "unknown";
     const now = Date.now();
 
     if (lastRequestTime.has(ip)) {

@@ -12,6 +12,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
     const generateBtn = document.getElementById('generateBtn');
+    const serverStatus = document.getElementById('serverStatus');
+
+    // 🛰️ SERVER HEALTH CHECK
+    async function checkServer() {
+        try {
+            const res = await fetch('https://quickjournal-backend.onrender.com/');
+            if (res.ok) {
+                serverStatus.className = "ml-2 px-2 py-0.5 rounded-full bg-emerald-100 text-[10px] font-bold text-emerald-600 flex items-center gap-1.5 shadow-sm";
+                serverStatus.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span>SERVER LIVE</span>';
+            } else {
+                throw new Error();
+            }
+        } catch (e) {
+            serverStatus.className = "ml-2 px-2 py-0.5 rounded-full bg-rose-100 text-[10px] font-bold text-rose-600 flex items-center gap-1.5 shadow-sm";
+            serverStatus.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span><span>SERVER OFFLINE</span>';
+        }
+    }
+    checkServer();
 
     function updateUI() {
         for (let i = 1; i <= totalSteps; i++) {
