@@ -180,24 +180,46 @@ app.post("/api/generate-section", async (req, res) => {
 
         const variation = Math.floor(Math.random() * 20); 
         const prompt = `
-You are a top-tier B.Tech scholar writing the ${sec.name} section of a deep reflective journal.
-Subject: ${subject} | Module: ${moduleRoman} | Topic: ${topic}
-Syllabus Context: ${syllabus || topic}
-
-TASK:
-Write a MINIMUM of 500 words for this section. Be extremely verbose.
-Write as ONE massive, cohesive paragraph. No headings or bullets.
-Focus on: ${sec.focus}
-
-Variation ID: ${variation}
-`;
+            Act as an elite academic researcher and B.Tech scholar. 
+            TASK: Write an EXTREMELY DETAILED ${sec.name} section for a reflective journal.
+            SUBJECT: ${subject} | MODULE: ${moduleRoman} | TOPIC: ${topic}
+            SYLLABUS CONTEXT: ${syllabus || topic}
+            
+            STRICT REQUIREMENTS:
+            1. Total Word Count MUST BE 500-600 words.
+            2. Format: One long, dense, scholarly paragraph. No bullets, no headings.
+            3. Tone: High-level technical analysis, professional, and deeply reflective.
+            4. Content Focus: ${sec.focus}
+            
+            GUIDELINE FOR LENGTH:
+            - Start with a 100-word introduction to the technical concepts.
+            - Provide a 200-word deep-dive into the specific sub-components and logic discussed.
+            - Include 150 words of personal critical analysis and engineering perspective.
+            - Conclude with a 50-word synthesis of future implications.
+        `;
 
         let text = await generateWithAI(prompt);
         
-        // Expansion logic
-        if (text.split(/\s+/).length < 400) {
-            console.log(`[${sectionTag}] Too short. Retrying expansion...`);
-            text = await generateWithAI(prompt + "\n\nCRITICAL: Must expand to 500+ words. Add much more detail.");
+        // 🔄 AGGRESSIVE RECURSIVE EXPANSION
+        let currentWordCount = text.split(/\s+/).length;
+        let attempts = 0;
+        
+        while (currentWordCount < 450 && attempts < 2) {
+            console.log(`[${sectionTag}] Length: ${currentWordCount}. Expanding...`);
+            const expansionPrompt = `
+                I have written this section but it is too short (${currentWordCount} words). 
+                I need it to be AT LEAST 500 words. 
+                Keep the existing content but ADD 300 MORE WORDS of technical detail, examples, and deep academic reflection.
+                
+                CURRENT CONTENT:
+                ${text}
+            `;
+            const expandedText = await generateWithAI(expansionPrompt);
+            if (expandedText.split(/\s+/).length > currentWordCount) {
+                text = expandedText;
+            }
+            currentWordCount = text.split(/\s+/).length;
+            attempts++;
         }
 
         // Clean up
@@ -220,11 +242,11 @@ Variation ID: ${variation}
             resultSent = true;
             const tag = (req.body && req.body.sectionTag) || "CONC";
             const fallbackTemplates = {
-                "EXP": `The classroom experience centered around the discussion of the topic was an exceptionally profound and intellectually stimulating session that offered a comprehensive overview...`,
-                "FEEL": `Reflecting upon my emotional and psychological journey during the course of this intensive lecture...`,
-                "LEARN": `The technical insights and conceptual breakthroughs achieved during this session...`,
-                "APP": `The practical and professional applications of the knowledge I have acquired are both vast...`,
-                "CONC": `In conclusion, this comprehensive session has represented a significant milestone...`
+                "EXP": `The classroom experience centered around the discussion of the topic was an exceptionally profound and intellectually stimulating session that offered a comprehensive overview of the fundamental principles and advanced applications of the subject matter. From the very inception of the lecture, the atmosphere in the room was one of intense academic focus, as the professor meticulously laid the groundwork for the complex theories we were about to navigate. We began with a rigorous exploration of the historical and theoretical frameworks, dissecting the core problems that these methodologies were designed to address in a real-world engineering context. The pedagogical approach was remarkably effective, utilizing a blend of high-level theoretical discourse and grounded, practical demonstrations that served to bridge the gap between abstract concepts and tangible execution. I found myself deeply engaged as the lecture transitioned into a series of detailed case studies, where each component of the system was isolated and analyzed for its specific contribution to the overarching architecture. The use of sophisticated visual aids, including multi-layered diagrams and live technical demonstrations, provided a multi-dimensional perspective that made even the most intricate sub-topics accessible. I made a concerted effort to capture every nuance in my notes, documenting not only the primary formulas and definitions but also the critical edge cases and potential failure points that were highlighted throughout the discussion. The interactive elements of the session, such as the spontaneous Q&A segments and the collaborative problem-solving exercises, forced us to think critically and apply our knowledge in real-time. By the conclusion of the lecture, the previously disparate elements of the syllabus had begun to coalesce into a unified mental model, providing me with a sense of clarity and technical confidence that I had not previously possessed. This session was a masterclass in effective instruction, leaving me with a deep appreciation for the complexities involved and a strong desire to explore further reaches. This was followed by a deeper dive into the specific algorithms that govern the system's efficiency, where we spent a significant amount of time analyzing time complexity and space requirements in various deployment scenarios, ensuring that our theoretical understanding was firmly rooted in practical engineering constraints.`,
+                "FEEL": `Reflecting upon my emotional and psychological journey during the course of this intensive lecture, I can identify a significant and highly positive transformation in my internal state, moving from a position of initial trepidation to one of profound intellectual empowerment. When the topic was first introduced, I must admit to feeling a distinct sense of academic anxiety, as the sheer scale and complexity of the material seemed, at first glance, to be almost insurmountable. The introduction of advanced terminology and abstract structural concepts initially triggered a feeling of cognitive overload, causing me to question the depth of my foundational preparation for such a rigorous module. However, as the professor began to systematically deconstruct these formidable concepts into more manageable, logical segments, my initial apprehension started to dissipate, replaced by a growing sense of curiosity and intellectual intrigue. I felt a genuine surge of excitement during the moments of conceptual breakthrough—those 'aha!' moments where the logic of the system finally clicked into place and the underlying elegance of the theory was revealed. These instances of clarity were incredibly rewarding, providing a much-needed boost to my academic self-esteem and reinforcing my passion for the subject. I found myself becoming increasingly invested in the logical progression of the lecture, experiencing a deep sense of satisfaction as I successfully anticipated the next steps in complex derivations. By the time the session reached its conclusion, the earlier feelings of uncertainty had been entirely supplanted by a robust sense of accomplishment and a heightened state of motivation. I left the classroom feeling not just informed, but genuinely inspired, possessing a newfound confidence in my ability to master even the most challenging aspects of the curriculum. This emotional shift has fundamentally altered my approach to the subject, turning what was once a source of stress into a source of genuine intellectual pleasure and academic pride.`,
+                "LEARN": `The technical insights and conceptual breakthroughs achieved during this session have provided me with an exceptionally robust and multi-faceted understanding of the core mechanics that govern this critical area of study. My learning progressed far beyond the superficial layer of rote memorization, moving instead into a deep, internalized comprehension of the fundamental principles and the underlying logic that dictates how these systems operate in high-pressure, real-world environments. I gained a precise understanding of the structural requirements, the specific syntax, and the rigorous methodologies that are essential for the successful implementation of the concepts in a professional engineering context. One of the most significant aspects of my learning was the realization of the 'why' behind the 'how'—the strategic reasoning that informs the choice of one technique over another and the critical importance of adhering to industry-standard best practices. We explored the intricate relationship between various components, learning how small changes in one area can have significant, cascading effects on the performance and stability of the entire system. I also learned to identify and mitigate common pitfalls, architectural flaws, and performance bottlenecks that often plague less experienced practitioners in this field. The lecture effectively bridged the theoretical-practical divide by providing multiple concrete examples, such as the optimization of data structures, the implementation of scalable algorithms, and the rigorous testing of edge-case scenarios. I now feel equipped with a comprehensive toolkit of analytical skills and technical knowledge that will be indispensable for my upcoming projects, laboratory assessments, and future career challenges. This session has not only sharpened my technical proficiency but has also enhanced my ability to think like a professional engineer, prioritizing efficiency, reliability, and logical consistency in all my academic and professional endeavors.`,
+                "APP": `The practical and professional applications of the knowledge I have acquired are both vast and immediately relevant to my trajectory as a future leader in the field of technology and engineering. I recognize that the concepts mastered today are not merely academic abstractions, but are the very building blocks used by industry professionals to architect and maintain the sophisticated systems that power our modern world. My immediate plan of action involves a rigorous application of these principles within my own personal development projects and upcoming university assignments, where I intend to implement the advanced methodologies we discussed to ensure maximum scalability and efficiency. I am particularly eager to apply these concepts to solve complex optimization problems, utilizing the specific frameworks and logical structures that were highlighted during the lecture. Furthermore, I see immense value in using this knowledge to pressure-test my existing codebase, identifying areas for improvement and refactoring my work to meet higher professional standards. In the broader context of my future career, the ability to articulate and implement these concepts with such a high degree of technical precision will be a definitive competitive advantage during technical interviews and in my eventual professional roles. I plan to continue my exploration of this topic by engaging with industry-standard documentation, contributing to open-source initiatives that utilize these technologies, and staying abreast of the latest research and developments in the field. By treating these academic concepts as professional tools, I am actively narrowing the gap between my current status as a student and my ultimate goal of becoming a highly competent, innovative engineer.`,
+                "CONC": `In conclusion, this comprehensive session has represented a significant milestone in my academic development, fundamentally reshaping my understanding of the subject and solidifying my technical foundation for the remainder of the semester. The intensive exploration of both theoretical frameworks and practical applications has successfully resolved numerous lingering doubts and has provided a clear, logical path forward for my continued studies. I now possess a unified and highly sophisticated mental model, one that integrates seamlessly with the broader themes of the syllabus and provides a robust framework for approaching even more advanced modules in the future. The transformation in my perspective has been profound; I have moved from a fragmented understanding of individual concepts to a holistic appreciation of how these elements interact to form a cohesive, powerful system. This learning experience has not only augmented my technical skill set but has also refined my overall analytical approach, teaching me to prioritize logical structure, technical rigor, and practical efficiency in all my work. I feel exceptionally well-prepared for the challenges of upcoming assessments and projects, possessing both the confidence and the competence required to excel at the highest academic levels. The value of the time and effort invested in this session cannot be overstated, as the insights and techniques gained here will continue to yield dividends throughout my university career and well into my professional life. I leave this module with a renewed sense of purpose, a deepened passion for engineering, and an unshakeable commitment to achieving excellence in all my future academic and professional pursuits.`
             };
             res.json({ text: fallbackTemplates[tag] || fallbackTemplates["CONC"] });
         }
