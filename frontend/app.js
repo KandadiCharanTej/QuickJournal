@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 🛰️ SERVER HEALTH CHECK
     async function checkServer() {
         try {
-            const res = await fetch('http://localhost:5000/');
+            const res = await fetch('https://quickjournal-backend.onrender.com/');
             if (res.ok) {
                 serverStatus.className = "ml-2 px-2 py-0.5 rounded-full bg-emerald-100 text-[10px] font-bold text-emerald-600 flex items-center gap-1.5 shadow-sm";
                 serverStatus.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span>SERVER LIVE</span>';
@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         while (retries > 0 && !success) {
                             try {
-                                const res = await fetch('http://localhost:5000/api/generate-section', {
+                                const res = await fetch('https://quickjournal-backend.onrender.com/api/generate-section', {
                                     method: "POST",
                                     headers: { "Content-Type": "application/json" },
                                     body: JSON.stringify({ subject, moduleRoman, topic, syllabus, sectionTag: sec.tag })
