@@ -231,15 +231,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     aiFillBtn.innerHTML = `<span>✨ Generating Matters...</span>`;
                     aiSpinner.classList.remove('hidden');
 
-                    // PARALLEL GENERATION (Lightning Fast)
+                    // SEQUENTIAL GENERATION (To preserve API stability and ensure full-length output)
                     aiFillBtn.innerHTML = `<span>✨ Generating Matters...</span>`;
                     
-                    const generateSection = async (sec) => {
-                        let retries = 3; // Reduced back to 3 since backend is now fail-fast
+                    for (const sec of sections) {
+                        aiFillBtn.innerHTML = `<span>✨ Generating ${sec.name}...</span>`;
+                        let retries = 3;
+                        let success = false;
                         let lastError = "";
-                        let retryAfter = 0;
 
-                        while (retries > 0) {
+                        while (retries > 0 && !success) {
                             try {
                                 const res = await fetch('https://quickjournal-backend.onrender.com/api/generate-section', {
                                     method: "POST",
@@ -251,28 +252,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
                                 if (!res.ok) {
                                     if (data.retryAfter) {
-                                        // Special error format to catch rate limits globally
                                         throw new Error(`RATELIMIT:${data.retryAfter}:${data.error}`);
                                     }
                                     throw new Error(data.error || `Failed to generate ${sec.name}`);
                                 }
 
                                 document.getElementById(sec.id).value = data.text;
-                                return; // Success!
+                                success = true;
+                                
+                                // Wait 1 second before the next section to let the API breathe
+                                await new Promise(r => setTimeout(r, 1000)); 
+
                             } catch (err) {
                                 lastError = err.message;
                                 if (lastError.startsWith("RATELIMIT:")) {
                                     throw err; // Throw immediately to trigger visual timer
                                 }
                                 retries--;
-                                if (retries > 0) await new Promise(r => setTimeout(r, 1500));
+                                if (retries > 0) {
+                                    aiFillBtn.innerHTML = `<span>⚠️ Retrying ${sec.name} (${retries} left)...</span>`;
+                                    await new Promise(r => setTimeout(r, 2000));
+                                }
                             }
                         }
-                        throw new Error(lastError);
-                    };
-
-                    // Fire all 5 requests at the exact same time
-                    await Promise.all(sections.map(sec => generateSection(sec)));
+                        if (!success) {
+                            throw new Error(lastError);
+                        }
+                    }
 
                     aiFillBtn.innerHTML = `<span>✅ Auto-Fill Completed!</span>`;
                     aiSpinner.classList.add('hidden');
