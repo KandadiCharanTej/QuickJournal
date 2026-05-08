@@ -16,11 +16,11 @@ app.use(express.json());
 
 const API_KEY = process.env.GROQ_API_KEY;
 
-// 🔐 Relaxed Rate Limiter (100 requests per 15 min)
+// 🔐 Relaxed Rate Limiter (500 requests per 15 min)
 const rateLimit = require("express-rate-limit");
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100, 
+    max: 500, 
     message: { error: "Too many requests. Please try later." }
 });
 app.use("/api/", limiter);
@@ -73,19 +73,50 @@ async function generateWithAI(prompt, retries = 4) {
             const data = await response.json();
 
             if (!response.ok) {
-                // If it's a rate limit error (429) and we have retries left, wait and retry
-                if (response.status === 429 && attempt < retries) {
-                    let waitTime = 3000; // Default wait 3s
-                    const errMsg = data.error?.message || "";
-                    const match = errMsg.match(/Please try again in ([0-9.]+)s/);
-                    if (match && match[1]) {
-                        waitTime = parseFloat(match[1]) * 1000 + 1500; // Add 1.5s buffer
-                    }
-                    console.log(`Rate limit hit! Waiting ${waitTime}ms before attempt ${attempt + 1}...`);
-                    await delay(waitTime);
-                    continue;
+                const errMsg = data.error?.message || "";
+                
+                // Extract human-readable wait time if available (e.g. "12s", "4m30s", "4h3m")
+                let waitTimeStr = "";
+                const strMatch = errMsg.match(/Please try again in ([a-zA-Z0-9.]+)\.?/);
+                if (strMatch && strMatch[1]) {
+                    waitTimeStr = strMatch[1];
                 }
-                throw new Error(data.error?.message || "API failed");
+
+                // If it's a rate limit error (429) or server error (503)
+                if (response.status === 429 || response.status >= 500) {
+                    const matchSecs = errMsg.match(/Please try again in ([0-9.]+)s/);
+                    
+                    if (matchSecs && matchSecs[1]) {
+                        const seconds = parseFloat(matchSecs[1]);
+                        if (seconds > 15) {
+                            throw new Error(`AI Rate limit reached! Please wait ${waitTimeStr} before trying again.`);
+                        }
+                        if (attempt < retries) {
+                            let waitTime = seconds * 1000 + 1500;
+                            console.log(`API Error (${response.status})! Waiting ${waitTime}ms before attempt ${attempt + 1}...`);
+                            await delay(waitTime);
+                            continue;
+                        }
+                    } else if (errMsg.includes("Please try again in")) {
+                        // Means it has minutes/hours like "14m30s"
+                        throw new Error(`AI Limit reached! Please wait ${waitTimeStr} before trying again.`);
+                    }
+
+                    // Standard exponential backoff if no time provided and retries left
+                    if (attempt < retries) {
+                        let waitTime = 3000 * attempt; 
+                        console.log(`API Error (${response.status})! Waiting ${waitTime}ms before attempt ${attempt + 1}...`);
+                        await delay(waitTime);
+                        continue;
+                    }
+                }
+                
+                // If it's a 429 but we exhausted retries or it's another error
+                if (response.status === 429) {
+                    throw new Error(waitTimeStr ? `API Limit reached. Please wait ${waitTimeStr} before trying again.` : "Too many requests. Please try again later.");
+                }
+                
+                throw new Error(data.error?.message || `API failed with status ${response.status}`);
             }
 
             if (!data?.choices?.[0]?.message?.content) {
@@ -167,7 +198,11 @@ ${sec.focus} ${sec.desc}
 
     } catch (err) {
         console.error("ROUTE ERROR:", err.message);
-        res.status(500).json({ error: "AI failed", details: err.message });
+        const isRateLimit = err.message.includes("wait") || err.message.includes("Limit");
+        res.status(isRateLimit ? 429 : 500).json({ 
+            error: isRateLimit ? err.message : "AI failed", 
+            details: err.message 
+        });
     }
 });
 
@@ -211,7 +246,11 @@ ${sec.focus} ${sec.desc}
 
     } catch (err) {
         console.error("SECTION ERROR:", err.message);
-        res.status(500).json({ error: "Section generation failed", details: err.message });
+        const isRateLimit = err.message.includes("wait") || err.message.includes("Limit");
+        res.status(isRateLimit ? 429 : 500).json({ 
+            error: isRateLimit ? err.message : "Section generation failed", 
+            details: err.message 
+        });
     }
 });
 

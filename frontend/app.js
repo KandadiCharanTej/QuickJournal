@@ -213,22 +213,50 @@ document.addEventListener('DOMContentLoaded', () => {
                     aiFillBtn.innerHTML = `<span>✨ Generating Matters...</span>`;
                     aiSpinner.classList.remove('hidden');
 
-                    // PARALLEL GENERATION
-                    await Promise.all(sections.map(async (sec) => {
-                        const res = await fetch('https://quickjournal-backend.onrender.com/api/generate-section', {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ subject, moduleRoman, topic, syllabus, sectionTag: sec.tag })
-                        });
+                    // SEQUENTIAL GENERATION TO PREVENT RATE LIMITS
+                    for (const sec of sections) {
+                        aiFillBtn.innerHTML = `<span>✨ Generating ${sec.name}...</span>`;
+                        let retries = 3;
+                        let success = false;
+                        let lastError = "";
 
-                        if (!res.ok) {
-                            const errData = await res.json().catch(() => ({}));
-                            throw new Error(errData?.error || `Failed to generate ${sec.name} section.`);
+                        while (retries > 0 && !success) {
+                            try {
+                                const res = await fetch('https://quickjournal-backend.onrender.com/api/generate-section', {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ subject, moduleRoman, topic, syllabus, sectionTag: sec.tag })
+                                });
+
+                                if (!res.ok) {
+                                    const errData = await res.json().catch(() => ({}));
+                                    throw new Error(errData?.error || `Failed to generate ${sec.name} section.`);
+                                }
+
+                                const data = await res.json();
+                                document.getElementById(sec.id).value = data.text;
+                                success = true;
+                            } catch (err) {
+                                lastError = err.message;
+                                
+                                // If the backend told us to wait (e.g. daily limit hit), stop retrying immediately!
+                                if (lastError.toLowerCase().includes("wait") || lastError.toLowerCase().includes("limit reached")) {
+                                    success = false;
+                                    break;
+                                }
+
+                                retries--;
+                                if (retries > 0) {
+                                    aiFillBtn.innerHTML = `<span>⚠️ Retrying ${sec.name}...</span>`;
+                                    await new Promise(resolve => setTimeout(resolve, 2000));
+                                }
+                            }
                         }
 
-                        const data = await res.json();
-                        document.getElementById(sec.id).value = data.text;
-                    }));
+                        if (!success) {
+                            throw new Error(lastError || `Failed to generate ${sec.name} section after retries.`);
+                        }
+                    }
 
                     aiFillBtn.innerHTML = `<span>✅ Auto-Fill Completed!</span>`;
                     aiSpinner.classList.add('hidden');
