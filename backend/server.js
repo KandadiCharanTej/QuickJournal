@@ -76,92 +76,80 @@ function cooldown(req, res, next) {
 }
 
 /* =========================
-   AI FUNCTION (Hyper-Robust Rotation)
+   AI FUNCTION (Lightning Fast Rotation)
 ========================= */
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
 async function generateWithAI(prompt) {
     if (GROQ_KEYS.length === 0) {
-        throw new Error("No valid API keys found in .env. Please check your setup.");
+        throw new Error("No valid API keys found in .env.");
     }
 
     let lastError = null;
 
-    // TRY EVERY KEY
-    for (let kIndex = 0; kIndex < GROQ_KEYS.length; kIndex++) {
-        const currentKey = GROQ_KEYS[kIndex];
+    // Create all possible combinations of Keys + Models
+    let combos = [];
+    for (let k = 0; k < GROQ_KEYS.length; k++) {
+        for (let m = 0; m < GROQ_MODELS.length; m++) {
+            combos.push({ key: GROQ_KEYS[k], model: GROQ_MODELS[m], kIdx: k });
+        }
+    }
+    
+    // Shuffle the combinations to spread the load randomly and avoid hammering one key
+    combos = combos.sort(() => Math.random() - 0.5);
 
-        // TRY EVERY MODEL
-        for (let mIndex = 0; mIndex < GROQ_MODELS.length; mIndex++) {
-            const currentModel = GROQ_MODELS[mIndex];
-            
-            console.log(`Trying Key ${kIndex + 1} with Model ${currentModel}...`);
-
-            for (let attempt = 1; attempt <= 2; attempt++) {
-                try {
-                    const response = await fetch(
-                        "https://api.groq.com/openai/v1/chat/completions",
-                        {
-                            method: "POST",
-                            headers: {
-                                "Authorization": `Bearer ${currentKey}`,
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                                model: currentModel,
-                                messages: [{ role: "user", content: prompt }],
-                                max_tokens: 600,
-                                temperature: 0.7
-                            })
-                        }
-                    );
-
-                    const data = await response.json();
-
-                    if (!response.ok) {
-                        const errMsg = data.error?.message || "";
-                        
-                        // Handle Rate Limits (429)
-                        if (response.status === 429) {
-                            console.warn(`[429] Key ${kIndex + 1} + ${currentModel} limited.`);
-                            
-                            // If it's a short wait, just wait it out
-                            const matchSecs = errMsg.match(/Please try again in ([0-9.]+)s/);
-                            if (matchSecs && parseFloat(matchSecs[1]) <= 3 && attempt < 2) {
-                                await delay(parseFloat(matchSecs[1]) * 1000 + 500);
-                                continue;
-                            }
-                            
-                            // Otherwise, move to next model/key
-                            break; 
-                        }
-
-                        // Handle Server Errors (500, 503)
-                        if (response.status >= 500) {
-                            console.warn(`[${response.status}] Server error, retrying...`);
-                            await delay(1000);
-                            continue;
-                        }
-
-                        throw new Error(errMsg || `Status ${response.status}`);
-                    }
-
-                    if (data?.choices?.[0]?.message?.content) {
-                        return data.choices[0].message.content.trim();
-                    }
-                    
-                    throw new Error("Empty response from AI");
-
-                } catch (err) {
-                    lastError = err;
-                    console.error(`Attempt Failed:`, err.message);
-                    if (attempt === 2) break;
+    for (const combo of combos) {
+        try {
+            console.log(`Trying Key ${combo.kIdx + 1} with Model ${combo.model}...`);
+            const response = await fetch(
+                "https://api.groq.com/openai/v1/chat/completions",
+                {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${combo.key}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: combo.model,
+                        messages: [{ role: "user", content: prompt }],
+                        max_tokens: 600,
+                        temperature: 0.7
+                    })
                 }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                const errMsg = data.error?.message || "";
+                
+                // If Rate Limited, DO NOT WAIT. Instantly skip to the next combo!
+                if (response.status === 429) {
+                    lastError = new Error(errMsg);
+                    continue; 
+                }
+
+                // If Server Error, skip to the next combo!
+                if (response.status >= 500) {
+                    continue;
+                }
+
+                throw new Error(errMsg || `Status ${response.status}`);
             }
+
+            if (data?.choices?.[0]?.message?.content) {
+                return data.choices[0].message.content.trim();
+            }
+            
+            throw new Error("Empty response from AI");
+
+        } catch (err) {
+            lastError = err;
+            // Instantly try next combo on network errors
         }
     }
 
-    throw new Error(`CRITICAL: All ${GROQ_KEYS.length} keys and ${GROQ_MODELS.length} models failed. Error: ${lastError?.message}`);
+    throw new Error(`CRITICAL: All APIs busy. Last error: ${lastError?.message}`);
 }
 
 
