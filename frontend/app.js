@@ -203,6 +203,24 @@ document.addEventListener('DOMContentLoaded', () => {
             { tag: "CONC", id: "conclusion", name: "Conclusion" }
         ];
 
+        // ⏱️ VISUAL TIMER HELPER
+        function startCooldownTimer(seconds) {
+            aiFillBtn.disabled = true;
+            let timeLeft = seconds;
+            
+            const cooldownInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(cooldownInterval);
+                    aiFillBtn.disabled = false;
+                    aiFillBtn.innerHTML = originalBtnHTML;
+                    aiErrorMsg.classList.add('hidden');
+                } else {
+                    aiFillBtn.innerHTML = `<span>⏳ Wait ${timeLeft}s...</span>`;
+                    timeLeft--;
+                }
+            }, 1000);
+        }
+
         // ⏱️ PRE-GENERATION COUNTDOWN (To relieve AI pressure)
         let countdown = 3;
         const timerInterval = setInterval(async () => {
@@ -219,6 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         let retries = 3;
                         let success = false;
                         let lastError = "";
+                        let retryAfter = 0;
 
                         while (retries > 0 && !success) {
                             try {
@@ -228,21 +247,25 @@ document.addEventListener('DOMContentLoaded', () => {
                                     body: JSON.stringify({ subject, moduleRoman, topic, syllabus, sectionTag: sec.tag })
                                 });
 
+                                const data = await res.json();
+
                                 if (!res.ok) {
-                                    const errData = await res.json().catch(() => ({}));
-                                    throw new Error(errData?.error || `Failed to generate ${sec.name} section.`);
+                                    retryAfter = data.retryAfter || 0;
+                                    throw new Error(data.error || `Failed to generate ${sec.name} section.`);
                                 }
 
-                                const data = await res.json();
                                 document.getElementById(sec.id).value = data.text;
                                 success = true;
                             } catch (err) {
                                 lastError = err.message;
                                 
-                                // If the backend told us to wait (e.g. daily limit hit), stop retrying immediately!
-                                if (lastError.toLowerCase().includes("wait") || lastError.toLowerCase().includes("limit reached")) {
-                                    success = false;
-                                    break;
+                                // If the backend told us to wait, start the visual timer
+                                if (retryAfter > 0) {
+                                    aiSpinner.classList.add('hidden');
+                                    aiErrorMsg.textContent = "❌ " + lastError;
+                                    aiErrorMsg.classList.remove('hidden');
+                                    startCooldownTimer(retryAfter);
+                                    return; // Stop everything
                                 }
 
                                 retries--;

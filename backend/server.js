@@ -14,7 +14,11 @@ app.set('trust proxy', 1); // Essential for rate limiting to work behind Render/
 app.use(cors());
 app.use(express.json());
 
-const API_KEY = process.env.GROQ_API_KEY;
+const GROQ_KEYS = [
+    process.env.GROQ_API_KEY_1,
+    process.env.GROQ_API_KEY_2,
+    process.env.GROQ_API_KEY_3
+].filter(k => k && !k.includes("PASTE_YOUR"));
 
 // 🔐 Relaxed Rate Limiter (500 requests per 15 min)
 const rateLimit = require("express-rate-limit");
@@ -47,92 +51,89 @@ function cooldown(req, res, next) {
 }
 
 /* =========================
-   AI FUNCTION
+   AI FUNCTION (Multi-Key Rotation)
 ========================= */
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
-async function generateWithAI(prompt, retries = 4) {
-    for (let attempt = 1; attempt <= retries; attempt++) {
-        try {
-            const response = await fetch(
-                "https://api.groq.com/openai/v1/chat/completions",
-                {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${API_KEY}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        model: "llama-3.1-8b-instant",
-                        messages: [{ role: "user", content: prompt }],
-                        max_tokens: 600
-                    })
-                }
-            );
+async function generateWithAI(prompt) {
+    let lastError = null;
 
-            const data = await response.json();
+    // Iterate through all available Groq keys
+    for (let i = 0; i < GROQ_KEYS.length; i++) {
+        const currentKey = GROQ_KEYS[i];
+        console.log(`Using Groq Key ${i + 1}/${GROQ_KEYS.length}...`);
 
-            if (!response.ok) {
-                const errMsg = data.error?.message || "";
-                
-                // Extract human-readable wait time if available (e.g. "12s", "4m30s", "4h3m")
-                let waitTimeStr = "";
-                const strMatch = errMsg.match(/Please try again in ([a-zA-Z0-9.]+)\.?/);
-                if (strMatch && strMatch[1]) {
-                    waitTimeStr = strMatch[1];
-                }
+        // Each key gets its own retry attempts for small wait times
+        for (let attempt = 1; attempt <= 2; attempt++) {
+            try {
+                const response = await fetch(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${currentKey}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            model: "llama-3.1-8b-instant",
+                            messages: [{ role: "user", content: prompt }],
+                            max_tokens: 600
+                        })
+                    }
+                );
 
-                // If it's a rate limit error (429) or server error (503)
-                if (response.status === 429 || response.status >= 500) {
-                    const matchSecs = errMsg.match(/Please try again in ([0-9.]+)s/);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    const errMsg = data.error?.message || "";
                     
-                    if (matchSecs && matchSecs[1]) {
-                        const seconds = parseFloat(matchSecs[1]);
-                        if (seconds > 15) {
-                            throw new Error(`AI Rate limit reached! Please wait ${waitTimeStr} before trying again.`);
+                    // If it's a rate limit error (429)
+                    if (response.status === 429) {
+                        console.warn(`Key ${i + 1} Rate Limited!`);
+                        
+                        // Check if we can wait (if it's just a few seconds)
+                        const matchSecs = errMsg.match(/Please try again in ([0-9.]+)s/);
+                        if (matchSecs && matchSecs[1]) {
+                            const seconds = parseFloat(matchSecs[1]);
+                            if (seconds <= 5 && attempt < 2) {
+                                console.log(`Waiting ${seconds}s for Key ${i + 1}...`);
+                                await delay(seconds * 1000 + 500);
+                                continue; // Retry with same key
+                            }
                         }
-                        if (attempt < retries) {
-                            let waitTime = seconds * 1000 + 1500;
-                            console.log(`API Error (${response.status})! Waiting ${waitTime}ms before attempt ${attempt + 1}...`);
-                            await delay(waitTime);
-                            continue;
-                        }
-                    } else if (errMsg.includes("Please try again in")) {
-                        // Means it has minutes/hours like "14m30s"
-                        throw new Error(`AI Limit reached! Please wait ${waitTimeStr} before trying again.`);
+                        
+                        // Otherwise, break inner loop to try next key
+                        lastError = new Error(errMsg || "Rate limit reached");
+                        break; 
                     }
 
-                    // Standard exponential backoff if no time provided and retries left
-                    if (attempt < retries) {
-                        let waitTime = 3000 * attempt; 
-                        console.log(`API Error (${response.status})! Waiting ${waitTime}ms before attempt ${attempt + 1}...`);
-                        await delay(waitTime);
+                    // If it's a server error, try one retry or move on
+                    if (response.status >= 500 && attempt < 2) {
+                        await delay(2000);
                         continue;
                     }
+
+                    throw new Error(errMsg || `API failed with status ${response.status}`);
                 }
-                
-                // If it's a 429 but we exhausted retries or it's another error
-                if (response.status === 429) {
-                    throw new Error(waitTimeStr ? `API Limit reached. Please wait ${waitTimeStr} before trying again.` : "Too many requests. Please try again later.");
+
+                if (!data?.choices?.[0]?.message?.content) {
+                    throw new Error("No content returned from AI");
                 }
-                
-                throw new Error(data.error?.message || `API failed with status ${response.status}`);
-            }
 
-            if (!data?.choices?.[0]?.message?.content) {
-                throw new Error("No content returned from AI");
-            }
+                return data.choices[0].message.content;
 
-            return data.choices[0].message.content;
-
-        } catch (err) {
-            if (attempt === retries) {
-                console.error("AI ERROR:", err.message);
-                throw err;
+            } catch (err) {
+                lastError = err;
+                console.error(`Error with Key ${i + 1}:`, err.message);
+                if (attempt === 2) break; // Move to next key
             }
         }
     }
+
+    // If we reached here, all keys failed
+    throw new Error(`All Groq keys exhausted or failed. Last error: ${lastError?.message}`);
 }
+
 
 /* =========================
    ROUTE
@@ -149,18 +150,19 @@ app.post("/api/generate", async (req, res) => {
             return res.status(400).json({ error: "Input too long or invalid" });
         }
 
-        // 🎲 ADD RANDOM VARIATION
-        const variation = Math.floor(Math.random() * 10);
+        // 🎲 OPTIMIZED CACHE: Only 6 variations allowed per topic.
+        // This ensures that if 10 students request the same topic, 4 will likely get a cached version.
+        const variation = Math.floor(Math.random() * 6);
 
         // 📦 LIMIT CACHE SIZE
-        if (cache.size > 100) {
+        if (cache.size > 200) {
             cache.clear();
         }
 
         // 📦 STEP 5: Check Cache (Updated Key)
         const cacheKey = JSON.stringify({ subject, moduleRoman, topic, syllabus }) + "_" + variation;
         if (cache.has(cacheKey)) {
-            console.log("Serving from cache!");
+            console.log(`Serving cached variation ${variation} for ${topic}`);
             return res.json({ text: cache.get(cacheKey) });
         }
 
@@ -246,10 +248,17 @@ ${sec.focus} ${sec.desc}
 
     } catch (err) {
         console.error("SECTION ERROR:", err.message);
+        
+        let retryAfter = 0;
         const isRateLimit = err.message.includes("wait") || err.message.includes("Limit");
+        
+        // Extract seconds if present
+        const matchSecs = err.message.match(/([0-9.]+)s/);
+        if (matchSecs) retryAfter = Math.ceil(parseFloat(matchSecs[1]));
+
         res.status(isRateLimit ? 429 : 500).json({ 
             error: isRateLimit ? err.message : "Section generation failed", 
-            details: err.message 
+            retryAfter: retryAfter || (isRateLimit ? 60 : 0)
         });
     }
 });
