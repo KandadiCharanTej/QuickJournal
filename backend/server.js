@@ -126,21 +126,40 @@ async function generateWithAI(prompt) {
    DYNAMIC FALLBACK GENERATOR
 ========================= */
 function getDynamicFallback(tag, subject, topic) {
-    const variation = Math.random().toString(36).substring(7);
+    const r = (arr) => arr[Math.floor(Math.random() * arr.length)];
     
-    const contents = {
-        "EXP": `During the lecture on ${topic} for ${subject}, the classroom was filled with a sense of academic curiosity. The professor began by explaining the core architectures, and I found the discussion of the fundamental principles to be particularly engaging. It felt like a masterclass in how ${subject} actually functions in the real world. ${variation}`,
-        "FEEL": `Emotionally, learning about ${topic} was a bit of a roller coaster. I started off feeling intimidated by the complexity of ${subject}, but as we dove deeper, that anxiety turned into a real sense of accomplishment. It was an 'aha!' moment that really boosted my confidence. ${variation}`,
-        "LEARN": `The key insight I gained today regarding ${topic} was the sheer efficiency of the design. I learned that in ${subject}, the way we structure our components can have a massive impact on long-term scalability. This technical breakthrough has changed how I think about engineering logic. ${variation}`,
-        "APP": `I can already see how I'll apply ${topic} in my future career. In a professional setting, being able to optimize ${subject} systems using these specific techniques will be a huge competitive advantage. I plan to use this knowledge in my upcoming lab projects immediately. ${variation}`,
-        "CONC": `Overall, the session on ${topic} was a significant milestone in my B.Tech journey. It has solidified my understanding of ${subject} and left me feeling incredibly prepared for the challenges of the next module. I'm excited to keep exploring this field. ${variation}`
-    };
+    const intros = [
+        `Our deep dive into ${topic} today was truly enlightening. `,
+        `The session on ${topic} provided a much-needed perspective on ${subject}. `,
+        `I found myself deeply engaged with the core concepts of ${topic} today. `,
+        `The lecture focused on the intricate relationship between ${topic} and the broader ${subject} architecture. `
+    ];
+    
+    const bodies = [
+        `We explored the historical evolution of these techniques, contrasting traditional approaches with modern standards. `,
+        `The professor used several real-world analogies that made the complex logic of ${topic} feel very accessible. `,
+        `We spent considerable time analyzing the performance bottlenecks and the scalability challenges inherent in ${topic}. `,
+        `The technical breakthroughs discussed regarding ${topic} have fundamentally changed how I view engineering design. `
+    ];
+    
+    const reflections = [
+        `Emotionally, I felt a huge surge of confidence as the pieces of the puzzle finally started to fit together. `,
+        `I went from a state of total confusion to a clear, 'aha!' moment that was incredibly rewarding. `,
+        `This module has boosted my academic self-esteem and reinforced my passion for ${subject}. `,
+        `Mastering these ${topic} principles has made me feel much more prepared for the upcoming lab assessments. `
+    ];
 
-    let text = contents[tag] || contents["CONC"];
+    const variations = [
+        `The complexity of the system is a testament to the innovation in ${subject}. `,
+        `I am particularly excited to apply this ${topic} logic in my final year project. `,
+        `This session was a masterclass in how we bridge the gap between theory and practical execution. `
+    ];
+
+    let text = r(intros) + r(bodies) + r(reflections) + r(variations);
     
-    // 🔄 FORCE 500 WORDS BY EXPANDING THE SPECIFIC SECTION TONE
-    while(text.split(/\s+/).length < 470) {
-        text += ` Furthermore, the integration of ${topic} within the broader scope of ${subject} provides a unique perspective on technical problem solving. We must consider the multi-layered implications of this theory as we move toward more advanced implementations in our academic path. `;
+    // 🔄 FORCE 500 WORDS WITH DYNAMIC FILLERS
+    while(text.split(/\s+/).length < 480) {
+        text += ` Furthermore, as we look at ${topic}, we see how vital ${subject} is to the modern tech stack. We discussed the multi-dimensional implications of this ${topic} theory and how it scales. ${r(variations)} `;
     }
     return text;
 }
