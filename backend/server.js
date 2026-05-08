@@ -76,6 +76,8 @@ function cooldown(req, res, next) {
 /* =========================
    AI FUNCTION
 ========================= */
+let currentComboIndex = 0;
+
 async function generateWithAI(prompt) {
     if (GROQ_KEYS.length === 0) {
         throw new Error("No valid API keys found. Please add GROQ_API_KEY_1 to 5 in your .env file.");
@@ -89,9 +91,11 @@ async function generateWithAI(prompt) {
         }
     }
     
-    combos = combos.sort(() => Math.random() - 0.5);
+    // Attempt all combos starting from the current index (Round-Robin)
+    for (let i = 0; i < combos.length; i++) {
+        let idx = (currentComboIndex + i) % combos.length;
+        const combo = combos[idx];
 
-    for (const combo of combos) {
         try {
             console.log(`[AI] Attempting ${combo.model} (Key ${combo.kIdx + 1})...`);
             const response = await fetch(
@@ -114,13 +118,16 @@ async function generateWithAI(prompt) {
             const data = await response.json();
 
             if (!response.ok) {
-                const isRetryable = response.status === 429 || response.status >= 500;
-                if (isRetryable) continue;
-                throw new Error(data.error?.message || `Status ${response.status}`);
+                // If ANY error occurs (Rate limit, Auth failure, etc.), try the next key.
+                console.warn(`[AI] Key ${combo.kIdx + 1} Failed: ${data.error?.message || response.status}`);
+                lastError = new Error(data.error?.message || `Status ${response.status}`);
+                continue; 
             }
 
             if (data?.choices?.[0]?.message?.content) {
-                console.log(`[AI] Success with ${combo.model}!`);
+                console.log(`[AI] Success with ${combo.model} (Key ${combo.kIdx + 1})!`);
+                // Move index forward so the NEXT request uses the NEXT key
+                currentComboIndex = (idx + 1) % combos.length;
                 return data.choices[0].message.content.trim();
             }
         } catch (err) {
@@ -129,7 +136,7 @@ async function generateWithAI(prompt) {
         }
     }
 
-    throw new Error(`CRITICAL: All AI services busy. Fallback activated.`);
+    throw new Error(`CRITICAL: All API keys/models failed. Fallback activated.`);
 }
 
 
