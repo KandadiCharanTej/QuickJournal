@@ -172,7 +172,7 @@ const globalCache = new Map();
 app.post("/api/generate-section", async (req, res) => {
     let resultSent = false;
     try {
-        const { subject, topic, sectionTag } = req.body;
+        const { subject, topic, sectionTag, moduleRoman, syllabus } = req.body;
         
         // 📊 10/6 RATIO LOGIC (40% cached to save API, 60% unique fresh AI)
         const cacheKey = `${subject}_${topic}_${sectionTag}`.toLowerCase();
