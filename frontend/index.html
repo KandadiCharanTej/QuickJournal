@@ -431,8 +431,21 @@
                 </div>
 
                 <div id="successMsg"
-                    class="hidden mt-6 p-4 bg-emerald-50 text-emerald-700 rounded-lg text-center font-bold border border-emerald-200 shadow-sm">
-                    <span class="">🎉</span> PDF Generated Successfully! Check your downloads folder.
+                    class="hidden step-content mt-6 p-6 bg-emerald-50 text-emerald-700 rounded-xl text-center font-bold border border-emerald-200 shadow-lg">
+                    <div class="flex flex-col items-center gap-4">
+                        <div class="flex items-center gap-2 text-lg">
+                            <span class="text-2xl">🎉</span> 
+                            <span>PDF Generated Successfully!</span>
+                        </div>
+                        <p class="text-sm font-medium text-emerald-600 mb-2">Check your downloads folder for the document.</p>
+                        <button type="button" id="resetBtn" 
+                            class="flex items-center gap-2 px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-all shadow-md hover:shadow-xl active:scale-95 group">
+                            <svg class="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                            </svg>
+                            Generate New Journal
+                        </button>
+                    </div>
                 </div>
             </form>
         </main>

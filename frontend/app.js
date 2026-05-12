@@ -399,6 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const successMsg = document.getElementById('successMsg');
         successMsg.classList.add('hidden');
+        successMsg.classList.remove('active');
         
         // Helper to load image
         const getBase64ImageFromURL = (url) => {
@@ -551,6 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Show Success Notification
             successMsg.classList.remove('hidden');
+            successMsg.classList.add('active');
 
             if (document.getElementById('btnText')) {
                 document.getElementById('btnText').innerText = "Generate PDF";
@@ -566,6 +568,62 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
+    // ---------------- RESET / NEW JOURNAL ----------------
+    const resetBtn = document.getElementById('resetBtn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            // Reset to Step 1
+            currentStep = 1;
+            
+            // Hide Success Message
+            const successMsg = document.getElementById('successMsg');
+            if (successMsg) {
+                successMsg.classList.add('hidden');
+                successMsg.classList.remove('active');
+            }
+
+            // Fields to clear (Step 2 and Step 3)
+            // We keep Step 1 (Student Info) as it's usually the same person
+            const academicFields = ['year', 'term', 'subject', 'assessmentNo', 'journalDate', 'topic'];
+            const contentFields = ['experience', 'feelings', 'learning', 'application', 'conclusion'];
+
+            academicFields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (el.tagName === 'SELECT') {
+                        el.selectedIndex = 0;
+                        if (id !== 'year') {
+                            // Reset to disabled state using existing logic
+                            el.disabled = true;
+                            el.classList.add('bg-slate-50', 'cursor-not-allowed');
+                            el.classList.remove('bg-white');
+                            const placeholder = id === 'assessmentNo' ? 'Select Subject First' : 
+                                              (id === 'subject' ? 'Select Term First' : 'Select Year First');
+                            el.innerHTML = `<option value="">${placeholder}</option>`;
+                        }
+                    } else {
+                        el.value = '';
+                    }
+                }
+            });
+
+            contentFields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.value = '';
+                    // Trigger input for word count badges
+                    el.dispatchEvent(new Event('input'));
+                }
+            });
+
+            // Update Stepper and UI
+            updateUI();
+
+            // Smooth scroll back to top of dashboard
+            document.getElementById('generator').scrollIntoView({ behavior: 'smooth' });
+        });
+    }
 
     // ---------------- MILESTONE CELEBRATION ----------------
     const milestoneBadge = document.getElementById('milestoneBadge');
