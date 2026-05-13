@@ -124,98 +124,164 @@ async function generateWithAI(prompt) {
 
 /* =========================
    DYNAMIC FALLBACK GENERATOR
+   🔒 ISOLATED POOLS - Zero overlap between sections
 ========================= */
 function getDynamicFallback(tag, subject, topic) {
     const r = (arr) => arr[Math.floor(Math.random() * arr.length)];
-    
-    const intros = [
-        `Our deep dive into ${topic} today was truly enlightening. `,
-        `The session on ${topic} provided a much-needed perspective on ${subject}. `,
-        `I found myself deeply engaged with the core concepts of ${topic} today. `,
-        `The lecture focused on the intricate relationship between ${topic} and the broader ${subject} architecture. `
-    ];
-    
-    const bodies = [
-        `We explored the historical evolution of these techniques, contrasting traditional approaches with modern standards. `,
-        `The professor used several real-world analogies that made the complex logic of ${topic} feel very accessible. `,
-        `We spent considerable time analyzing the performance bottlenecks and the scalability challenges inherent in ${topic}. `,
-        `The technical breakthroughs discussed regarding ${topic} have fundamentally changed how I view engineering design. `
-    ];
-    
-    const reflections = [
-        `Emotionally, I felt a huge surge of confidence as the pieces of the puzzle finally started to fit together. `,
-        `I went from a state of total confusion to a clear, 'aha!' moment that was incredibly rewarding. `,
-        `This module has boosted my academic self-esteem and reinforced my passion for ${subject}. `,
-        `Mastering these ${topic} principles has made me feel much more prepared for the upcoming lab assessments. `
-    ];
 
-    const variations = [
-        `The complexity of the system is a testament to the innovation in ${subject}. `,
-        `I am particularly excited to apply this ${topic} logic in my final year project. `,
-        `This session was a masterclass in how we bridge the gap between theory and practical execution. `
-    ];
+    const pools = {
+        EXP: {
+            starters: [
+                `The classroom was quiet as the professor began writing the first definition of ${topic} on the board. `,
+                `We kicked off the session with a quick recap before diving headfirst into ${topic}. `,
+                `Today's lecture opened with a real-world case study that connected ${topic} to everyday technology. `
+            ],
+            fillers: [
+                `The whiteboard was covered with diagrams showing how ${topic} fits into the ${subject} pipeline. `,
+                `We traced the evolution of ${topic} from its earliest form to the modern implementation used in industry today. `,
+                `The professor walked us through a live coding demo that made the abstract concepts of ${topic} feel tangible. `
+            ]
+        },
+        FEEL: {
+            starters: [
+                `There was a moment during the lecture when ${topic} suddenly clicked, and I felt a genuine rush of excitement. `,
+                `Honestly, I walked into class feeling unsure about ${topic}, but my confidence grew with every example. `,
+                `A wave of curiosity hit me when the professor posed a challenging question about ${subject}. `
+            ],
+            fillers: [
+                `The emotional shift from confusion to clarity was one of the most satisfying parts of this module. `,
+                `I remember feeling frustrated when the first example did not make sense, but persistence paid off. `,
+                `By the end of the session, I felt a deep sense of accomplishment that I rarely experience in lectures. `
+            ]
+        },
+        LEARN: {
+            starters: [
+                `The single most important concept I took away from this session is how ${topic} governs the underlying logic of ${subject}. `,
+                `Before this class, I had a surface-level understanding of ${topic}, but now I see the deeper mechanics. `,
+                `A key technical insight was realizing that ${topic} is not an isolated concept but a building block for everything in ${subject}. `
+            ],
+            fillers: [
+                `I now understand the precise relationship between the theoretical model and its practical output. `,
+                `The professor's explanation of edge cases in ${topic} helped me see why robust design matters so much. `,
+                `I gained clarity on how different layers of ${subject} interact when ${topic} is applied correctly. `
+            ]
+        },
+        APP: {
+            starters: [
+                `One immediate way I plan to use ${topic} is in my upcoming semester project where ${subject} plays a central role. `,
+                `Thinking about my career, the knowledge of ${topic} will be directly useful in software development roles. `,
+                `I have already started sketching out a personal side-project where I can experiment with ${topic} hands-on. `
+            ],
+            fillers: [
+                `In a professional setting, ${topic} can dramatically reduce debugging time and improve code quality. `,
+                `I plan to share these ${subject} strategies with my study group to improve our collaborative workflow. `,
+                `The practical applications extend beyond academics; ${topic} is used in real products that millions of people depend on. `
+            ]
+        },
+        CONC: {
+            starters: [
+                `Looking back at this module, my understanding of ${subject} has matured significantly. `,
+                `This session marks a turning point in how I approach problem-solving within ${subject}. `,
+                `If I had to summarize my growth in one sentence, it would be that ${topic} taught me to think systematically. `
+            ],
+            fillers: [
+                `I am walking away from this class with a toolkit of concepts that will serve me for years. `,
+                `The journey from confusion to confidence is exactly what higher education should feel like. `,
+                `I am now eager to tackle the next module, armed with a much stronger foundation in ${subject}. `
+            ]
+        }
+    };
 
-    let text = r(intros) + r(bodies) + r(reflections) + r(variations);
-    
-    // 🔄 FORCE 500 WORDS WITH DYNAMIC FILLERS
-    while(text.split(/\s+/).length < 480) {
-        text += ` Furthermore, as we look at ${topic}, we see how vital ${subject} is to the modern tech stack. We discussed the multi-dimensional implications of this ${topic} theory and how it scales. ${r(variations)} `;
+    const pool = pools[tag] || pools.EXP;
+    let text = r(pool.starters) + r(pool.fillers);
+
+    // Add bullet points for LEARN and APP sections
+    if (tag === 'LEARN' || tag === 'APP') {
+        const bullets = [
+            `Understanding the core architecture of ${topic}.`,
+            `Applying ${subject} principles to real-world edge cases.`,
+            `Evaluating the long-term scalability impact of ${topic}.`,
+            `Building robust solutions using ${topic} best practices.`,
+            `Connecting theoretical ${subject} models to production systems.`
+        ];
+        const selected = bullets.sort(() => 0.5 - Math.random()).slice(0, 3);
+        text += "\n\nKey Takeaways:\n" + selected.map(p => "• " + p).join("\n") + "\n\n";
+    }
+
+    // Diverse padding to reach word count
+    while (text.split(/\s+/).length < 480) {
+        const extra = [
+            `Furthermore, the methodology behind ${topic} is surprisingly elegant when you break it down step by step. `,
+            `I spent extra time after class reviewing ${topic} documentation to reinforce what was taught. `,
+            `The connection between ${topic} and professional software engineering was a recurring theme in the discussion. `,
+            `It became clear that ${topic} is not just an academic exercise but a skill that employers actively seek. `,
+            `The collaborative atmosphere of the class made it easier to digest the complexity of ${topic}. `,
+            `I realized that my earlier misconceptions about ${subject} were holding me back from a deeper understanding. `
+        ];
+        text += r(extra);
     }
     return text;
 }
 
 /* =========================
-   ROUTES (10/6 Uniqueness Ratio)
+   ROUTES (Always Fresh - No Cache)
 ========================= */
-const globalCache = new Map();
+
+// 🔒 Section-specific prompt descriptions
+const SECTION_PROMPTS = {
+    EXP: "Describe your classroom EXPERIENCE. What topics were discussed? What did the professor explain? What examples were given? Write as if describing the class to a friend.",
+    FEEL: "Share your EMOTIONAL REACTIONS during the class. How did you feel? Were you confused, excited, nervous? Did your mood change during the lecture? Be honest and personal.",
+    LEARN: "Highlight the KEY INSIGHTS you gained. What concepts clicked? What did you understand for the first time? Explain the technical knowledge you now have. You may include a few bullet points.",
+    APP: "Describe how you will APPLY this knowledge in real life, projects, or your career. Give specific examples of where this theory is useful. You may include a few bullet points.",
+    CONC: "Write a CONCLUSION reflecting on your overall growth. How has your thinking changed? What is the most memorable takeaway? Look forward to the next challenge."
+};
 
 app.post("/api/generate-section", async (req, res) => {
     let resultSent = false;
     try {
-        const { subject, topic, sectionTag, moduleRoman, syllabus } = req.body;
-        
-        // 📊 10/6 RATIO LOGIC (40% cached to save API, 60% unique fresh AI)
-        const cacheKey = `${subject}_${topic}_${sectionTag}`.toLowerCase();
-        const shouldReuse = Math.random() < 0.4; // 40% chance to reuse
-        
-        if (shouldReuse && globalCache.has(cacheKey)) {
-            console.log(`[SYSTEM] ♻️ Reusing cached content for ${sectionTag} (10/6 Optimization)`);
-            resultSent = true;
-            return res.json({ text: globalCache.get(cacheKey) });
-        }
+        const { subject, topic, sectionTag, moduleRoman, syllabus, styleInstruction } = req.body;
+
+        const sectionGuide = SECTION_PROMPTS[sectionTag] || SECTION_PROMPTS.EXP;
 
         const prompt = `
-            SUBJECT: ${subject}
-            MODULE: ${moduleRoman}
-            TOPIC: ${topic}
-            SYLLABUS/CONTENT: ${syllabus || topic}
-            SECTION: ${sectionTag}
-            
-            TASK: Write a 500-word reflective journal section.
-            STYLE: Human, first-person "I", emotional, relatable. Avoid robotic academic lists.
-            CONTENT: Include real-life analogies and personal classroom learning moments. 
-            REQUIREMENT: Deeply reflect on the topics mentioned in the SYLLABUS/CONTENT provided above.
-            STRICT: One massive paragraph. No headings. No bullets. Must be at least 500 words.
+You are a B.Tech student writing a reflective journal for an academic submission.
+
+SUBJECT: ${subject}
+MODULE: Module ${moduleRoman}
+TOPIC: ${topic}
+SYLLABUS/CONTENT: ${syllabus || topic}
+
+SECTION TO WRITE: ${sectionTag}
+SECTION PURPOSE: ${sectionGuide}
+
+${styleInstruction ? `OPENING INSTRUCTION: ${styleInstruction}` : ''}
+
+RULES:
+- Write approximately 500 words for this ONE section only.
+- Write in FIRST PERSON ("I learned", "I felt").
+- Use SIMPLE English with academic clarity.
+- Be HUMAN-LIKE, natural, thoughtful, NOT robotic.
+- Use relatable real-life examples and analogies.
+- Smooth transitions between sentences.
+- Focus on DEPTH OF REFLECTION, not just explanation.
+- For LEARN and APP sections, you MAY include 2-3 bullet points to highlight key insights.
+- DO NOT repeat the same opening phrase as other sections.
+- DO NOT use markdown formatting like ** or ##.
         `;
 
         console.log(`[SYSTEM] 🤖 Generating FRESH AI content for ${sectionTag}`);
         let text = "";
         try {
-            const part1 = await generateWithAI(prompt + " Focus on the technical theory.");
-            const part2 = await generateWithAI(prompt + " Focus on personal feelings and practical application.");
-            text = part1 + " " + part2;
+            text = await generateWithAI(prompt);
         } catch (aiErr) {
+            console.log(`[SYSTEM] ⚠️ AI failed for ${sectionTag}, using fallback`);
             text = getDynamicFallback(sectionTag, subject, topic);
         }
 
         // 🔄 MINIMUM LENGTH GUARD
-        if (text.split(/\s+/).length < 450) {
+        if (text.split(/\s+/).length < 350) {
             text += " " + getDynamicFallback(sectionTag, subject, topic).substring(0, 800);
         }
-
-        // Store in cache for the 4/10 reuse ratio
-        globalCache.set(cacheKey, text.trim());
-        if (globalCache.size > 200) globalCache.delete(globalCache.keys().next().value);
 
         if (!resultSent) {
             resultSent = true;
@@ -226,7 +292,7 @@ app.post("/api/generate-section", async (req, res) => {
         if (!resultSent) {
             resultSent = true;
             const tag = req.body.sectionTag || "CONC";
-            res.json({ text: getDynamicFallback(tag, req.body.subject, req.body.topic) });
+            res.json({ text: getDynamicFallback(tag, req.body.subject || "the subject", req.body.topic || "the topic") });
         }
     }
 });
