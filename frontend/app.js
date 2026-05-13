@@ -225,9 +225,9 @@ document.addEventListener('DOMContentLoaded', () => {
             `Mastering ${subject} is my top priority. `
         ];
 
-        // 📝 BULLET POINT INJECTOR (Randomly adds lists to break up paragraphs)
+        // 📝 BULLET POINT INJECTOR (Randomly adds lists to any section)
         let bulletSection = "";
-        if ((tag === 'LEARN' || tag === 'APP') && Math.random() > 0.3) {
+        if (Math.random() > 0.6) { // ~40% chance per section
             const points = [
                 `Developing a deeper grasp of ${topic} mechanics.`,
                 `Identifying the synergy between ${topic} and ${subject}.`,

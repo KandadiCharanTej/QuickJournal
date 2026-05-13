@@ -195,17 +195,18 @@ function getDynamicFallback(tag, subject, topic) {
     const pool = pools[tag] || pools.EXP;
     let text = r(pool.starters) + r(pool.fillers);
 
-    // Add bullet points for LEARN and APP sections
-    if (tag === 'LEARN' || tag === 'APP') {
-        const bullets = [
-            `Understanding the core architecture of ${topic}.`,
-            `Applying ${subject} principles to real-world edge cases.`,
-            `Evaluating the long-term scalability impact of ${topic}.`,
-            `Building robust solutions using ${topic} best practices.`,
-            `Connecting theoretical ${subject} models to production systems.`
+    // 📝 DYNAMIC BULLET POINT INJECTOR (Randomly adds lists to any section)
+    if (Math.random() > 0.6) { // ~40% chance per section to have bullets
+        const points = [
+            `Deep dive into the underlying mechanics of ${topic}.`,
+            `Connecting ${subject} theory to real-world engineering hurdles.`,
+            `Evaluating the scalability and efficiency of ${topic} in production.`,
+            `Collaborative insights gained from group discussions during class.`,
+            `Synthesizing ${topic} with my existing knowledge of ${subject}.`,
+            `Formulating a plan to experiment with ${topic} in a lab setting.`
         ];
-        const selected = bullets.sort(() => 0.5 - Math.random()).slice(0, 3);
-        text += "\n\nKey Takeaways:\n" + selected.map(p => "• " + p).join("\n") + "\n\n";
+        const selected = points.sort(() => 0.5 - Math.random()).slice(0, 3);
+        text += "\n\nKey Reflections:\n" + selected.map(p => "• " + p).join("\n") + "\n\n";
     }
 
     // Diverse padding to reach word count
@@ -300,7 +301,7 @@ RULES:
 - Use relatable real-life examples and analogies.
 - Smooth transitions between sentences.
 - Focus on DEPTH OF REFLECTION, not just explanation.
-- For LEARN and APP sections, you MAY include 2-3 bullet points to highlight key insights.
+- You MAY include 2-3 bullet points in this section to highlight key insights or personal thoughts.
 - DO NOT repeat the same opening phrase as other sections.
 - DO NOT use markdown formatting like ** or ##.
 - This is variation ${variationNumber} of ${MAX_VARIATIONS}. Make the opening line UNIQUE.
