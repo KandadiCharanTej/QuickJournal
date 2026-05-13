@@ -376,7 +376,8 @@ document.addEventListener('DOMContentLoaded', () => {
                                         topic, 
                                         syllabus, 
                                         sectionTag: sec.tag,
-                                        styleInstruction: sec.hint // 🚀 Tells AI how to start the first line
+                                        styleInstruction: sec.hint,
+                                        requestSeed: Date.now() // 🚀 Forces AI to be fresh every time
                                     })
                                 });
 
