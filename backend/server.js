@@ -235,6 +235,17 @@ function getDynamicFallback(tag, subject, topic) {
 ============================================ */
 const variationPool = new Map(); // key: "subject_module_section" -> value: string[]
 const MAX_VARIATIONS = 10;
+let poolCreatedAt = Date.now();
+const POOL_LIFETIME_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+// 🔄 Auto-refresh: wipe pool every 24 hours so users get fresh AI content daily
+function checkPoolExpiry() {
+    if (Date.now() - poolCreatedAt > POOL_LIFETIME_MS) {
+        console.log(`[POOL] 🔄 24-hour expiry reached. Clearing ${variationPool.size} cached keys for fresh content.`);
+        variationPool.clear();
+        poolCreatedAt = Date.now();
+    }
+}
 
 // 🔒 Section-specific prompt descriptions
 const SECTION_PROMPTS = {
@@ -246,6 +257,7 @@ const SECTION_PROMPTS = {
 };
 
 app.post("/api/generate-section", async (req, res) => {
+    checkPoolExpiry(); // 🔄 Wipe pool if 24 hours have passed
     let resultSent = false;
     try {
         const { subject, topic, sectionTag, moduleRoman, syllabus, styleInstruction } = req.body;
