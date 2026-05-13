@@ -344,11 +344,11 @@ document.addEventListener('DOMContentLoaded', () => {
         aiErrorMsg.classList.add('hidden');
 
         const sections = [
-            { tag: "EXP", id: "experience", name: "Experience" },
-            { tag: "FEEL", id: "feelings", name: "Feelings" },
-            { tag: "LEARN", id: "learning", name: "Learning" },
-            { tag: "APP", id: "application", name: "Application" },
-            { tag: "CONC", id: "conclusion", name: "Conclusion" }
+            { tag: "EXP", id: "experience", name: "Experience", hint: "Start with a direct observation about the classroom environment or the teacher's first words." },
+            { tag: "FEEL", id: "feelings", name: "Feelings", hint: "Start with a specific emotional reaction or a personal doubt you had during the lecture." },
+            { tag: "LEARN", id: "learning", name: "Learning", hint: "Start with a technical definition or a core concept that 'clicked' for you today." },
+            { tag: "APP", id: "application", name: "Application", hint: "Start with a hypothetical scenario or a project idea where this knowledge will be used." },
+            { tag: "CONC", id: "conclusion", name: "Conclusion", hint: "Start with a final summary of how your perspective has evolved since the start of the module." }
         ];
 
         // ⏱️ VISUAL TIMER HELPER
@@ -391,7 +391,14 @@ document.addEventListener('DOMContentLoaded', () => {
                                 const res = await fetch(`${API_BASE_URL}/api/generate-section`, {
                                     method: "POST",
                                     headers: { "Content-Type": "application/json" },
-                                    body: JSON.stringify({ subject, moduleRoman, topic, syllabus, sectionTag: sec.tag })
+                                    body: JSON.stringify({ 
+                                        subject, 
+                                        moduleRoman, 
+                                        topic, 
+                                        syllabus, 
+                                        sectionTag: sec.tag,
+                                        styleInstruction: sec.hint // 🚀 Tells AI how to start the first line
+                                    })
                                 });
 
                                 const data = await res.json();
