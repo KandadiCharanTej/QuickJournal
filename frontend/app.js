@@ -18,27 +18,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const LOCAL_URL = 'http://localhost:5000';
     let API_BASE_URL = REMOTE_URL; // Default
 
-    // 🛰️ SERVER HEALTH CHECK
+    // 🛰️ SERVER HEALTH CHECK (With Auto-Wakeup Retry)
     async function checkServer() {
-        try {
-            // First, try local backend (fastest for development)
+        let retries = 5;
+        while (retries > 0) {
             try {
+                // Try local first
                 const localRes = await fetch(`${LOCAL_URL}/`, { signal: AbortSignal.timeout(2000) });
-                if (localRes.ok) {
-                    API_BASE_URL = LOCAL_URL;
-                    return;
-                }
-            } catch (e) { /* Local not running, ignore */ }
+                if (localRes.ok) { API_BASE_URL = LOCAL_URL; return; }
+            } catch (e) {}
 
-            // Then try remote backend
-            const res = await fetch(`${REMOTE_URL}/`, { signal: AbortSignal.timeout(10000) });
-            if (res.ok) {
-                API_BASE_URL = REMOTE_URL;
-            }
-        } catch (e) {
-            // Fallback to REMOTE_URL as default if both fail (the app handles offline internally)
-            API_BASE_URL = REMOTE_URL;
+            try {
+                // Try remote with longer timeout for "cold start"
+                const res = await fetch(`${REMOTE_URL}/`, { signal: AbortSignal.timeout(15000) });
+                if (res.ok) { API_BASE_URL = REMOTE_URL; return; }
+            } catch (e) {}
+
+            retries--;
+            if (retries > 0) await new Promise(r => setTimeout(r, 5000)); // Wait 5s between wake-up pings
         }
+        API_BASE_URL = REMOTE_URL; // Default fallback
     }
 
     checkServer();
@@ -359,10 +358,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     aiFillBtn.innerHTML = `<span>✨ Generating Content...</span>`;
                     aiSpinner.classList.remove('hidden');
 
-                    // SEQUENTIAL GENERATION
+                    // SEQUENTIAL GENERATION WITH AUTO-WAKEUP
                     for (const sec of sections) {
                         aiFillBtn.innerHTML = `<span>✨ Generating ${sec.name}...</span>`;
-                        let retries = 3;
+                        let retries = 5; // Extra retries per section to wait for server wake-up
                         let success = false;
                         let lastError = "";
 
