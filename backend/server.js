@@ -234,7 +234,7 @@ function getDynamicFallback(tag, subject, topic) {
    - 10 variations × 5 sections = 100,000 unique journal combinations.
 ============================================ */
 const variationPool = new Map(); // key: "subject_module_section" -> value: string[]
-const MAX_VARIATIONS = 50;
+const MAX_VARIATIONS = 20; // 20^5 = 3.2 million unique journal combinations
 let poolCreatedAt = Date.now();
 const POOL_LIFETIME_MS = 24 * 60 * 60 * 1000; // 24 hours
 
