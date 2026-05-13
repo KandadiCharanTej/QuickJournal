@@ -343,12 +343,40 @@ document.addEventListener('DOMContentLoaded', () => {
         const originalBtnHTML = aiFillBtn.innerHTML;
         aiErrorMsg.classList.add('hidden');
 
+        // 🎨 Opening Variation Engine (Forces different starting styles)
+        const getOpeningStyle = (tag) => {
+            const styles = {
+                EXP: ["Start by describing the visual setting of the classroom.", "Start with the first topic the professor mentioned.", "Start with a specific example that was written on the board.", "Start with the initial curiosity you felt entering the class."],
+                FEEL: ["Start with a moment of confusion you experienced.", "Start with a sense of excitement you felt about a concept.", "Start with a question that popped into your head.", "Start with how your mood shifted during the lecture."],
+                LEARN: ["Start with the most important technical insight.", "Start by clarifying a concept you previously misunderstood.", "Start with a 'lightbulb' moment you had.", "Start with a core principle that defines this module."],
+                APP: ["Start with a specific career goal where this applies.", "Start with a personal project idea inspired by this.", "Start with a real-life problem this theory solves.", "Start with how you will explain this to a teammate."],
+                CONC: ["Start with how your perspective has matured.", "Start with a final summary of your progress.", "Start with a look towards the next academic challenge.", "Start with the most memorable takeaway."]
+            };
+            const options = styles[tag] || styles.EXP;
+            return options[Math.floor(Math.random() * options.length)];
+        };
+
         const sections = [
-            { tag: "EXP", id: "experience", name: "Experience", hint: "Start with a direct observation about the classroom environment or the teacher's first words." },
-            { tag: "FEEL", id: "feelings", name: "Feelings", hint: "Start with a specific emotional reaction or a personal doubt you had during the lecture." },
-            { tag: "LEARN", id: "learning", name: "Learning", hint: "Start with a technical definition or a core concept that 'clicked' for you today." },
-            { tag: "APP", id: "application", name: "Application", hint: "Start with a hypothetical scenario or a project idea where this knowledge will be used." },
-            { tag: "CONC", id: "conclusion", name: "Conclusion", hint: "Start with a final summary of how your perspective has evolved since the start of the module." }
+            { 
+                tag: "EXP", id: "experience", name: "Experience", 
+                hint: `Format: Briefly describe topics/concepts discussed. Tone: Human-like, natural. Instruction: ${getOpeningStyle('EXP')}. DO NOT start with 'Today we learned' or 'In this session'.` 
+            },
+            { 
+                tag: "FEEL", id: "feelings", name: "Feelings", 
+                hint: `Format: Share emotional reactions and thoughts. How did you feel learning this? Tone: Thoughtful, not robotic. Instruction: ${getOpeningStyle('FEEL')}. DO NOT start with 'I felt' or 'My feelings were'.` 
+            },
+            { 
+                tag: "LEARN", id: "learning", name: "Learning", 
+                hint: `Format: Highlight key insights or fundamental concepts gained. Tone: Simple language with academic clarity. Instruction: ${getOpeningStyle('LEARN')}. DO NOT start with 'I learned' or 'The key insight was'.` 
+            },
+            { 
+                tag: "APP", id: "application", name: "Application", 
+                hint: `Format: Describe real-life/career application and practical utility. Tone: Use relatable examples. Instruction: ${getOpeningStyle('APP')}. DO NOT start with 'I will apply' or 'This can be applied'.` 
+            },
+            { 
+                tag: "CONC", id: "conclusion", name: "Conclusion", 
+                hint: `Format: Overall learning, shaping of thinking/knowledge. Tone: Depth of reflection. Instruction: ${getOpeningStyle('CONC')}. DO NOT start with 'In conclusion' or 'To summarize'.` 
+            }
         ];
 
         // ⏱️ VISUAL TIMER HELPER
