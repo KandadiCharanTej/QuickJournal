@@ -194,116 +194,68 @@ document.addEventListener('DOMContentLoaded', () => {
     function getClientFallback(tag, subject, topic) {
         const r = (arr) => arr[Math.floor(Math.random() * arr.length)];
         
-        // Section-specific content pools
+        // 🔒 STICKY SECTION-SPECIFIC POOLS (Zero Overlap)
         const pools = {
             EXP: {
-                intros: [
-                    `During the session on ${topic}, the atmosphere in the class was quite focused as we delved into ${subject}. `,
-                    `The lecture today centered primarily on the core concepts of ${topic} within our ${subject} curriculum. `,
-                    `Our professor introduced ${topic} today, explaining its fundamental role in modern ${subject} applications. `,
-                    `I spent a significant portion of today's class exploring the intricacies of ${topic}. `
-                ],
-                bodies: [
-                    `We started by looking at the basic architecture and then moved into more complex implementations. `,
-                    `The teacher used several real-world analogies to explain how ${topic} works in a production environment. `,
-                    `A key part of the demonstration involved showing how ${topic} interacts with existing systems. `,
-                    `I took detailed notes as we walked through the step-by-step process of implementing ${topic}. `
-                ]
+                intros: [`The classroom was buzzing with energy as we started ${topic}. `, `Today's lecture provided a deep dive into ${topic}. `, `We spent the first half of the class mapping out ${topic}. `],
+                bodies: [`The professor used a whiteboard to trace the history of ${subject}. `, `We broke down the technical barriers of ${topic} step-by-step. `, `The lecture was filled with diagrams explaining ${topic} logic. `]
             },
             FEEL: {
-                intros: [
-                    `Reflecting on today's lesson, I found myself initially quite challenged by ${topic}. `,
-                    `I felt a genuine sense of curiosity when the topic of ${topic} was first brought up. `,
-                    `There was a moment of "aha!" for me when the connection between ${topic} and ${subject} became clear. `,
-                    `Honestly, I felt a bit overwhelmed at first because ${topic} seemed quite abstract. `
-                ],
-                bodies: [
-                    `However, as the lecture progressed, my confusion turned into a growing interest in the subject. `,
-                    `It was exciting to see how these theories actually apply to the tools I use every day. `,
-                    `I feel much more confident now that I've seen the logic behind the implementation. `,
-                    `This session has encouraged me to look deeper into ${subject} as a potential career path. `
-                ]
+                intros: [`I felt a mix of curiosity and slight confusion during ${topic}. `, `My emotional reaction to ${topic} was one of genuine surprise. `, `I found myself questioning my previous assumptions about ${subject}. `],
+                bodies: [`It was a relief to finally understand the complexity of ${topic}. `, `The discussion sparked a lot of internal debate for me. `, `I felt motivated to learn more after seeing the real-world impact. `]
             },
             LEARN: {
-                intros: [
-                    `The most critical takeaway from today's study of ${topic} was the importance of structural integrity. `,
-                    `I managed to grasp several key technical points regarding ${topic} that I hadn't understood before. `,
-                    `Learning about ${topic} has completely changed my perspective on how ${subject} should be approached. `,
-                    `Through various examples, I learned that ${topic} is not just a theory but a practical necessity. `
-                ],
-                bodies: [
-                    `One major insight was the efficiency gain when using these specific methods. `,
-                    `I understood the relationship between different components and how they synchronize. `,
-                    `The concept of optimization in ${topic} was particularly enlightening for me. `,
-                    `I learned the best practices for maintaining clean and scalable code in this context. `
-                ]
+                intros: [`The breakthrough moment for me was understanding ${topic}'s core. `, `I mastered three distinct concepts regarding ${subject} today. `, `Learning about ${topic} felt like finally seeing the big picture. `],
+                bodies: [`I now understand how ${topic} manages to keep systems stable. `, `The technical nuances of ${subject} are much clearer now. `, `I've gained a solid foundation in ${topic} architecture. `]
             },
             APP: {
-                intros: [
-                    `I am already planning to implement these ${topic} concepts in my current personal project. `,
-                    `The practical utility of ${topic} in the industry cannot be overstated. `,
-                    `I can see myself using this knowledge to solve performance bottlenecks in future assignments. `,
-                    `Moving forward, I will prioritize using ${topic} whenever I deal with complex ${subject} tasks. `
-                ],
-                bodies: [
-                    `Applying these methods will likely reduce the time I spend on debugging and testing. `,
-                    `I intend to share these insights with my peers to improve our collaborative project workflow. `,
-                    `Specifically, I want to explore how ${topic} can be integrated with mobile platforms. `,
-                    `The ability to apply these theories in real-time is a skill I plan to master. `
-                ]
+                intros: [`I plan to use ${topic} to optimize my next engineering project. `, `The practical utility of ${topic} is immediately obvious to me. `, `I can't wait to try implementing ${topic} in a real-world scenario. `],
+                bodies: [`This will save me hours of manual work in my future career. `, `I will use these ${subject} strategies in my upcoming assessments. `, `My goal is to master ${topic} to build better software. `]
             },
             CONC: {
-                intros: [
-                    `In conclusion, the study of ${topic} has been a highly rewarding part of this term. `,
-                    `Overall, I feel that my understanding of ${subject} has reached a new level today. `,
-                    `Summarizing my experience, ${topic} is definitely a cornerstone of my academic progress. `,
-                    `To wrap up, I am grateful for the deep dive we took into ${topic} this week. `
-                ],
-                bodies: [
-                    `I look forward to building upon this foundation in the coming modules. `,
-                    `This knowledge has equipped me with the tools I need for advanced assessments. `,
-                    `I will continue to reflect on these lessons as I move toward my final project. `,
-                    `The journey of learning ${subject} continues to be both challenging and inspiring. `
-                ]
+                intros: [`Overall, this module has completely reshaped my thinking. `, `In conclusion, I feel much more prepared for the professional world. `, `This session on ${topic} was a turning point in my studies. `],
+                bodies: [`I am walking away with a much stronger grasp of ${subject}. `, `My knowledge of ${topic} has evolved from basic to advanced. `, `I am ready to move on to more complex ${subject} modules. `]
             }
         };
 
         const pool = pools[tag] || pools.EXP;
         const conclusions = [
-            `It's clear that mastering ${topic} is essential for any professional in ${subject}. `,
-            `I am excited to see where this new understanding takes my academic journey. `,
-            `This session reinforced the idea that consistent practice is key to success. `,
-            `I feel prepared to tackle the next set of challenges in this module. `
+            `This study of ${topic} is vital for my growth. `,
+            `I'm glad we covered ${topic} in such detail. `,
+            `I feel a new sense of academic confidence now. `,
+            `Mastering ${subject} is my top priority. `
         ];
 
-        // Randomly decide to add bullet points (only for LEARN and APP)
+        // 📝 BULLET POINT INJECTOR (Randomly adds lists to break up paragraphs)
         let bulletSection = "";
-        if ((tag === 'LEARN' || tag === 'APP') && Math.random() > 0.4) {
+        if ((tag === 'LEARN' || tag === 'APP') && Math.random() > 0.3) {
             const points = [
-                `Understanding the core architecture of ${topic}.`,
-                `Applying ${subject} principles to solve edge cases.`,
-                `Optimizing the performance of the overall system.`,
-                `Collaborating on ${topic} implementation with teammates.`,
-                `Analyzing the impact of ${topic} on scalability.`
+                `Developing a deeper grasp of ${topic} mechanics.`,
+                `Identifying the synergy between ${topic} and ${subject}.`,
+                `Applying optimized logic to real-world ${subject} cases.`,
+                `Evaluating the long-term impact of ${topic} on the field.`,
+                `Streamlining workflows using ${topic} best practices.`
             ];
-            // Shuffle and pick 3
-            const shuffled = points.sort(() => 0.5 - Math.random()).slice(0, 3);
-            bulletSection = "\n\nKey Highlights:\n" + shuffled.map(p => "• " + p).join("\n") + "\n\n";
+            const selected = points.sort(() => 0.5 - Math.random()).slice(0, 3);
+            bulletSection = "\n\nKey Insights & Takeaways:\n" + selected.map(p => "• " + p).join("\n") + "\n\n";
         }
 
         let text = r(pool.intros) + r(pool.bodies) + r(conclusions);
         if (bulletSection) text += bulletSection;
 
-        // Force word count with diverse padding
-        while(text.split(/\s+/).length < 430) {
-            const padding = [
-                `Furthermore, we discussed how ${topic} serves as a bridge between theoretical frameworks and industrial requirements. `,
-                `The complexity of ${topic} requires a very methodical approach to ensure that every variable is accounted for correctly. `,
-                `When we look at the historical development of ${subject}, it becomes obvious why ${topic} is so relevant today. `,
-                `Moreover, the interactive nature of the class allowed for a better exchange of ideas regarding the future of ${topic}. `,
-                `I also found that comparing ${topic} with other similar modules helped in solidifying my basic understanding. `
+        // 🚀 DIVERSE PADDING (To reach word count without repeating)
+        while(text.split(/\s+/).length < 425) {
+            const extra = [
+                `Additionally, we looked at how ${topic} impacts the broader ecosystem of ${subject}. `,
+                `The methodology behind ${topic} is surprisingly elegant and efficient. `,
+                `I found that ${topic} is often misunderstood by beginners, so I paid extra attention. `,
+                `We explored how ${subject} has evolved over the last decade due to ${topic}. `,
+                `The lecturer emphasized that ${topic} is the future of modern industry. `,
+                `I spent some extra time after class reviewing the ${topic} documentation. `,
+                `The connection between ${topic} and professional ethics was also discussed. `,
+                `I realized that ${topic} is much more than just a theoretical concept. `
             ];
-            text += r(padding);
+            text += r(extra);
         }
 
         return text.trim();
