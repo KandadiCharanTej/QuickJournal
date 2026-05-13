@@ -61,7 +61,7 @@ const GROQ_MODELS = [
     "mixtral-8x7b-32768"
 ];
 
-// ⏱️ Anti-spam
+// ⏱️ Light Anti-spam (3s cooldown instead of 15s for high traffic)
 const lastRequestTime = new Map();
 
 function cooldown(req, res, next) {
@@ -70,8 +70,8 @@ function cooldown(req, res, next) {
 
     if (lastRequestTime.has(ip)) {
         const diff = now - lastRequestTime.get(ip);
-        if (diff < 15000) { 
-            return res.status(429).json({ error: "Wait 15 seconds before next request" });
+        if (diff < 3000) { 
+            return res.status(429).json({ error: "Please wait a moment before the next request." });
         }
     }
 
@@ -105,11 +105,11 @@ async function generateWithAI(prompt) {
                 body: JSON.stringify({
                     model: combo.model,
                     messages: [
-                        { role: "system", content: "You are a B.Tech student writing a deeply personal, human-like reflective journal. Use first-person 'I', personal analogies, and relatable class-room experiences. Avoid robotic lists. Write in long, dense, scholarly paragraphs." },
+                        { role: "system", content: "You are a B.Tech student writing a deeply personal, human-like reflective journal. Use first-person 'I', personal analogies, and relatable class-room experiences. Write in a natural, thoughtful tone with smooth transitions." },
                         { role: "user", content: prompt }
                     ],
-                    max_tokens: 3500,
-                    temperature: 0.9 // Higher for uniqueness
+                    max_tokens: 2000,
+                    temperature: 0.95
                 })
             });
 
@@ -223,9 +223,18 @@ function getDynamicFallback(tag, subject, topic) {
     return text;
 }
 
-/* =========================
-   ROUTES (Always Fresh - No Cache)
-========================= */
+/* ============================================
+   🚀 SMART VARIATION POOL (2000+ Journals/Day)
+   ============================================
+   Strategy:
+   - For each subject+module+section combo, store up to 10 unique AI-generated variations.
+   - When a user requests: if pool has <10, generate fresh via AI AND save to pool.
+   - If pool has 10+, randomly pick from pool (instant, no API call needed).
+   - Each section has its own pool, so sections within one journal are ALWAYS different.
+   - 10 variations × 5 sections = 100,000 unique journal combinations.
+============================================ */
+const variationPool = new Map(); // key: "subject_module_section" -> value: string[]
+const MAX_VARIATIONS = 10;
 
 // 🔒 Section-specific prompt descriptions
 const SECTION_PROMPTS = {
@@ -240,11 +249,26 @@ app.post("/api/generate-section", async (req, res) => {
     let resultSent = false;
     try {
         const { subject, topic, sectionTag, moduleRoman, syllabus, styleInstruction } = req.body;
+        const poolKey = `${subject}_${moduleRoman}_${sectionTag}`.toLowerCase().replace(/\s+/g, '_');
 
+        // Check if we have enough variations cached
+        const existingPool = variationPool.get(poolKey) || [];
+
+        // 🔀 POOL IS FULL → Serve from cache (instant, no API call)
+        if (existingPool.length >= MAX_VARIATIONS) {
+            const randomPick = existingPool[Math.floor(Math.random() * existingPool.length)];
+            console.log(`[POOL] ✅ Serving cached variation for ${sectionTag} (${existingPool.length} in pool)`);
+            resultSent = true;
+            return res.json({ text: randomPick });
+        }
+
+        // 🤖 POOL NOT FULL → Generate fresh AI content AND add to pool
         const sectionGuide = SECTION_PROMPTS[sectionTag] || SECTION_PROMPTS.EXP;
+        const variationNumber = existingPool.length + 1;
 
         const prompt = `
 You are a B.Tech student writing a reflective journal for an academic submission.
+This is VARIATION #${variationNumber} — make it completely different from any previous versions.
 
 SUBJECT: ${subject}
 MODULE: Module ${moduleRoman}
@@ -257,7 +281,7 @@ SECTION PURPOSE: ${sectionGuide}
 ${styleInstruction ? `OPENING INSTRUCTION: ${styleInstruction}` : ''}
 
 RULES:
-- Write approximately 500 words for this ONE section only.
+- Write approximately 450-550 words for this ONE section only.
 - Write in FIRST PERSON ("I learned", "I felt").
 - Use SIMPLE English with academic clarity.
 - Be HUMAN-LIKE, natural, thoughtful, NOT robotic.
@@ -267,20 +291,32 @@ RULES:
 - For LEARN and APP sections, you MAY include 2-3 bullet points to highlight key insights.
 - DO NOT repeat the same opening phrase as other sections.
 - DO NOT use markdown formatting like ** or ##.
+- This is variation ${variationNumber} of ${MAX_VARIATIONS}. Make the opening line UNIQUE.
         `;
 
-        console.log(`[SYSTEM] 🤖 Generating FRESH AI content for ${sectionTag}`);
+        console.log(`[POOL] 🤖 Generating variation #${variationNumber} for ${poolKey}`);
         let text = "";
         try {
             text = await generateWithAI(prompt);
         } catch (aiErr) {
-            console.log(`[SYSTEM] ⚠️ AI failed for ${sectionTag}, using fallback`);
+            console.log(`[POOL] ⚠️ AI failed, using fallback for ${sectionTag}`);
             text = getDynamicFallback(sectionTag, subject, topic);
         }
 
-        // 🔄 MINIMUM LENGTH GUARD
-        if (text.split(/\s+/).length < 350) {
+        // Minimum length guard
+        if (text.split(/\s+/).length < 300) {
             text += " " + getDynamicFallback(sectionTag, subject, topic).substring(0, 800);
+        }
+
+        // Save to pool
+        existingPool.push(text.trim());
+        variationPool.set(poolKey, existingPool);
+        console.log(`[POOL] 📦 Pool for ${poolKey}: ${existingPool.length}/${MAX_VARIATIONS} variations stored`);
+
+        // Cap total memory (max 500 keys in the pool)
+        if (variationPool.size > 500) {
+            const oldestKey = variationPool.keys().next().value;
+            variationPool.delete(oldestKey);
         }
 
         if (!resultSent) {
