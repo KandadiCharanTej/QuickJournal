@@ -127,6 +127,7 @@ async function generateWithAI(prompt) {
    🔒 ISOLATED POOLS - Zero overlap between sections
 ========================= */
 function getDynamicFallback(tag, subject, topic) {
+    const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
     const r = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
     const pools = {
@@ -134,60 +135,80 @@ function getDynamicFallback(tag, subject, topic) {
             starters: [
                 `The classroom was quiet as the professor began writing the first definition of ${topic} on the board. `,
                 `We kicked off the session with a quick recap before diving headfirst into ${topic}. `,
-                `Today's lecture opened with a real-world case study that connected ${topic} to everyday technology. `
+                `Today's lecture opened with a real-world case study that connected ${topic} to everyday technology. `,
+                `The session began with an engaging discussion about how ${topic} has evolved in recent years. `,
+                `I entered the class today eager to finally break down the complexity of ${topic}. `
             ],
             fillers: [
                 `The whiteboard was covered with diagrams showing how ${topic} fits into the ${subject} pipeline. `,
                 `We traced the evolution of ${topic} from its earliest form to the modern implementation used in industry today. `,
-                `The professor walked us through a live coding demo that made the abstract concepts of ${topic} feel tangible. `
+                `The professor walked us through a live coding demo that made the abstract concepts of ${topic} feel tangible. `,
+                `We spent considerable time discussing the architectural implications of ${topic} in large-scale systems. `,
+                `A major part of the discussion focused on the trade-offs between different ${topic} methodologies. `
             ]
         },
         FEEL: {
             starters: [
                 `There was a moment during the lecture when ${topic} suddenly clicked, and I felt a genuine rush of excitement. `,
                 `Honestly, I walked into class feeling unsure about ${topic}, but my confidence grew with every example. `,
-                `A wave of curiosity hit me when the professor posed a challenging question about ${subject}. `
+                `A wave of curiosity hit me when the professor posed a challenging question about ${subject}. `,
+                `I felt initially overwhelmed by the sheer volume of information regarding ${topic}. `,
+                `There was a palpable sense of focus in the room as we collectively tackled ${topic}. `
             ],
             fillers: [
                 `The emotional shift from confusion to clarity was one of the most satisfying parts of this module. `,
                 `I remember feeling frustrated when the first example did not make sense, but persistence paid off. `,
-                `By the end of the session, I felt a deep sense of accomplishment that I rarely experience in lectures. `
+                `By the end of the session, I felt a deep sense of accomplishment that I rarely experience in lectures. `,
+                `I felt a new level of respect for the engineers who pioneered ${topic} after seeing its inner workings. `,
+                `The collaborative energy of the class helped ease the tension I felt regarding this difficult subject. `
             ]
         },
         LEARN: {
             starters: [
                 `The single most important concept I took away from this session is how ${topic} governs the underlying logic of ${subject}. `,
                 `Before this class, I had a surface-level understanding of ${topic}, but now I see the deeper mechanics. `,
-                `A key technical insight was realizing that ${topic} is not an isolated concept but a building block for everything in ${subject}. `
+                `A key technical insight was realizing that ${topic} is not an isolated concept but a building block for everything in ${subject}. `,
+                `I discovered that ${topic} operates on principles that are far more sophisticated than I initially thought. `,
+                `The breakthrough moment for me was understanding the relationship between ${topic} and system efficiency. `
             ],
             fillers: [
                 `I now understand the precise relationship between the theoretical model and its practical output. `,
                 `The professor's explanation of edge cases in ${topic} helped me see why robust design matters so much. `,
-                `I gained clarity on how different layers of ${subject} interact when ${topic} is applied correctly. `
+                `I gained clarity on how different layers of ${subject} interact when ${topic} is applied correctly. `,
+                `The session demystified several complex algorithms that I had previously found intimidating. `,
+                `I learned how to optimize ${subject} workflows by leveraging the unique properties of ${topic}. `
             ]
         },
         APP: {
             starters: [
                 `One immediate way I plan to use ${topic} is in my upcoming semester project where ${subject} plays a central role. `,
                 `Thinking about my career, the knowledge of ${topic} will be directly useful in software development roles. `,
-                `I have already started sketching out a personal side-project where I can experiment with ${topic} hands-on. `
+                `I have already started sketching out a personal side-project where I can experiment with ${topic} hands-on. `,
+                `I can see myself applying ${topic} logic to solve real-world scalability issues in future internships. `,
+                `This session provided a bridge between classroom theory and the practical demands of the industry. `
             ],
             fillers: [
                 `In a professional setting, ${topic} can dramatically reduce debugging time and improve code quality. `,
                 `I plan to share these ${subject} strategies with my study group to improve our collaborative workflow. `,
-                `The practical applications extend beyond academics; ${topic} is used in real products that millions of people depend on. `
+                `The practical applications extend beyond academics; ${topic} is used in real products that millions of people depend on. `,
+                `I intend to use the ${topic} framework to build more responsive and user-friendly applications. `,
+                `Mastering ${topic} will give me a competitive edge when applying for specialized technical roles. `
             ]
         },
         CONC: {
             starters: [
                 `Looking back at this module, my understanding of ${subject} has matured significantly. `,
                 `This session marks a turning point in how I approach problem-solving within ${subject}. `,
-                `If I had to summarize my growth in one sentence, it would be that ${topic} taught me to think systematically. `
+                `If I had to summarize my growth in one sentence, it would be that ${topic} taught me to think systematically. `,
+                `I am finishing this section with a far more nuanced perspective on ${topic} than when I started. `,
+                `This deep dive into ${subject} has reaffirmed my passion for this specific area of engineering. `
             ],
             fillers: [
                 `I am walking away from this class with a toolkit of concepts that will serve me for years. `,
                 `The journey from confusion to confidence is exactly what higher education should feel like. `,
-                `I am now eager to tackle the next module, armed with a much stronger foundation in ${subject}. `
+                `I am now eager to tackle the next module, armed with a much stronger foundation in ${subject}. `,
+                `Reflecting on my progress, I realize that ${topic} is a cornerstone of my professional development. `,
+                `I feel a renewed sense of purpose and clarity regarding my long-term academic goals. `
             ]
         }
     };
@@ -195,32 +216,65 @@ function getDynamicFallback(tag, subject, topic) {
     const pool = pools[tag] || pools.EXP;
     let text = r(pool.starters) + r(pool.fillers);
 
-    // 📝 DYNAMIC BULLET POINT INJECTOR (Randomly adds lists to any section)
-    if (Math.random() > 0.6) { // ~40% chance per section to have bullets
+    // 📝 DYNAMIC BULLET POINT INJECTOR (Random 2-4 points)
+    if (Math.random() > 0.5) { 
         const points = [
             `Deep dive into the underlying mechanics of ${topic}.`,
             `Connecting ${subject} theory to real-world engineering hurdles.`,
             `Evaluating the scalability and efficiency of ${topic} in production.`,
             `Collaborative insights gained from group discussions during class.`,
             `Synthesizing ${topic} with my existing knowledge of ${subject}.`,
-            `Formulating a plan to experiment with ${topic} in a lab setting.`
+            `Formulating a plan to experiment with ${topic} in a lab setting.`,
+            `Identifying potential bottlenecks when implementing ${topic} at scale.`,
+            `Exploring the historical context that led to the development of ${subject}.`,
+            `Analyzing the relationship between ${topic} and other core modules.`
         ];
-        const selected = points.sort(() => 0.5 - Math.random()).slice(0, 3);
+        // Random number of points between 2 and 4
+        const count = Math.floor(Math.random() * 3) + 2;
+        const selected = shuffle(points).slice(0, count);
         text += "\n\nKey Reflections:\n" + selected.map(p => "• " + p).join("\n") + "\n\n";
     }
 
-    // Diverse padding to reach word count
-    while (text.split(/\s+/).length < 480) {
-        const extra = [
-            `Furthermore, the methodology behind ${topic} is surprisingly elegant when you break it down step by step. `,
-            `I spent extra time after class reviewing ${topic} documentation to reinforce what was taught. `,
-            `The connection between ${topic} and professional software engineering was a recurring theme in the discussion. `,
-            `It became clear that ${topic} is not just an academic exercise but a skill that employers actively seek. `,
-            `The collaborative atmosphere of the class made it easier to digest the complexity of ${topic}. `,
-            `I realized that my earlier misconceptions about ${subject} were holding me back from a deeper understanding. `
-        ];
-        text += r(extra);
+    // 🚀 RICH PADDING POOL (30+ unique sentences to prevent repetition)
+    const extraPool = shuffle([
+        `Furthermore, the methodology behind ${topic} is surprisingly elegant when you break it down step by step. `,
+        `I spent extra time after class reviewing ${topic} documentation to reinforce what was taught. `,
+        `The connection between ${topic} and professional software engineering was a recurring theme in the discussion. `,
+        `It became clear that ${topic} is not just an academic exercise but a skill that employers actively seek. `,
+        `The collaborative atmosphere of the class made it easier to digest the complexity of ${topic}. `,
+        `I realized that my earlier misconceptions about ${subject} were holding me back from a deeper understanding. `,
+        `The professor emphasized that ${topic} is foundational to almost everything we will do in this field. `,
+        `We looked at several case studies where ${topic} was the difference between success and failure. `,
+        `I found it fascinating how ${subject} principles can be applied to diverse domains. `,
+        `The lecture touched on the ethical considerations of using ${topic} in sensitive data environments. `,
+        `I noticed that my peers were also struggling with ${topic} at first, which made me feel better. `,
+        `We compared ${topic} with alternative approaches and discussed the pros and cons of each. `,
+        `The visual aids used in the class really helped in visualizing the flow of ${topic}. `,
+        `I've decided to dedicate more study hours to ${subject} to ensure I don't fall behind. `,
+        `It's impressive how ${topic} can simplify what used to be a very manual and tedious process. `,
+        `The discussion on ${topic} optimization strategies was particularly enlightening for me. `,
+        `I plan to revisit the lecture notes on ${subject} to clear up some minor doubts. `,
+        `The interactive nature of the session allowed me to ask specific questions about ${topic}. `,
+        `I am starting to see how ${topic} fits into the larger puzzle of my engineering degree. `,
+        `The sheer versatility of ${subject} as a discipline is something I am only now beginning to appreciate. `,
+        `I took detailed notes on the specific implementation details of ${topic} mentioned today. `,
+        `The session concluded with a look at future trends in ${subject}, which was very inspiring. `,
+        `I feel like I have crossed a significant threshold in my understanding of ${topic}. `,
+        `The real-world examples provided by the professor bridged the gap between theory and practice. `,
+        `I am looking forward to the lab session where we can implement ${topic} ourselves. `,
+        `Understanding the limitations of ${topic} is just as important as knowing its strengths. `,
+        `I've found that ${subject} requires a different way of thinking compared to my other classes. `,
+        `The clarity of the lecture made even the most difficult parts of ${topic} accessible. `,
+        `I'm going to try to explain ${topic} to a classmate to test my own understanding. `,
+        `The session reminded me why I chose to study ${subject} in the first place. `
+    ]);
+
+    let extraIdx = 0;
+    while (text.split(/\s+/).length < 480 && extraIdx < extraPool.length) {
+        text += extraPool[extraIdx];
+        extraIdx++;
     }
+    
     return text;
 }
 
@@ -301,7 +355,7 @@ RULES:
 - Use relatable real-life examples and analogies.
 - Smooth transitions between sentences.
 - Focus on DEPTH OF REFLECTION, not just explanation.
-- You MAY include 2-3 bullet points in this section to highlight key insights or personal thoughts.
+- You MAY include 2-4 bullet points in this section if it feels natural to highlight key insights, or you can skip them entirely to keep the flow conversational.
 - DO NOT repeat the same opening phrase as other sections.
 - DO NOT use markdown formatting like ** or ##.
 - This is variation ${variationNumber} of ${MAX_VARIATIONS}. Make the opening line UNIQUE.
