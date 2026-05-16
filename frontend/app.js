@@ -305,9 +305,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let text = r(pool.intros) + r(pool.bodies) + r(conclusions);
-        if (bulletSection) text += bulletSection;
 
-        // 🚀 RICH PADDING POOL (30+ unique sentences to prevent repetition)
+        // 📝 NATURAL BULLET POINT INJECTOR (Weighted & Varied)
+        const weights = { LEARN: 0.7, APP: 0.7, EXP: 0.4, FEEL: 0.2, CONC: 0.1 };
+        const threshold = weights[tag] || 0.4;
+
+        if (Math.random() < threshold) { 
+            const points = [
+                `Developing a deeper grasp of ${topic} mechanics.`,
+                `Identifying the synergy between ${topic} and ${subject}.`,
+                `Applying optimized logic to real-world ${subject} cases.`,
+                `Evaluating the long-term impact of ${topic} on the field.`,
+                `Streamlining workflows using ${topic} best practices.`,
+                `Understanding the core architecture of ${topic} systems.`,
+                `Analyzing efficiency gains through ${topic} implementation.`,
+                `Collaborating with peers to solve ${subject} challenges.`,
+                `Prototyping new solutions using ${topic} modules.`,
+                `Reducing system latency by optimizing ${subject} parameters.`,
+                `Expanding my technical vocabulary within the ${topic} domain.`,
+                `Synthesizing academic theory with industrial ${topic} standards.`
+            ];
+            const count = Math.floor(Math.random() * 4) + 2; // 2 to 5 points
+            const selected = shuffle(points).slice(0, count);
+            
+            const headers = ["Key Takeaways:", "Core Concepts:", "Technical Observations:", "Practical Insights:", "My Notes:", ""];
+            const header = r(headers);
+            const bulletStyles = ["• ", "– ", "  - ", "➤ "];
+            const style = r(bulletStyles);
+            
+            const bulletText = (header ? `\n\n${header}\n` : "\n\n") + selected.map(p => style + p).join("\n") + "\n\n";
+            
+            if (Math.random() > 0.8) {
+                text = bulletText + text;
+            } else {
+                text += bulletText;
+            }
+        }
+
         const extraPool = shuffle([
             `Additionally, we looked at how ${topic} impacts the broader ecosystem of ${subject}. `,
             `The methodology behind ${topic} is surprisingly elegant and efficient. `,

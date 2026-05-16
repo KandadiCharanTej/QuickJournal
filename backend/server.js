@@ -216,8 +216,11 @@ function getDynamicFallback(tag, subject, topic) {
     const pool = pools[tag] || pools.EXP;
     let text = r(pool.starters) + r(pool.fillers);
 
-    // 📝 DYNAMIC BULLET POINT INJECTOR (Random 2-4 points)
-    if (Math.random() > 0.5) { 
+    // 📝 NATURAL BULLET POINT INJECTOR (Weighted & Varied)
+    const weights = { LEARN: 0.7, APP: 0.7, EXP: 0.4, FEEL: 0.2, CONC: 0.1 };
+    const threshold = weights[tag] || 0.4;
+
+    if (Math.random() < threshold) { 
         const points = [
             `Deep dive into the underlying mechanics of ${topic}.`,
             `Connecting ${subject} theory to real-world engineering hurdles.`,
@@ -227,12 +230,28 @@ function getDynamicFallback(tag, subject, topic) {
             `Formulating a plan to experiment with ${topic} in a lab setting.`,
             `Identifying potential bottlenecks when implementing ${topic} at scale.`,
             `Exploring the historical context that led to the development of ${subject}.`,
-            `Analyzing the relationship between ${topic} and other core modules.`
+            `Analyzing the relationship between ${topic} and other core modules.`,
+            `Documenting the technical constraints encountered during the ${topic} demo.`,
+            `Refining my understanding of ${subject} through peer feedback.`,
+            `Mapping out the dependencies between ${topic} and system architecture.`
         ];
-        // Random number of points between 2 and 4
-        const count = Math.floor(Math.random() * 3) + 2;
+        
+        const count = Math.floor(Math.random() * 4) + 2; // 2 to 5 points
         const selected = shuffle(points).slice(0, count);
-        text += "\n\nKey Reflections:\n" + selected.map(p => "• " + p).join("\n") + "\n\n";
+        
+        const headers = ["Key Takeaways:", "Core Concepts:", "Technical Observations:", "Practical Insights:", "My Notes:", ""];
+        const header = r(headers);
+        const bulletStyles = ["• ", "– ", "  - ", "➤ "];
+        const style = r(bulletStyles);
+        
+        const bulletText = (header ? `\n\n${header}\n` : "\n\n") + selected.map(p => style + p).join("\n") + "\n\n";
+        
+        // Randomly decide to append or prepend or mix (mostly append for natural flow)
+        if (Math.random() > 0.8) {
+            text = bulletText + text;
+        } else {
+            text += bulletText;
+        }
     }
 
     // 🚀 RICH PADDING POOL (30+ unique sentences to prevent repetition)
