@@ -156,7 +156,10 @@ textarea {
 #milestoneBadge {
     animation: floating 3.5s ease-in-out infinite;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    position: relative;
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 60;
 }
 
 #milestoneBadge::before {
