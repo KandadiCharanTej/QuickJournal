@@ -154,12 +154,47 @@ textarea {
 
 /* --- Milestone Celebration Styles --- */
 #milestoneBadge {
-    animation: floating 3s ease-in-out infinite;
+    animation: floating 3.5s ease-in-out infinite;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+}
+
+#milestoneBadge::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    background: linear-gradient(to tr, #8b5cf6, #c084fc, #6366f1);
+    border-radius: 50%;
+    z-index: -1;
+    opacity: 0.6;
+    filter: blur(8px);
+    animation: pulseGlow 2.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+#milestoneBadge:hover {
+    filter: drop-shadow(0 12px 24px rgba(139, 92, 246, 0.5));
 }
 
 @keyframes floating {
     0%, 100% { transform: translateY(0) rotate(0); }
-    50% { transform: translateY(-10px) rotate(5deg); }
+    50% { transform: translateY(-10px) rotate(4deg); }
+}
+
+@keyframes pulseGlow {
+    0%, 100% { transform: scale(1); opacity: 0.4; }
+    50% { transform: scale(1.18); opacity: 0.8; }
+}
+
+#milestoneModal #modalOverlay {
+    opacity: 0;
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#milestoneModal #modalContent {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease-out;
 }
 
 #milestoneModal.active {
@@ -172,7 +207,7 @@ textarea {
 
 #milestoneModal.active #modalContent {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) translateY(0);
 }
 
 .perspective {
@@ -181,8 +216,8 @@ textarea {
 
 /* Glass effect refinement for modal */
 #modalContent {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.25), 0 0 50px 10px rgba(139, 92, 246, 0.05);
 }

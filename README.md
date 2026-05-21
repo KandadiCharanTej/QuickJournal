@@ -87,9 +87,9 @@ node server.js
 
 ## 📊 Project Impact
 QuickJournal was designed to solve a real-world productivity bottleneck in higher education.
-*   **500+ Journals Generated** to date.
-*   **~1,500+ Hours Saved** for students across multiple engineering departments.
-*   **98% Success Rate** in automated submission formatting.
+*   **150+ Students** empowered.
+*   **1200+ PDFs** generated to date.
+*   **2000+ Hours Saved** for students across engineering departments.
 
 ---
 
