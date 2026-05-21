@@ -77,6 +77,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // 📊 JOURNAL COUNTER TRACKING (localStorage)
+    function initJournalCounter() {
+        let count = localStorage.getItem('total_journals_count');
+        if (!count) {
+            count = 542;
+            localStorage.setItem('total_journals_count', count);
+        } else {
+            count = parseInt(count, 10);
+        }
+        updateJournalCountUI(count);
+    }
+
+    function updateJournalCountUI(count) {
+        const badgePdf = document.getElementById('badgePdfCount');
+        const tooltipPdf = document.getElementById('tooltipPdfCount');
+        const modalPdf = document.getElementById('modalPdfCount');
+        const modalPdfLabel = document.getElementById('modalPdfLabel');
+
+        if (badgePdf) badgePdf.innerText = count;
+        if (tooltipPdf) tooltipPdf.innerText = count;
+        if (modalPdf) modalPdf.innerText = count;
+        if (modalPdfLabel) modalPdfLabel.innerText = "Journals Generated";
+    }
+
+    function incrementJournalCounter() {
+        let count = parseInt(localStorage.getItem('total_journals_count'), 10) || 542;
+        count++;
+        localStorage.setItem('total_journals_count', count);
+        updateJournalCountUI(count);
+    }
+
     function validateCurrentStep() {
         const currentContainer = document.getElementById(`step-${currentStep}`);
         const inputs = currentContainer.querySelectorAll('input, select, textarea');
@@ -725,6 +756,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const safeSub = data.sub.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
             const cleanFilename = `${safeName}_${safeReg}_ReflectiveJournal_${safeSub}-${moduleRoman}`;
             doc.save(`${cleanFilename}.pdf`);
+            incrementJournalCounter();
 
             // Show Success Notification
             successMsg.classList.remove('hidden');
@@ -883,4 +915,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize UI on load
     updateUI();
+    initJournalCounter();
 });
