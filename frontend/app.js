@@ -80,8 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 📊 JOURNAL COUNTER TRACKING (localStorage)
     function initJournalCounter() {
         let count = localStorage.getItem('total_journals_count');
-        if (!count) {
-            count = 542;
+        if (!count || parseInt(count, 10) < 1200) {
+            count = 1200;
             localStorage.setItem('total_journals_count', count);
         } else {
             count = parseInt(count, 10);
@@ -89,20 +89,42 @@ document.addEventListener('DOMContentLoaded', () => {
         updateJournalCountUI(count);
     }
 
+    function formatBadgeCount(count) {
+        if (count >= 1000) {
+            return (count / 1000).toFixed(1) + 'K+';
+        }
+        return count + '+';
+    }
+
     function updateJournalCountUI(count) {
         const badgePdf = document.getElementById('badgePdfCount');
+        
+        // Tooltip elements
         const tooltipPdf = document.getElementById('tooltipPdfCount');
+        const tooltipStudents = document.getElementById('tooltipStudentsCount');
+        const tooltipHours = document.getElementById('tooltipHoursCount');
+        
+        // Modal elements
         const modalPdf = document.getElementById('modalPdfCount');
-        const modalPdfLabel = document.getElementById('modalPdfLabel');
+        const modalStudents = document.getElementById('modalStudentsCount');
+        const modalHours = document.getElementById('modalHoursCount');
 
-        if (badgePdf) badgePdf.innerText = count;
+        const studentsHelped = Math.floor(count / 12);
+        const hoursSaved = Math.floor((count * 15) / 60);
+
+        if (badgePdf) badgePdf.innerText = formatBadgeCount(count);
+        
         if (tooltipPdf) tooltipPdf.innerText = count;
-        if (modalPdf) modalPdf.innerText = count;
-        if (modalPdfLabel) modalPdfLabel.innerText = "Journals Generated";
+        if (tooltipStudents) tooltipStudents.innerText = studentsHelped;
+        if (tooltipHours) tooltipHours.innerText = hoursSaved;
+
+        if (modalPdf) modalPdf.innerText = count + "+";
+        if (modalStudents) modalStudents.innerText = studentsHelped + "+";
+        if (modalHours) modalHours.innerText = hoursSaved + "+";
     }
 
     function incrementJournalCounter() {
-        let count = parseInt(localStorage.getItem('total_journals_count'), 10) || 542;
+        let count = parseInt(localStorage.getItem('total_journals_count'), 10) || 1200;
         count++;
         localStorage.setItem('total_journals_count', count);
         updateJournalCountUI(count);

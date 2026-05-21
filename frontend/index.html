@@ -540,15 +540,17 @@
             <span class="text-white/80 font-bold text-[7px] uppercase tracking-widest mt-0.5 leading-none">PDFs</span>
             <div class="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 rounded-full border-2 border-white flex items-center justify-center text-[10px] shadow-md animate-pulse">⭐</div>
         </div>
-        <div class="absolute bottom-full right-0 mb-3 whitespace-nowrap opacity-0 scale-90 origin-bottom-right group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 bg-slate-950/95 backdrop-blur-md text-slate-100 text-[11px] px-4 py-2.5 rounded-xl shadow-2xl font-bold border border-violet-500/20 tracking-wider pointer-events-none flex items-center gap-2">
-            <span>✨</span> 150+ Students | <span id="tooltipPdfCount">1200+</span> PDFs | 2000+ Hours Saved 🚀
+        <div class="absolute bottom-full right-0 mb-3 opacity-0 scale-90 origin-bottom-right group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 bg-slate-950/95 backdrop-blur-md text-slate-100 text-[11px] px-4 py-2.5 rounded-xl shadow-2xl font-bold border border-violet-500/20 tracking-wider pointer-events-none flex flex-col items-start gap-1.5 whitespace-nowrap">
+            <div class="flex items-center gap-1.5">👨‍🎓 <span id="tooltipStudentsCount">100</span>+ Students Helped</div>
+            <div class="flex items-center gap-1.5">📄 <span id="tooltipPdfCount">1200</span>+ Journals Generated</div>
+            <div class="flex items-center gap-1.5">⏳ <span id="tooltipHoursCount">300</span>+ Hours Saved</div>
         </div>
     </div>
 
-    <div id="milestoneModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
-        <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-md opacity-0 transition-opacity duration-500"
+    <div id="milestoneModal" class="fixed inset-0 z-[100] flex items-end justify-end p-4 sm:p-6 pointer-events-none hidden">
+        <div class="absolute inset-0 bg-slate-950/30 backdrop-blur-[2px] opacity-0 transition-opacity duration-500 pointer-events-auto"
             id="modalOverlay"></div>
-        <div class="relative glass-panel w-full max-w-md mx-4 p-8 rounded-3xl text-center overflow-hidden transform scale-90 opacity-0 transition-all duration-500"
+        <div class="relative glass-panel w-full max-w-sm p-6 rounded-3xl text-center overflow-hidden transform scale-90 opacity-0 transition-all duration-500 pointer-events-auto mb-20 sm:mb-24 shadow-2xl"
             id="modalContent">
             <!-- Decorative Background Elements -->
             <div class="absolute -top-10 -left-10 w-36 h-36 bg-violet-500/15 rounded-full blur-3xl"></div>
@@ -572,8 +574,8 @@
                         <svg class="w-6 h-6 text-violet-600 mb-2 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A11.386 11.386 0 0110.089 21c-2.243 0-4.352-.64-6.136-1.758a10.974 10.974 0 01.322-3.359c.799-2.228 3.011-3.693 5.485-3.693a4.878 4.878 0 012.747.832M12 9.75a3 3 0 11-6 0 3 3 0 016 0zm9 5.25a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-1.5-6.75a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
                         </svg>
-                        <div class="text-violet-600 font-extrabold text-2xl tracking-tight leading-none">150+</div>
-                        <div class="text-slate-500 text-[9px] font-extrabold uppercase tracking-wider mt-2">Students</div>
+                        <div id="modalStudentsCount" class="text-violet-600 font-extrabold text-2xl tracking-tight leading-none">100+</div>
+                        <div class="text-slate-500 text-[9px] font-extrabold uppercase tracking-wider mt-2">Students Helped</div>
                     </div>
                     <!-- PDFs Card -->
                     <div class="bg-gradient-to-br from-fuchsia-50/70 to-fuchsia-100/30 border border-fuchsia-100/80 p-4 rounded-2xl hover:scale-105 transition-all duration-300 shadow-sm hover:shadow-md">
@@ -581,14 +583,14 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                         </svg>
                         <div id="modalPdfCount" class="text-fuchsia-600 font-extrabold text-2xl tracking-tight leading-none">1200+</div>
-                        <div id="modalPdfLabel" class="text-slate-500 text-[9px] font-extrabold uppercase tracking-wider mt-2">PDFs</div>
+                        <div id="modalPdfLabel" class="text-slate-500 text-[9px] font-extrabold uppercase tracking-wider mt-2">Journals Generated</div>
                     </div>
                     <!-- Hours Saved Card -->
                     <div class="bg-gradient-to-br from-indigo-50/70 to-indigo-100/30 border border-indigo-100/80 p-4 rounded-2xl hover:scale-105 transition-all duration-300 shadow-sm hover:shadow-md">
                         <svg class="w-6 h-6 text-indigo-600 mb-2 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        <div class="text-indigo-600 font-extrabold text-2xl tracking-tight leading-none">2000+</div>
+                        <div id="modalHoursCount" class="text-indigo-600 font-extrabold text-2xl tracking-tight leading-none">300+</div>
                         <div class="text-slate-500 text-[9px] font-extrabold uppercase tracking-wider mt-2">Hours Saved</div>
                     </div>
                 </div>
