@@ -1110,19 +1110,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
 
-                let nextY = qaY;
-                qaBlocks.forEach((block, index) => {
-                    doc.autoTable({
-                        startY: nextY,
-                        margin: { top: 45 },
-                        theme: 'grid',
-                        styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 4 },
-                        body: [
-                            [{ content: `Question ${block.qNum}: ${block.question}`, styles: { fontStyle: 'bold', fontSize: 12 } }],
-                            [{ content: `Answer:\n\n${block.answer}`, styles: { fontStyle: 'normal' } }]
-                        ],
-                    });
-                    nextY = doc.lastAutoTable.finalY + 6;
+                let bodyData = [];
+                qaBlocks.forEach((block) => {
+                    bodyData.push([{ content: `Question ${block.qNum}: ${block.question}`, styles: { fontStyle: 'bold', fontSize: 12 } }]);
+                    bodyData.push([{ content: `Answer:\n\n${block.answer}`, styles: { fontStyle: 'normal' } }]);
+                });
+
+                doc.autoTable({
+                    startY: qaY,
+                    margin: { top: 45 },
+                    theme: 'grid',
+                    styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 4 },
+                    body: bodyData,
                 });
             } else {
                 drawContentSection('1. Experience\n(Class Content)', data.exp, qaY);
@@ -1264,37 +1263,35 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 500);
         };
 
-        milestoneBadge.addEventListener('click', showModal);
         closeMilestone.addEventListener('click', hideModal);
         modalOverlay.addEventListener('click', hideModal);
 
-        // AUTO-SHOW LOGIC (Every 3 days for 1 month)
-        const checkMilestoneAutoShow = () => {
-            const now = Date.now();
-            let firstSeen = localStorage.getItem('milestone_first_seen');
-            let lastShown = localStorage.getItem('milestone_last_shown');
-            
-            const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
-            const threeDaysInMs = 3 * 24 * 60 * 60 * 1000;
-
-            if (!firstSeen) {
-                localStorage.setItem('milestone_first_seen', now);
-                firstSeen = now;
-            }
-
-            // Stop auto-showing after 1 month
-            if (now - firstSeen > thirtyDaysInMs) return;
-
-            // Show if it's the first time OR 3 days have passed since last auto-show
-            if (!lastShown || (now - lastShown > threeDaysInMs)) {
+        // AUTO-SHOW LOGIC (Show only once per user)
+        const checkAnnouncementShow = () => {
+            if (!localStorage.getItem('term4AnnouncementSeen')) {
                 setTimeout(() => {
                     showModal();
-                    localStorage.setItem('milestone_last_shown', Date.now());
-                }, 2500); // Wait 2.5s after load to not overwhelm the user
+                }, 1000);
             }
         };
 
-        checkMilestoneAutoShow();
+        const exploreNowBtn = document.getElementById('exploreNowBtn');
+        if (exploreNowBtn) {
+            exploreNowBtn.addEventListener('click', () => {
+                hideModal();
+                localStorage.setItem('term4AnnouncementSeen', 'true');
+            });
+        }
+        
+        // Ensure flag is set even if they just click close or overlay
+        closeMilestone.addEventListener('click', () => {
+            localStorage.setItem('term4AnnouncementSeen', 'true');
+        });
+        modalOverlay.addEventListener('click', () => {
+            localStorage.setItem('term4AnnouncementSeen', 'true');
+        });
+
+        checkAnnouncementShow();
     }
 
     // ---------------- WORD COUNT TRACKING ----------------
