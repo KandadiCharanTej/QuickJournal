@@ -1112,15 +1112,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 let bodyData = [];
                 qaBlocks.forEach((block) => {
-                    bodyData.push([{ content: `Question ${block.qNum}: ${block.question}`, styles: { fontStyle: 'bold', fontSize: 12 } }]);
-                    bodyData.push([{ content: `Answer:\n\n${block.answer}`, styles: { fontStyle: 'normal' } }]);
+                    // Combine question and answer into a single string for a unified box
+                    bodyData.push([{ 
+                        content: `Question ${block.qNum}: ${block.question}\n\nAnswer:\n${block.answer}`, 
+                        styles: { fontStyle: 'normal' } 
+                    }]);
                 });
 
                 doc.autoTable({
                     startY: qaY,
                     margin: { top: 45 },
                     theme: 'grid',
-                    styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 4 },
+                    styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 6 },
                     body: bodyData,
                 });
             } else {
