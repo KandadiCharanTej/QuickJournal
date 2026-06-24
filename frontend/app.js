@@ -1252,11 +1252,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const exploreNowBtn = document.getElementById('exploreNowBtn');
     const term4Badge = document.getElementById('term4Badge');
     
-    const milestoneModal = document.getElementById('milestoneModal');
     const closeMilestone = document.getElementById('closeMilestone');
     const modalOverlay = document.getElementById('modalOverlay');
 
     if (announcementModal) {
+        let wasAutoShown = false;
+
         const showAnnouncement = () => {
             announcementModal.classList.remove('hidden');
             setTimeout(() => {
@@ -1270,9 +1271,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 announcementModal.classList.add('hidden');
             }, 500);
             
-            // Increment count when closed
-            let count = parseInt(localStorage.getItem('term4PopupCount') || '0', 10);
-            localStorage.setItem('term4PopupCount', (count + 1).toString());
+            // Increment count only if it was auto-shown
+            if (wasAutoShown) {
+                let count = parseInt(localStorage.getItem('term4PopupCount') || '0', 10);
+                localStorage.setItem('term4PopupCount', (count + 1).toString());
+                wasAutoShown = false;
+            }
         };
 
         if (term4Badge) term4Badge.addEventListener('click', showAnnouncement);
@@ -1283,7 +1287,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Show automatically up to 5 times
         let showCount = parseInt(localStorage.getItem('term4PopupCount') || '0', 10);
         if (showCount < 5) {
-            setTimeout(showAnnouncement, 1000);
+            setTimeout(() => {
+                wasAutoShown = true;
+                showAnnouncement();
+            }, 1000);
         }
     }
 
