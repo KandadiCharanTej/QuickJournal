@@ -1250,6 +1250,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeAnnouncement = document.getElementById('closeAnnouncement');
     const announcementOverlay = document.getElementById('announcementOverlay');
     const exploreNowBtn = document.getElementById('exploreNowBtn');
+    const term4Badge = document.getElementById('term4Badge');
     
     const closeMilestone = document.getElementById('closeMilestone');
     const modalOverlay = document.getElementById('modalOverlay');
@@ -1267,15 +1268,18 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 announcementModal.classList.add('hidden');
             }, 500);
-            localStorage.setItem('term4AnnouncementSeen', 'true');
         };
 
+        if (term4Badge) term4Badge.addEventListener('click', showAnnouncement);
         if (closeAnnouncement) closeAnnouncement.addEventListener('click', hideAnnouncement);
         if (announcementOverlay) announcementOverlay.addEventListener('click', hideAnnouncement);
         if (exploreNowBtn) exploreNowBtn.addEventListener('click', hideAnnouncement);
 
-        if (!localStorage.getItem('term4AnnouncementSeen')) {
+        // Show automatically up to 5 times
+        let showCount = parseInt(localStorage.getItem('term4AnnouncementShowCount') || '0', 10);
+        if (showCount < 5) {
             setTimeout(showAnnouncement, 1000);
+            localStorage.setItem('term4AnnouncementShowCount', (showCount + 1).toString());
         }
     }
 
