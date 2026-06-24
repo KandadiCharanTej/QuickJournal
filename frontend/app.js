@@ -1250,10 +1250,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeAnnouncement = document.getElementById('closeAnnouncement');
     const announcementOverlay = document.getElementById('announcementOverlay');
     const exploreNowBtn = document.getElementById('exploreNowBtn');
-    const term4Badge = document.getElementById('term4Badge');
-    
-    const closeMilestone = document.getElementById('closeMilestone');
-    const modalOverlay = document.getElementById('modalOverlay');
 
     if (announcementModal) {
         const showAnnouncement = () => {
@@ -1270,37 +1266,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 500);
         };
 
-        if (term4Badge) term4Badge.addEventListener('click', showAnnouncement);
+        if (milestoneBadge) milestoneBadge.addEventListener('click', showAnnouncement);
         if (closeAnnouncement) closeAnnouncement.addEventListener('click', hideAnnouncement);
         if (announcementOverlay) announcementOverlay.addEventListener('click', hideAnnouncement);
         if (exploreNowBtn) exploreNowBtn.addEventListener('click', hideAnnouncement);
 
-        // Show automatically up to 5 times
+        // Show automatically up to 8 times
         let showCount = parseInt(localStorage.getItem('term4AnnouncementShowCount') || '0', 10);
-        if (showCount < 5) {
+        if (showCount < 8) {
             setTimeout(showAnnouncement, 1000);
             localStorage.setItem('term4AnnouncementShowCount', (showCount + 1).toString());
         }
-    }
-
-    if (milestoneBadge && milestoneModal) {
-        const showMilestone = () => {
-            milestoneModal.classList.remove('hidden');
-            setTimeout(() => {
-                milestoneModal.classList.add('active');
-            }, 10);
-        };
-
-        const hideMilestone = () => {
-            milestoneModal.classList.remove('active');
-            setTimeout(() => {
-                milestoneModal.classList.add('hidden');
-            }, 500);
-        };
-
-        milestoneBadge.addEventListener('click', showMilestone);
-        if (closeMilestone) closeMilestone.addEventListener('click', hideMilestone);
-        if (modalOverlay) modalOverlay.addEventListener('click', hideMilestone);
     }
 
     // ---------------- WORD COUNT TRACKING ----------------
