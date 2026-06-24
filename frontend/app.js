@@ -1245,53 +1245,58 @@ document.addEventListener('DOMContentLoaded', () => {
     // ---------------- MILESTONE CELEBRATION ----------------
     const milestoneBadge = document.getElementById('milestoneBadge');
     const milestoneModal = document.getElementById('milestoneModal');
+    // ---------------- MODAL LOGIC ----------------
+    const announcementModal = document.getElementById('announcementModal');
+    const closeAnnouncement = document.getElementById('closeAnnouncement');
+    const announcementOverlay = document.getElementById('announcementOverlay');
+    const exploreNowBtn = document.getElementById('exploreNowBtn');
+    
     const closeMilestone = document.getElementById('closeMilestone');
     const modalOverlay = document.getElementById('modalOverlay');
 
+    if (announcementModal) {
+        const showAnnouncement = () => {
+            announcementModal.classList.remove('hidden');
+            setTimeout(() => {
+                announcementModal.classList.add('active');
+            }, 10);
+        };
+
+        const hideAnnouncement = () => {
+            announcementModal.classList.remove('active');
+            setTimeout(() => {
+                announcementModal.classList.add('hidden');
+            }, 500);
+            localStorage.setItem('term4AnnouncementSeen', 'true');
+        };
+
+        if (closeAnnouncement) closeAnnouncement.addEventListener('click', hideAnnouncement);
+        if (announcementOverlay) announcementOverlay.addEventListener('click', hideAnnouncement);
+        if (exploreNowBtn) exploreNowBtn.addEventListener('click', hideAnnouncement);
+
+        if (!localStorage.getItem('term4AnnouncementSeen')) {
+            setTimeout(showAnnouncement, 1000);
+        }
+    }
+
     if (milestoneBadge && milestoneModal) {
-        const showModal = () => {
+        const showMilestone = () => {
             milestoneModal.classList.remove('hidden');
             setTimeout(() => {
                 milestoneModal.classList.add('active');
             }, 10);
         };
 
-        const hideModal = () => {
+        const hideMilestone = () => {
             milestoneModal.classList.remove('active');
             setTimeout(() => {
                 milestoneModal.classList.add('hidden');
             }, 500);
         };
 
-        closeMilestone.addEventListener('click', hideModal);
-        modalOverlay.addEventListener('click', hideModal);
-
-        // AUTO-SHOW LOGIC (Show only once per user)
-        const checkAnnouncementShow = () => {
-            if (!localStorage.getItem('term4AnnouncementSeen')) {
-                setTimeout(() => {
-                    showModal();
-                }, 1000);
-            }
-        };
-
-        const exploreNowBtn = document.getElementById('exploreNowBtn');
-        if (exploreNowBtn) {
-            exploreNowBtn.addEventListener('click', () => {
-                hideModal();
-                localStorage.setItem('term4AnnouncementSeen', 'true');
-            });
-        }
-        
-        // Ensure flag is set even if they just click close or overlay
-        closeMilestone.addEventListener('click', () => {
-            localStorage.setItem('term4AnnouncementSeen', 'true');
-        });
-        modalOverlay.addEventListener('click', () => {
-            localStorage.setItem('term4AnnouncementSeen', 'true');
-        });
-
-        checkAnnouncementShow();
+        milestoneBadge.addEventListener('click', showMilestone);
+        if (closeMilestone) closeMilestone.addEventListener('click', hideMilestone);
+        if (modalOverlay) modalOverlay.addEventListener('click', hideMilestone);
     }
 
     // ---------------- WORD COUNT TRACKING ----------------
