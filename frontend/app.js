@@ -1065,7 +1065,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let currentY = doc.lastAutoTable.finalY + 15;
             doc.setFont("times", "bold");
             doc.setFontSize(14);
-            doc.text(`${isTerm4 ? "Assessment" : "Reflective Journal"} - ${data.assNum}`, pageWidth/2, currentY, { align: "center" });
+            doc.text(`${isTerm4 ? "Assignment" : "Reflective Journal"} - ${data.assNum}`, pageWidth/2, currentY, { align: "center" });
             
             let qaY;
             if (!isTerm4) {
@@ -1112,33 +1112,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 let nextY = qaY;
                 qaBlocks.forEach((block, index) => {
-                    // Question (Bold, size 12)
                     doc.autoTable({
                         startY: nextY,
                         margin: { top: 45 },
-                        theme: 'plain',
-                        styles: { font: 'times', fontSize: 12, fontStyle: 'bold', textColor: [0, 0, 0], cellPadding: { top: 4, bottom: 2 } },
-                        body: [[`Question ${block.qNum}: ${block.question}`]],
+                        theme: 'grid',
+                        styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 4 },
+                        body: [
+                            [{ content: `Question ${block.qNum}: ${block.question}`, styles: { fontStyle: 'bold', fontSize: 12 } }],
+                            [{ content: `Answer:\n\n${block.answer}`, styles: { fontStyle: 'normal' } }]
+                        ],
                     });
-
-                    // Answer (Normal, size 11)
-                    doc.autoTable({
-                        startY: doc.lastAutoTable.finalY,
-                        margin: { top: 45 },
-                        theme: 'plain',
-                        styles: { font: 'times', fontSize: 11, fontStyle: 'normal', textColor: [0, 0, 0], cellPadding: { top: 2, bottom: 6 } },
-                        body: [[block.answer]],
-                        didDrawCell: (dataCell) => {
-                            if (index < qaBlocks.length - 1) {
-                                const docInstance = dataCell.doc;
-                                const cell = dataCell.cell;
-                                docInstance.setDrawColor(200, 200, 200);
-                                docInstance.setLineWidth(0.2);
-                                docInstance.line(cell.x, cell.y + cell.height, cell.x + cell.width, cell.y + cell.height);
-                            }
-                        }
-                    });
-
                     nextY = doc.lastAutoTable.finalY + 6;
                 });
             } else {

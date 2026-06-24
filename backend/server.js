@@ -356,26 +356,29 @@ app.post("/api/generate-section", async (req, res) => {
 
         // 🤖 POOL NOT FULL → Generate fresh AI content AND add to pool
         const isAssignment = sectionTag === "ASSIGNMENT";
-        const targetWordCount = (subject.includes("Heritage") || subject.includes("Culture")) ? 460 : 380;
+        const targetWordCount = 425;
         const variationNumber = existingPool.length + 1;
 
         let systemContent = undefined;
         let prompt;
 
         if (isAssignment) {
-            systemContent = "You are a university student writing an assignment for a B.Tech course. Write in simple, student-friendly language and a natural, academic writing style. Do NOT sound like an AI, do NOT be overly formal or robotic. Write clearly, explain the concepts thoroughly with relevant examples, and make it suitable for a college-level assignment submission.";
+            systemContent = "You are an expert writing a university assignment for a B.Tech course. Write detailed academic content in simple, student-friendly language. Maintain a university assignment style. Do NOT write as a reflective journal. Do NOT use first-person pronouns (e.g., 'I learned', 'I felt'). Write strictly as an objective, academic assignment answer.";
             prompt = `
 Write a detailed answer for the following question.
-This is VARIATION #${variationNumber} of the answer — make it unique and write it in a natural student tone.
+This is VARIATION #${variationNumber} of the answer — make it unique and maintain a professional university assignment style.
 
 SUBJECT: ${subject}
 ASSIGNMENT: ${moduleRoman}
 QUESTION: ${topic}
 
 RULES:
-- Write approximately ${targetWordCount} words for this answer.
-- Explain the concept thoroughly with relevant examples.
-- Focus on depth of explanation and clear structure.
+- Write approximately 350–500 words for this answer.
+- Write detailed academic content using simple, student-friendly language.
+- Include explanations, relevant examples, and important facts.
+- Naturally include short bullet points (e.g., • Importance, • Features, • Types, • Applications) only when relevant to the question.
+- NEVER generate artificial sections like "My Notes:", "Technical Observations:", "Personal Notes", "Session Notes", or "Lecture Notes".
+- Do NOT write as a reflective journal. Do NOT use first-person writing ("I learned", "I felt", etc.).
 - Write only the answer text. Do not repeat the question or include introductory filler like "Here is the answer to your question:".
 - Make the opening line and phrasing unique for this variation #${variationNumber}.
             `;
