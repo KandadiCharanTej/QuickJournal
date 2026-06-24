@@ -158,6 +158,119 @@ const academicData = {
                 "9": { title: "Photonics and Fiber Optic Communication", syllabus: "Total internal reflection, optical fibers, acceptance angle, Numerical Aperture (Qualitative), Signal loss mechanisms: attenuation, dispersion, Fiber Optic Communication - Applications in high-speed internet and cloud data transfer" },
                 "10": { title: "Sensors and its Applications", syllabus: "Sensors, Sensor characteristics: sensitivity, precision, accuracy, Principles of mechanical, optical, and thermal sensors, Applications in robotics, automation, IoT, and smart systems" }
             }
+        },
+
+        // ----- TERM 4 -----
+        "4": {
+            "Environmental Science": {
+                "1": {
+                    title: "Assignment - 1",
+                    questions: [
+                        "Explain the structure and functions of an ecosystem.",
+                        "What is ecological balance? Explain its importance.",
+                        "Explain food chain with a suitable example.",
+                        "What are trophic levels? Explain different trophic levels.",
+                        "Explain ecological pyramids and their types.",
+                        "Explain the pyramid of energy and its importance."
+                    ]
+                },
+                "2": {
+                    title: "Assignment - 2",
+                    questions: [
+                        "Explain the Carbon Cycle.",
+                        "Explain the Nitrogen Cycle.",
+                        "Explain the Greenhouse Effect and Global Warming.",
+                        "Explain Ozone Layer Depletion and Climate Change.",
+                        "Explain Air Pollution, its Sources, and Effects.",
+                        "Explain Air Pollution Control Devices."
+                    ]
+                },
+                "3": {
+                    title: "Assignment - 3",
+                    questions: [
+                        "Explain Noise Pollution, its Sources, and Effects on Human Health.",
+                        "How is Noise Measured? Explain Prevention and Control Measures.",
+                        "Explain Noise Pollution Rules.",
+                        "Explain Water Pollution, its Sources, and Types.",
+                        "Explain Surface Water and Groundwater Pollution.",
+                        "Explain Water Quality Parameters: pH, Turbidity, Total Solids, TSS, BOD, and COD."
+                    ]
+                },
+                "4": {
+                    title: "Assignment - 4",
+                    questions: [
+                        "Explain the stages of Wastewater Treatment.",
+                        "Explain Primary, Secondary, and Tertiary Treatment of Wastewater.",
+                        "Explain Soil Pollution, its Causes, Effects, and Control Measures.",
+                        "Explain Solar Energy and its Applications.",
+                        "Explain Biomass Energy and Biogas Production.",
+                        "Explain Wind Energy Systems, Applications, and Benefits."
+                    ]
+                },
+                "5": {
+                    title: "Assignment - 5",
+                    questions: [
+                        "Explain Hydrogen Energy, its Advantages, and Applications.",
+                        "Explain Tidal Energy and Ocean Energy.",
+                        "Explain Geothermal Energy and its Applications.",
+                        "Discuss the Environmental Benefits and Future Prospects of Alternative Energy Sources.",
+                        "Explain E-Waste Management and the 3R Principles.",
+                        "Explain Environmental Legislation and ISO 14000 Standards."
+                    ]
+                }
+            },
+            "Indian Heritage and Culture": {
+                "1": {
+                    title: "Assignment 1",
+                    questions: [
+                        "Explain the architectural and cultural significance of Sanchi Stupa.",
+                        "Describe the artistic features and historical importance of Ajanta Caves.",
+                        "Write an essay on the engineering excellence of Konark Sun Temple.",
+                        "Discuss the architectural beauty and heritage value of Taj Mahal.",
+                        "Explain the importance of ancient Indian engineering with reference to Mahabalipuram and Red Fort."
+                    ]
+                },
+                "2": {
+                    title: "Assignment 2",
+                    questions: [
+                        "Explain the significance of Indian festivals in preserving cultural traditions.",
+                        "Discuss the importance of rituals and customs in Indian society.",
+                        "Describe the role of regional traditions in promoting cultural diversity in India.",
+                        "Write an essay on religious and seasonal festivals celebrated in different parts of India.",
+                        "Explain how Indian festivals promote unity, harmony, and social values among people."
+                    ]
+                },
+                "3": {
+                    title: "Assignment 3",
+                    questions: [
+                        "Explain the contributions of C. V. Raman to modern Indian science.",
+                        "Write a short note on the achievements of A. P. J. Abdul Kalam in space and nuclear science.",
+                        "Discuss the development of modern science and technology in India after independence.",
+                        "Explain how modern Indian science bridges the gap between ancient traditions and present-day innovations.",
+                        "Describe the role of physics, space research, and nuclear science in the progress of modern India."
+                    ]
+                },
+                "4": {
+                    title: "Assignment 4",
+                    questions: [
+                        "Explain the significance of traditional Indian crafts and discuss the cultural importance of pottery, woodcraft, and Bidriware.",
+                        "Describe the major handloom traditions of India, highlighting the features of Banarasi, Pashmina, Kanchipuram, and Paithani textiles.",
+                        "Discuss the role of folk art in preserving Indian cultural heritage with reference to Madhubani, Warli, and Kalamkari art forms.",
+                        "Examine the artistic and cultural significance of stone carvings in the Indian artistic tradition.",
+                        "How do traditional Indian crafts and folk arts contribute to the preservation and promotion of India's cultural identity? Explain with examples."
+                    ]
+                },
+                "5": {
+                    title: "Assignment 5",
+                    questions: [
+                        "Explain the concept of holistic healthcare in India. Discuss the role of Yoga, Ayurveda, Siddha, and Unani systems in promoting physical, mental, and spiritual well-being.",
+                        "Describe the eight limbs of Ashtanga Yoga as explained by Patanjali and explain how Yoga contributes to preventive healthcare and stress management.",
+                        "Discuss the meaning of cultural diversity in India. How do languages, customs, traditions, food habits, and clothing contribute to India's 'Unity in Diversity'?",
+                        "Examine the importance of preserving Indian cultural heritage. Explain the role of UNESCO, government organizations, educational institutions, and society in heritage conservation.",
+                        "How do traditional healthcare systems and cultural heritage together contribute to the promotion of India's identity and global recognition? Explain with suitable examples."
+                    ]
+                }
+            }
         }
     }
 };
