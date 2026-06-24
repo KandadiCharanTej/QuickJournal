@@ -223,6 +223,18 @@ document.addEventListener('DOMContentLoaded', () => {
         sel.classList.remove('bg-white');
     }
 
+    function updateAssessmentLabel() {
+        const term = termSel.value;
+        const label = document.getElementById('assessmentNoLabel');
+        if (label) {
+            if (term === "4") {
+                label.textContent = "Assessment Number";
+            } else {
+                label.textContent = "Reflective Number";
+            }
+        }
+    }
+
     yearSel.addEventListener('change', () => {
         const year = yearSel.value;
         termSel.innerHTML = '<option value="" disabled selected>Select Term</option>';
@@ -233,6 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
         disableSelect(subjSel, 'Select Term First');
         disableSelect(assessSel, 'Select Subject First');
         topicInp.value = "";
+        updateAssessmentLabel();
     });
 
     termSel.addEventListener('change', () => {
@@ -245,6 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
         enableSelect(subjSel);
         disableSelect(assessSel, 'Select Subject First');
         topicInp.value = "";
+        updateAssessmentLabel();
     });
 
     subjSel.addEventListener('change', () => {
@@ -256,9 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (term === "4") {
             assessSel.innerHTML = '<option value="" disabled selected>Select Assessment</option>';
             Object.keys(modules).forEach(num => {
-                const moduleData = modules[num];
-                const title = moduleData.title || `Assessment ${num}`;
-                assessSel.innerHTML += `<option value="${num}">${title}</option>`;
+                assessSel.innerHTML += `<option value="${num}">Assessment ${num}</option>`;
             });
         } else {
             // Populate module dropdown with "Module I - Title" labels from data.js
@@ -1044,7 +1056,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 theme: 'grid',
                 styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
                 body: [
-                    [{ content: 'Name of the Assessment', styles: { fontStyle: 'bold', cellWidth: 60 } }, { content: `${isTerm4 ? "Assignment" : "Reflective Journal"} - ${data.assNum}` }],
+                    [{ content: isTerm4 ? 'Assessment' : 'Name of the Assessment', styles: { fontStyle: 'bold', cellWidth: isTerm4 ? 50 : 60 } }, { content: `${isTerm4 ? "Assignment" : "Reflective Journal"} - ${data.assNum}` }],
                     [{ content: 'Date of Submission', styles: { fontStyle: 'bold' } }, { content: data.date }]
                 ],
             });
@@ -1053,20 +1065,26 @@ document.addEventListener('DOMContentLoaded', () => {
             let currentY = doc.lastAutoTable.finalY + 15;
             doc.setFont("times", "bold");
             doc.setFontSize(14);
-            doc.text(`${isTerm4 ? "Assignment" : "Reflective Journal"} - ${data.assNum}`, pageWidth/2, currentY, { align: "center" });
+            doc.text(`${isTerm4 ? "Assessment" : "Reflective Journal"} - ${data.assNum}`, pageWidth/2, currentY, { align: "center" });
             
-            // Table 3: Topic Header
-            currentY += 8;
-            doc.autoTable({
-                startY: currentY,
-                margin: { top: 45 },
-                theme: 'grid',
-                styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
-                body: [
-                    [{ content: 'Date', styles: { fontStyle: 'normal', textColor: [192, 0, 0], cellWidth: 40 } }, { content: data.date }],
-                    [{ content: `${isTerm4 ? "Assignment" : "Journal Entry"}\nTopic`, styles: { fontStyle: 'normal', textColor: [192, 0, 0] } }, { content: data.topic }]
-                ],
-            });
+            let qaY;
+            if (!isTerm4) {
+                // Table 3: Topic Header
+                currentY += 8;
+                doc.autoTable({
+                    startY: currentY,
+                    margin: { top: 45 },
+                    theme: 'grid',
+                    styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
+                    body: [
+                        [{ content: 'Date', styles: { fontStyle: 'normal', textColor: [192, 0, 0], cellWidth: 40 } }, { content: data.date }],
+                        [{ content: `Journal Entry\nTopic`, styles: { fontStyle: 'normal', textColor: [192, 0, 0] } }, { content: data.topic }]
+                    ],
+                });
+                qaY = doc.lastAutoTable.finalY;
+            } else {
+                qaY = currentY + 10;
+            }
 
             // Formal Boxed Content Sections
             const drawContentSection = (title, content, startPosY) => {
@@ -1081,9 +1099,50 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             if (isTerm4) {
-                drawContentSection('Assignment\nAnswers', data.assignmentAnswers, doc.lastAutoTable.finalY);
+                const qaBlocks = [];
+                const regex = /Question\s*(\d+):?\s*([\s\S]*?)\n+Answer:\s*([\s\S]*?)(?=\n*Question\s*\d+:|$)/gi;
+                let match;
+                while ((match = regex.exec(data.assignmentAnswers)) !== null) {
+                    qaBlocks.push({
+                        qNum: match[1],
+                        question: match[2].trim(),
+                        answer: match[3].trim()
+                    });
+                }
+
+                let nextY = qaY;
+                qaBlocks.forEach((block, index) => {
+                    // Question (Bold, size 12)
+                    doc.autoTable({
+                        startY: nextY,
+                        margin: { top: 45 },
+                        theme: 'plain',
+                        styles: { font: 'times', fontSize: 12, fontStyle: 'bold', textColor: [0, 0, 0], cellPadding: { top: 4, bottom: 2 } },
+                        body: [[`Question ${block.qNum}: ${block.question}`]],
+                    });
+
+                    // Answer (Normal, size 11)
+                    doc.autoTable({
+                        startY: doc.lastAutoTable.finalY,
+                        margin: { top: 45 },
+                        theme: 'plain',
+                        styles: { font: 'times', fontSize: 11, fontStyle: 'normal', textColor: [0, 0, 0], cellPadding: { top: 2, bottom: 6 } },
+                        body: [[block.answer]],
+                        didDrawCell: (dataCell) => {
+                            if (index < qaBlocks.length - 1) {
+                                const docInstance = dataCell.doc;
+                                const cell = dataCell.cell;
+                                docInstance.setDrawColor(200, 200, 200);
+                                docInstance.setLineWidth(0.2);
+                                docInstance.line(cell.x, cell.y + cell.height, cell.x + cell.width, cell.y + cell.height);
+                            }
+                        }
+                    });
+
+                    nextY = doc.lastAutoTable.finalY + 6;
+                });
             } else {
-                drawContentSection('1. Experience\n(Class Content)', data.exp, doc.lastAutoTable.finalY);
+                drawContentSection('1. Experience\n(Class Content)', data.exp, qaY);
                 drawContentSection('2. Feelings\n(Emotional Reactions)', data.feel, doc.lastAutoTable.finalY);
                 drawContentSection('3. Learning\n(Key Insights)', data.learn, doc.lastAutoTable.finalY);
                 drawContentSection('4. Application\n(Practical Use)', data.app, doc.lastAutoTable.finalY);
@@ -1194,6 +1253,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Update Stepper and UI
             updateUI();
+            updateAssessmentLabel();
 
             // Smooth scroll back to top of dashboard
             document.getElementById('generator').scrollIntoView({ behavior: 'smooth' });
