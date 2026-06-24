@@ -544,6 +544,32 @@
         </div>
     </footer>
 
+    <!-- 🌟 Term 4 Badge -->
+    <div id="term4Badge" class="fixed bottom-28 right-6 z-[60] cursor-pointer group">
+        <div class="relative w-16 h-16 flex flex-col items-center justify-center bg-gradient-to-tr from-fuchsia-600 via-pink-600 to-rose-500 rounded-full shadow-[0_8px_30px_rgb(217,70,239,0.4)] animate-bounce group-hover:scale-115 transition-all duration-300 ring-4 ring-white/50">
+            <span class="text-white font-extrabold text-[13px] tracking-tighter leading-none">NEW</span>
+            <span class="text-white/80 font-bold text-[7px] uppercase tracking-widest mt-0.5 leading-none">TERM 4</span>
+            <div class="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 rounded-full border-2 border-white flex items-center justify-center text-[10px] shadow-md animate-pulse">✨</div>
+        </div>
+        <div class="absolute top-1/2 right-full mr-4 -translate-y-1/2 opacity-0 scale-90 origin-right group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 bg-slate-950/95 backdrop-blur-md text-slate-100 text-[11px] px-4 py-2.5 rounded-xl shadow-2xl font-bold border border-fuchsia-500/20 tracking-wider pointer-events-none flex flex-col items-start gap-1.5 whitespace-nowrap">
+            <div class="flex items-center gap-1.5">🎉 View Term 4 Assignments</div>
+        </div>
+    </div>
+
+    <!-- 🏆 Milestone Celebration -->
+    <div id="milestoneBadge" class="fixed bottom-6 right-6 z-[60] cursor-pointer group">
+        <div class="relative w-16 h-16 flex flex-col items-center justify-center bg-gradient-to-tr from-violet-600 via-indigo-600 to-fuchsia-500 rounded-full shadow-[0_8px_30px_rgb(139,92,246,0.4)] group-hover:scale-115 transition-all duration-300 ring-4 ring-white/50">
+            <span id="badgePdfCount" class="text-white font-extrabold text-[13px] tracking-tighter leading-none">1.2K+</span>
+            <span class="text-white/80 font-bold text-[7px] uppercase tracking-widest mt-0.5 leading-none">PDFs</span>
+            <div class="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 rounded-full border-2 border-white flex items-center justify-center text-[10px] shadow-md animate-pulse">⭐</div>
+        </div>
+        <div class="absolute top-1/2 right-full mr-4 -translate-y-1/2 opacity-0 scale-90 origin-right group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 bg-slate-950/95 backdrop-blur-md text-slate-100 text-[11px] px-4 py-2.5 rounded-xl shadow-2xl font-bold border border-violet-500/20 tracking-wider pointer-events-none flex flex-col items-start gap-1.5 whitespace-nowrap">
+            <div class="flex items-center gap-1.5">👨‍🎓 <span id="tooltipStudentsCount">100</span>+ Students Helped</div>
+            <div class="flex items-center gap-1.5">📄 <span id="tooltipPdfCount">1200</span>+ Journals Generated</div>
+            <div class="flex items-center gap-1.5">⏳ <span id="tooltipHoursCount">300</span>+ Hours Saved</div>
+        </div>
+    </div>
+
     <div id="announcementModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
         <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-md opacity-0 transition-opacity duration-500"
             id="announcementOverlay"></div>
@@ -553,21 +579,45 @@
             <div class="absolute -top-10 -left-10 w-36 h-36 bg-violet-500/15 rounded-full blur-3xl"></div>
             <div class="absolute -bottom-10 -right-10 w-36 h-36 bg-fuchsia-500/15 rounded-full blur-3xl"></div>
 
-            <div class="relative z-10">
-                <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-tr from-violet-600 via-indigo-600 to-fuchsia-500 rounded-full shadow-2xl shadow-violet-500/40 mb-6 ring-4 ring-white relative overflow-hidden group">
+            <div class="relative z-10 max-h-[80vh] overflow-y-auto custom-scrollbar">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-tr from-violet-600 via-indigo-600 to-fuchsia-500 rounded-full shadow-2xl shadow-violet-500/40 mb-6 ring-4 ring-white relative overflow-hidden group mt-2">
                     <span class="text-3.5xl text-white animate-pulse">🎉</span>
                     <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                 </div>
 
-                <h2 class="text-3xl font-extrabold text-slate-800 mb-2 tracking-tight">🎉 Term 4 Assignments Now Available</h2>
-                <p class="text-slate-500 font-medium mb-4 leading-relaxed text-sm">
+                <h2 class="text-3xl font-extrabold text-slate-800 mb-4 tracking-tight">🎉 Term 4 Assignments Now Available</h2>
+                <p class="text-slate-600 font-medium mb-6 leading-relaxed text-sm">
                     Environmental Science and Indian Heritage & Culture have been added to QuickJournal.
                 </p>
-                <p class="text-slate-500 font-medium mb-4 leading-relaxed text-sm">
-                    You can now generate all Term 4 assignments and download them directly as professionally formatted PDF documents.
-                </p>
-                <p class="text-slate-500 font-medium mb-8 leading-relaxed text-sm">
-                    Start exploring the new assessments today.
+                
+                <div class="text-left bg-white/50 p-4 rounded-xl mb-6">
+                    <p class="text-slate-800 font-bold mb-2 text-sm">You can now generate:</p>
+                    
+                    <div class="mb-3">
+                        <p class="text-violet-700 font-bold text-sm mb-1">Environmental Science</p>
+                        <ul class="text-slate-600 text-sm list-disc pl-5 space-y-1">
+                            <li>Assignment 1</li>
+                            <li>Assignment 2</li>
+                            <li>Assignment 3</li>
+                            <li>Assignment 4</li>
+                            <li>Assignment 5</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <p class="text-violet-700 font-bold text-sm mb-1">Indian Heritage and Culture</p>
+                        <ul class="text-slate-600 text-sm list-disc pl-5 space-y-1">
+                            <li>Assignment 1</li>
+                            <li>Assignment 2</li>
+                            <li>Assignment 3</li>
+                            <li>Assignment 4</li>
+                            <li>Assignment 5</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <p class="text-slate-600 font-medium mb-8 leading-relaxed text-sm">
+                    All assignments can be automatically generated and downloaded as professionally formatted PDF documents.
                 </p>
 
                 <div class="space-y-4 mb-4">
@@ -580,6 +630,84 @@
                 <button id="closeAnnouncement"
                     class="w-full py-4 text-slate-400 font-bold text-sm hover:text-slate-600 transition-colors uppercase tracking-widest border-t border-slate-100 mt-4">
                     Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="milestoneModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-md opacity-0 transition-opacity duration-500"
+            id="modalOverlay"></div>
+        <div class="relative glass-panel w-full max-w-md mx-4 p-8 rounded-3xl text-center overflow-hidden transform scale-90 opacity-0 transition-all duration-500"
+            id="modalContent">
+            <!-- Decorative Background Elements -->
+            <div class="absolute -top-10 -left-10 w-36 h-36 bg-violet-500/15 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-10 -right-10 w-36 h-36 bg-fuchsia-500/15 rounded-full blur-3xl"></div>
+
+            <div class="relative z-10">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-tr from-violet-600 via-indigo-600 to-fuchsia-500 rounded-full shadow-2xl shadow-violet-500/40 mb-6 ring-4 ring-white relative overflow-hidden group">
+                    <span class="text-3.5xl text-white animate-pulse">🎉</span>
+                    <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                </div>
+
+                <h2 class="text-3xl font-extrabold text-slate-800 mb-2 tracking-tight">Milestones Reached!</h2>
+                <p class="text-slate-500 font-medium mb-8 leading-relaxed text-sm">
+                    We've officially expanded our impact in helping students learn smarter and submit faster:
+                </p>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-3 gap-3 mb-8">
+                    <!-- Students Card -->
+                    <div class="bg-gradient-to-br from-violet-50/70 to-violet-100/30 border border-violet-100/80 p-4 rounded-2xl hover:scale-105 transition-all duration-300 shadow-sm hover:shadow-md">
+                        <svg class="w-6 h-6 text-violet-600 mb-2 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A11.386 11.386 0 0110.089 21c-2.243 0-4.352-.64-6.136-1.758a10.974 10.974 0 01.322-3.359c.799-2.228 3.011-3.693 5.485-3.693a4.878 4.878 0 012.747.832M12 9.75a3 3 0 11-6 0 3 3 0 016 0zm9 5.25a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-1.5-6.75a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                        </svg>
+                        <div id="modalStudentsCount" class="text-violet-600 font-extrabold text-2xl tracking-tight leading-none">100+</div>
+                        <div class="text-slate-500 text-[9px] font-extrabold uppercase tracking-wider mt-2">Students Helped</div>
+                    </div>
+                    <!-- PDFs Card -->
+                    <div class="bg-gradient-to-br from-fuchsia-50/70 to-fuchsia-100/30 border border-fuchsia-100/80 p-4 rounded-2xl hover:scale-105 transition-all duration-300 shadow-sm hover:shadow-md">
+                        <svg class="w-6 h-6 text-fuchsia-600 mb-2 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                        </svg>
+                        <div id="modalPdfCount" class="text-fuchsia-600 font-extrabold text-2xl tracking-tight leading-none">1200+</div>
+                        <div id="modalPdfLabel" class="text-slate-500 text-[9px] font-extrabold uppercase tracking-wider mt-2">Journals Generated</div>
+                    </div>
+                    <!-- Hours Saved Card -->
+                    <div class="bg-gradient-to-br from-indigo-50/70 to-indigo-100/30 border border-indigo-100/80 p-4 rounded-2xl hover:scale-105 transition-all duration-300 shadow-sm hover:shadow-md">
+                        <svg class="w-6 h-6 text-indigo-600 mb-2 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div id="modalHoursCount" class="text-indigo-600 font-extrabold text-2xl tracking-tight leading-none">300+</div>
+                        <div class="text-slate-500 text-[9px] font-extrabold uppercase tracking-wider mt-2">Hours Saved</div>
+                    </div>
+                </div>
+
+                <div class="space-y-4 mb-8">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Connect with the Creator</p>
+                    <div class="flex items-center justify-center gap-4">
+                        <a href="https://www.linkedin.com/in/kandadicharantej/" target="_blank"
+                            class="flex items-center gap-2 px-5 py-2.5 bg-blue-50 text-blue-600 rounded-xl font-bold hover:bg-blue-600 hover:text-white transition-all duration-300 shadow-sm hover:shadow-md group">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                            </svg>
+                            LinkedIn
+                        </a>
+                        <a href="https://github.com/KandadiCharanTej" target="_blank"
+                            class="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all duration-300 shadow-sm hover:shadow-md group">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+                            </svg>
+                            GitHub
+                        </a>
+                    </div>
+                </div>
+
+                <button id="closeMilestone"
+                    class="w-full py-4 text-slate-400 font-bold text-sm hover:text-slate-600 transition-colors uppercase tracking-widest border-t border-slate-100 mt-4">
+                    Dismiss
                 </button>
             </div>
         </div>
