@@ -1112,11 +1112,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 let bodyData = [];
                 qaBlocks.forEach((block) => {
-                    // Combine question and answer into a single string for a unified box
-                    bodyData.push([{ 
-                        content: `Question ${block.qNum}: ${block.question}\n\nAnswer:\n${block.answer}`, 
-                        styles: { fontStyle: 'normal' } 
-                    }]);
+                    bodyData.push([{ content: `Question ${block.qNum}: ${block.question}`, styles: { fontStyle: 'bold', fontSize: 11 } }]);
+                    bodyData.push([{ content: `Answer:\n\n${block.answer}`, styles: { fontStyle: 'normal' } }]);
                 });
 
                 doc.autoTable({
@@ -1125,6 +1122,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     theme: 'grid',
                     styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 6 },
                     body: bodyData,
+                    didParseCell: function(data) {
+                        // If it's a Question cell (even row index 0, 2, 4...)
+                        if (data.row.index % 2 === 0) {
+                            // Top, Right, Bottom, Left
+                            data.cell.styles.lineWidth = { top: 0.2, right: 0.2, bottom: 0, left: 0.2 };
+                        } else {
+                            // Answer cell
+                            data.cell.styles.lineWidth = { top: 0, right: 0.2, bottom: 0.2, left: 0.2 };
+                        }
+                    }
                 });
             } else {
                 drawContentSection('1. Experience\n(Class Content)', data.exp, qaY);
