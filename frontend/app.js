@@ -719,16 +719,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             while (retries > 0 && !success) {
                                 try {
-                                    const res = await fetch(`${API_BASE_URL}/api/generate-assignment`, {
+                                    const res = await fetch(`${API_BASE_URL}/api/generate-section`, {
                                         method: "POST",
                                         headers: { "Content-Type": "application/json" },
                                         body: JSON.stringify({
                                             subject,
-                                            assessmentNo: moduleNum,
-                                            question,
-                                            questionNo: qNum,
-                                            totalQuestions: questions.length,
-                                            requestSeed: Date.now()
+                                            topic: question,
+                                            sectionTag: "ASSIGNMENT",
+                                            moduleRoman: moduleNum,
+                                            syllabus: question,
+                                            styleInstruction: ""
                                         })
                                     });
 

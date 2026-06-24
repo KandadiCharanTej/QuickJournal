@@ -130,6 +130,9 @@ async function generateWithAI(prompt, systemContent) {
    🔒 ISOLATED POOLS - Zero overlap between sections
 ========================= */
 function getDynamicFallback(tag, subject, topic) {
+    if (tag === "ASSIGNMENT") {
+        return getDynamicAssignmentFallback(subject, topic);
+    }
     const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
     const r = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -352,10 +355,33 @@ app.post("/api/generate-section", async (req, res) => {
         }
 
         // 🤖 POOL NOT FULL → Generate fresh AI content AND add to pool
-        const sectionGuide = SECTION_PROMPTS[sectionTag] || SECTION_PROMPTS.EXP;
+        const isAssignment = sectionTag === "ASSIGNMENT";
+        const targetWordCount = (subject.includes("Heritage") || subject.includes("Culture")) ? 460 : 380;
         const variationNumber = existingPool.length + 1;
 
-        const prompt = `
+        let systemContent = undefined;
+        let prompt;
+
+        if (isAssignment) {
+            systemContent = "You are a university student writing an assignment for a B.Tech course. Write in simple, student-friendly language and a natural, academic writing style. Do NOT sound like an AI, do NOT be overly formal or robotic. Write clearly, explain the concepts thoroughly with relevant examples, and make it suitable for a college-level assignment submission.";
+            prompt = `
+Write a detailed answer for the following question.
+This is VARIATION #${variationNumber} of the answer — make it unique and write it in a natural student tone.
+
+SUBJECT: ${subject}
+ASSIGNMENT: ${moduleRoman}
+QUESTION: ${topic}
+
+RULES:
+- Write approximately ${targetWordCount} words for this answer.
+- Explain the concept thoroughly with relevant examples.
+- Focus on depth of explanation and clear structure.
+- Write only the answer text. Do not repeat the question or include introductory filler like "Here is the answer to your question:".
+- Make the opening line and phrasing unique for this variation #${variationNumber}.
+            `;
+        } else {
+            const sectionGuide = SECTION_PROMPTS[sectionTag] || SECTION_PROMPTS.EXP;
+            prompt = `
 You are a B.Tech student writing a reflective journal for an academic submission.
 This is VARIATION #${variationNumber} — make it completely different from any previous versions.
 
@@ -381,19 +407,21 @@ RULES:
 - DO NOT repeat the same opening phrase as other sections.
 - DO NOT use markdown formatting like ** or ##.
 - This is variation ${variationNumber} of ${MAX_VARIATIONS}. Make the opening line UNIQUE.
-        `;
+            `;
+        }
 
         console.log(`[POOL] 🤖 Generating variation #${variationNumber} for ${poolKey}`);
         let text = "";
         try {
-            text = await generateWithAI(prompt);
+            text = await generateWithAI(prompt, systemContent);
         } catch (aiErr) {
             console.log(`[POOL] ⚠️ AI failed, using fallback for ${sectionTag}`);
             text = getDynamicFallback(sectionTag, subject, topic);
         }
 
         // Minimum length guard
-        if (text.split(/\s+/).length < 300) {
+        const minWords = isAssignment ? (targetWordCount - 100) : 300;
+        if (text.split(/\s+/).length < minWords) {
             text += " " + getDynamicFallback(sectionTag, subject, topic).substring(0, 800);
         }
 
@@ -582,84 +610,5 @@ function getDynamicAssignmentFallback(subject, question) {
     
     return matchedText;
 }
-
-app.post("/api/generate-assignment", async (req, res) => {
-    checkPoolExpiry(); // 🔄 Wipe pool if 24 hours have passed
-    let resultSent = false;
-    try {
-        const { subject, assessmentNo, question, questionNo, totalQuestions } = req.body;
-        const poolKey = `assignment_${subject}_${assessmentNo}_q${questionNo}`.toLowerCase().replace(/\s+/g, '_');
-
-        // Check if we have enough variations cached
-        const existingPool = variationPool.get(poolKey) || [];
-
-        // serve from cache if pool is full
-        if (existingPool.length >= MAX_VARIATIONS) {
-            const randomPick = existingPool[Math.floor(Math.random() * existingPool.length)];
-            console.log(`[POOL] ✅ Serving cached assignment for ${poolKey} (${existingPool.length} in pool)`);
-            resultSent = true;
-            return res.json({ text: randomPick });
-        }
-
-        const variationNumber = existingPool.length + 1;
-        const targetWordCount = (subject.includes("Heritage") || subject.includes("Culture")) ? 460 : 380;
-
-        const systemContent = "You are a university student writing an assignment for a B.Tech course. Write in simple, student-friendly language and a natural, academic writing style. Do NOT sound like an AI, do NOT be overly formal or robotic. Write clearly, explain the concepts thoroughly with relevant examples, and make it suitable for a college-level assignment submission.";
-
-        const prompt = `
-Write a detailed answer for the following question.
-This is VARIATION #${variationNumber} of the answer — make it unique and write it in a natural student tone.
-
-SUBJECT: ${subject}
-ASSIGNMENT: ${assessmentNo}
-QUESTION: ${question}
-
-RULES:
-- Write approximately ${targetWordCount} words for this answer.
-- Explain the concept thoroughly with relevant examples.
-- Focus on depth of explanation and clear structure.
-- Write only the answer text. Do not repeat the question or include introductory filler like "Here is the answer to your question:".
-- Make the opening line and phrasing unique for this variation #${variationNumber}.
-        `;
-
-        console.log(`[POOL] 🤖 Generating assignment answer #${variationNumber} for ${poolKey}`);
-        let text = "";
-        try {
-            text = await generateWithAI(prompt, systemContent);
-        } catch (aiErr) {
-            console.log(`[POOL] ⚠️ AI failed, using fallback for assignment question`);
-            text = getDynamicAssignmentFallback(subject, question);
-        }
-
-        // Minimum length guard
-        const minWords = targetWordCount - 100;
-        if (text.split(/\s+/).length < minWords) {
-            text += " " + getDynamicAssignmentFallback(subject, question).substring(0, 800);
-        }
-
-        // Save to pool
-        existingPool.push(text.trim());
-        variationPool.set(poolKey, existingPool);
-        console.log(`[POOL] 📦 Pool for ${poolKey}: ${existingPool.length}/${MAX_VARIATIONS} variations stored`);
-
-        // Cap total memory (max 500 keys in the pool)
-        if (variationPool.size > 500) {
-            const oldestKey = variationPool.keys().next().value;
-            variationPool.delete(oldestKey);
-        }
-
-        if (!resultSent) {
-            resultSent = true;
-            res.json({ text: text.trim() });
-        }
-
-    } catch (err) {
-        if (!resultSent) {
-            resultSent = true;
-            res.json({ text: getDynamicAssignmentFallback(req.body.subject || "", req.body.question || "") });
-        }
-    }
-});
-
 app.get("/", (req, res) => res.send("QuickJournal Engine Active 🚀"));
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
