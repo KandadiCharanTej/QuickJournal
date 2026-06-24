@@ -455,6 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return matchedText;
     }
 
+    function getClientFallback(tag, subject, topic) {
         const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
         const r = (arr) => arr[Math.floor(Math.random() * arr.length)];
         
@@ -1063,7 +1064,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
                 body: [
                     [{ content: 'Date', styles: { fontStyle: 'normal', textColor: [192, 0, 0], cellWidth: 40 } }, { content: data.date }],
-                    [{ content: `${isTerm4 ? "Assignment" : "Journal Entry"}\nTopic', styles: { fontStyle: 'normal', textColor: [192, 0, 0] } }, { content: data.topic }]
+                    [{ content: `${isTerm4 ? "Assignment" : "Journal Entry"}\nTopic`, styles: { fontStyle: 'normal', textColor: [192, 0, 0] } }, { content: data.topic }]
                 ],
             });
 
