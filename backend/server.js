@@ -341,7 +341,11 @@ app.post("/api/generate-section", async (req, res) => {
     let resultSent = false;
     try {
         const { subject, topic, sectionTag, moduleRoman, syllabus, styleInstruction } = req.body;
-        const poolKey = `${subject}_${moduleRoman}_${sectionTag}`.toLowerCase().replace(/\s+/g, '_');
+        const isAssignment = sectionTag === "ASSIGNMENT";
+        
+        // Include topic in poolKey for assignments so each question caches independently
+        const baseKey = isAssignment ? `${subject}_${moduleRoman}_${sectionTag}_${topic.substring(0, 30)}` : `${subject}_${moduleRoman}_${sectionTag}`;
+        const poolKey = baseKey.toLowerCase().replace(/\s+/g, '_');
 
         // Check if we have enough variations cached
         const existingPool = variationPool.get(poolKey) || [];
@@ -355,32 +359,38 @@ app.post("/api/generate-section", async (req, res) => {
         }
 
         // 🤖 POOL NOT FULL → Generate fresh AI content AND add to pool
-        const isAssignment = sectionTag === "ASSIGNMENT";
-        const targetWordCount = 425;
+        const targetWordCount = isAssignment ? 425 : 425;
         const variationNumber = existingPool.length + 1;
 
         let systemContent = undefined;
         let prompt;
 
         if (isAssignment) {
-            systemContent = "You are an expert writing a university assignment for a B.Tech course. Write detailed academic content in simple, student-friendly language. Maintain a university assignment style. Do NOT write as a reflective journal. Do NOT use first-person pronouns (e.g., 'I learned', 'I felt'). Write strictly as an objective, academic assignment answer.";
+            systemContent = "You are an expert academic writer and professor creating an answer key for a university assignment. Write highly detailed, factually accurate, and structured academic content in third-person professional language. Under NO circumstances should you use words like 'I learned', 'I felt', 'The professor explained', or 'In this session'. This is NOT a reflective journal. It is a formal assignment answer.";
+            
+            // Force unique structural approaches based on variation
+            let structuralInstruction = "";
+            if (variationNumber === 1) structuralInstruction = "Start with a direct academic definition, followed by chronological stages/types, and end with real-world examples.";
+            else if (variationNumber === 2) structuralInstruction = "Start with the historical context or core problem, explain the theoretical mechanism, and conclude with significance.";
+            else if (variationNumber === 3) structuralInstruction = "Begin with the broader environmental/cultural impact, break down the specific components, and end with preventive/conservation measures.";
+            else structuralInstruction = "Use a unique academic structural approach, ensuring no repetition from generic templates.";
+
             prompt = `
-Write a detailed answer for the following question.
-This is VARIATION #${variationNumber} of the answer — make it unique and maintain a professional university assignment style.
+Write a detailed university-level answer for the following assignment question.
+This is VARIATION #${variationNumber} — you must ensure the paragraph structure, phrasing, and examples are completely distinct from other variations.
 
 SUBJECT: ${subject}
-ASSIGNMENT: ${moduleRoman}
+ASSIGNMENT/MODULE: ${moduleRoman}
 QUESTION: ${topic}
 
-RULES:
-- Write approximately 350–500 words for this answer.
-- Write detailed academic content using simple, student-friendly language.
-- Include explanations, relevant examples, and important facts.
-- Naturally include short bullet points (e.g., • Importance, • Features, • Types, • Applications) only when relevant to the question.
-- NEVER generate artificial sections like "My Notes:", "Technical Observations:", "Personal Notes", "Session Notes", or "Lecture Notes".
-- Do NOT write as a reflective journal. Do NOT use first-person writing ("I learned", "I felt", etc.).
-- Write only the answer text. Do not repeat the question or include introductory filler like "Here is the answer to your question:".
-- Make the opening line and phrasing unique for this variation #${variationNumber}.
+STRICT INSTRUCTIONS:
+- Target Length: 350 to 500 words.
+- Structural Approach: ${structuralInstruction}
+- Content: Provide rich academic detail, definitions, explanations, and facts.
+- Formatting: Use natural paragraphs. You may include short bullet points (e.g., • Types, • Features, • Effects) but integrate them naturally.
+- DO NOT use generic section headers like "Here is the answer" or "My Notes:".
+- DO NOT use first-person pronouns ("I", "we", "my") or reflective phrases ("I understood").
+- Begin the answer immediately.
             `;
         } else {
             const sectionGuide = SECTION_PROMPTS[sectionTag] || SECTION_PROMPTS.EXP;
@@ -584,34 +594,69 @@ function getDynamicAssignmentFallback(subject, question) {
     
     // Default fallback if no keyword matches
     if (!matchedText) {
-        matchedText = `This assignment analysis evaluates ${question.replace(/[?.]/g, '')} within the curriculum of ${subject}. The topic represents a crucial milestone in our academic understanding of the field, highlighting the structural, theoretical, and practical applications of this knowledge. By analyzing the core mechanisms involved, we can appreciate the design considerations and methodologies that govern the system. For instance, when implementing these concepts, it is essential to consider the trade-offs between efficiency and reliability, which are key priorities in the industry today. Furthermore, the practical applications of this theory extend beyond the classroom, influencing how real-world problems are addressed by professionals and engineers. Through rigorous study and peer collaboration, we can synthesize these academic principles with industrial standards, preparing us to tackle complex challenges and contribute to future innovations.`;
+        matchedText = `This academic analysis evaluates ${question.replace(/[?.]/g, '')} within the broader context of ${subject}. The topic represents a crucial theoretical milestone, highlighting the structural and practical applications of this knowledge. By examining the core mechanisms involved, we can appreciate the underlying methodologies that govern the system. Furthermore, the practical implications of this theory extend beyond foundational studies, influencing how complex challenges are addressed by researchers and professionals.`;
     }
     
     // Pad the text with extra sentences to meet the 380/460 word target
     const targetWordCount = (subject.includes("Heritage") || subject.includes("Culture")) ? 460 : 380;
-    const fillerPool = [
-        `Additionally, a detailed study of ${question.replace(/[?.]/g, '')} reveals that the theoretical principles are highly aligned with modern system constraints. `,
-        `We must also take into account the historical development of ${subject} as a discipline to understand how these standards were established. `,
-        `The structural integrity of this approach has been validated through multiple case studies and industrial deployments. `,
-        `From a student perspective, understanding these parameters is crucial for building a strong foundation in the course. `,
-        `The lecture sessions provided several diagrams and visual aids that helped clarify these complex relationships. `,
-        `By examining the boundary conditions of this topic, we gain insights into potential optimization bottlenecks. `,
-        `In a professional setting, mastering these concepts helps reduce system downtime and optimizes resource allocation. `,
-        `I intend to explore this topic further in the laboratory sessions to verify the theoretical calculations hands-on. `,
-        `Understanding the limitations and edge cases of this methodology is just as critical as knowing its strengths. `,
-        `The collaborative discussions with classmates during the session helped clear up some initial misconceptions. `
+    
+    const introFillers = [
+        `Fundamentally, the study of ${question.replace(/[?.]/g, '')} requires a comprehensive understanding of various interconnected principles. `,
+        `Historically, the evolution of concepts within ${subject} has been heavily influenced by these underlying parameters. `,
+        `A rigorous academic approach dictates that we must first define the boundary conditions surrounding this phenomenon. `
     ];
+
+    const bodyFillers = [
+        `Additionally, a detailed evaluation reveals that the theoretical principles are highly aligned with modern system constraints. `,
+        `The structural integrity of this approach has been validated through numerous empirical studies and peer-reviewed observations. `,
+        `When implementing these concepts, it is essential to consider the trade-offs between efficiency, sustainability, and long-term viability. `,
+        `By examining the boundary conditions of this topic, one gains insights into potential optimization bottlenecks and systemic vulnerabilities. `,
+        `Furthermore, the integration of these methodologies often necessitates a multidisciplinary framework to ensure robust outcomes. `
+    ];
+
+    const concludingFillers = [
+        `In conclusion, the overarching significance of this topic cannot be overstated when mapping out future advancements in ${subject}. `,
+        `Ultimately, mastering these concepts facilitates a deeper appreciation for the intricate dynamics at play. `,
+        `Moving forward, continued research and analysis will be required to fully harness the potential of these mechanisms. `
+    ];
+
+    const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
     
-    let words = matchedText.split(/\s+/);
-    let fillerIdx = 0;
+    // Build a unique academic response
+    let padding = "";
+    padding += introFillers[Math.floor(Math.random() * introFillers.length)];
     
-    while (words.length < targetWordCount && fillerIdx < fillerPool.length) {
-        matchedText += " " + fillerPool[fillerIdx];
-        words = matchedText.split(/\s+/);
-        fillerIdx++;
+    const selectedBodyFillers = shuffle(bodyFillers).slice(0, 3);
+    padding += selectedBodyFillers.join("");
+    
+    padding += concludingFillers[Math.floor(Math.random() * concludingFillers.length)];
+
+    let currentWords = (matchedText + " " + padding).split(/\s+/).length;
+    
+    // If still short, inject an academic bulleted list
+    if (currentWords < targetWordCount) {
+        const bulletPoints = [
+            `• Primary functional characteristics and foundational theories.`,
+            `• Analytical models used to measure systemic efficiency.`,
+            `• Historical milestones that shaped current paradigms.`,
+            `• Practical applications in modern industrial or societal frameworks.`,
+            `• Limitations and constraints of the theoretical models.`,
+            `• Strategies for sustainable implementation and resource management.`,
+            `• Comparative analysis against alternative methodologies.`
+        ];
+        
+        const selectedBullets = shuffle(bulletPoints).slice(0, 4);
+        padding += `\n\nKey Academic Considerations:\n` + selectedBullets.join("\n") + `\n\n`;
+        currentWords += 40; 
     }
     
-    return matchedText;
+    // Add additional body fillers if still vastly under target
+    while (currentWords < targetWordCount) {
+        padding += shuffle(bodyFillers)[0];
+        currentWords += 15;
+    }
+    
+    return matchedText + "\n\n" + padding;
 }
 app.get("/", (req, res) => res.send("QuickJournal Engine Active 🚀"));
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
