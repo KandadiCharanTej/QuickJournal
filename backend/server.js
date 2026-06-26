@@ -111,7 +111,7 @@ async function generateWithAI(prompt, systemContent) {
                         { role: "system", content: system },
                         { role: "user", content: prompt }
                     ],
-                    max_tokens: 2000,
+                    max_tokens: 4500,
                     temperature: 0.95
                 })
             });
@@ -359,7 +359,7 @@ app.post("/api/generate-section", async (req, res) => {
         }
 
         // 🤖 POOL NOT FULL → Generate fresh AI content AND add to pool
-        const targetWordCount = isAssignment ? 425 : 425;
+        const targetWordCount = isAssignment ? 2500 : 425;
         const variationNumber = existingPool.length + 1;
 
         let systemContent = undefined;
@@ -384,7 +384,7 @@ ASSIGNMENT/MODULE: ${moduleRoman}
 QUESTION: ${topic}
 
 STRICT INSTRUCTIONS:
-- Target Length: 350 to 500 words.
+- Target Length: 2500 words.
 - Structural Approach: ${structuralInstruction}
 - Content: Provide rich academic detail, definitions, explanations, and facts.
 - Formatting: Use natural paragraphs. You may include short bullet points (e.g., • Types, • Features, • Effects) but integrate them naturally.
