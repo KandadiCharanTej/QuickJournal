@@ -513,31 +513,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
         
         // Default fallback if no keyword matches
         if (!matchedText) {
-            matchedText = `This assignment analysis evaluates ${question.replace(/[?.]/g, '')} within the curriculum of ${subject}. The topic represents a crucial milestone in our academic understanding of the field, highlighting the structural, theoretical, and practical applications of this knowledge. By analyzing the core mechanisms involved, we can appreciate the design considerations and methodologies that govern the system. For instance, when implementing these concepts, it is essential to consider the trade-offs between efficiency and reliability, which are key priorities in the industry today. Furthermore, the practical applications of this theory extend beyond the classroom, influencing how real-world problems are addressed by professionals and engineers. Through rigorous study and peer collaboration, we can synthesize these academic principles with industrial standards, preparing us to tackle complex challenges and contribute to future innovations.`;
-        }
-        
-        // Pad the text with extra sentences to meet the 380/460 word target
-        const targetWordCount = (subject.includes("Heritage") || subject.includes("Culture")) ? 460 : 380;
-        const fillerPool = [
-            `Additionally, a detailed study of ${question.replace(/[?.]/g, '')} reveals that the theoretical principles are highly aligned with modern system constraints. `,
-            `We must also take into account the historical development of ${subject} as a discipline to understand how these standards were established. `,
-            `The structural integrity of this approach has been validated through multiple case studies and industrial deployments. `,
-            `From a student perspective, understanding these parameters is crucial for building a strong foundation in the course. `,
-            `The lecture sessions provided several diagrams and visual aids that helped clarify these complex relationships. `,
-            `By examining the boundary conditions of this topic, we gain insights into potential optimization bottlenecks. `,
-            `In a professional setting, mastering these concepts helps reduce system downtime and optimizes resource allocation. `,
-            `I intend to explore this topic further in the laboratory sessions to verify the theoretical calculations hands-on. `,
-            `Understanding the limitations and edge cases of this methodology is just as critical as knowing its strengths. `,
-            `The collaborative discussions with classmates during the session helped clear up some initial misconceptions. `
-        ];
-        
-        let words = matchedText.split(/\s+/);
-        let fillerIdx = 0;
-        
-        while (words.length < targetWordCount && fillerIdx < fillerPool.length) {
-            matchedText += " " + fillerPool[fillerIdx];
-            words = matchedText.split(/\s+/);
-            fillerIdx++;
+            matchedText = `This assignment analysis evaluates ${question.replace(/[?.]/g, '')} within the curriculum of ${subject}. The topic represents a crucial milestone in our academic understanding of the field, highlighting the structural, theoretical, and practical applications of this knowledge. By analyzing the core mechanisms involved, we can appreciate the design considerations and methodologies that govern the system. For instance, when implementing these concepts, it is essential to consider the trade-offs between efficiency and reliability, which are key priorities in the industry today.`;
         }
         
         return matchedText;

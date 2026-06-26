@@ -670,69 +670,10 @@ function getDynamicAssignmentFallback(subject, question) {
     
     // Default fallback if no keyword matches
     if (!matchedText) {
-        matchedText = `This academic analysis evaluates ${question.replace(/[?.]/g, '')} within the broader context of ${subject}. The topic represents a crucial theoretical milestone, highlighting the structural and practical applications of this knowledge. By examining the core mechanisms involved, we can appreciate the underlying methodologies that govern the system. Furthermore, the practical implications of this theory extend beyond foundational studies, influencing how complex challenges are addressed by researchers and professionals.`;
+        matchedText = `This assignment analysis evaluates ${question.replace(/[?.]/g, '')} within the curriculum of ${subject}. The topic represents a crucial milestone in our academic understanding of the field, highlighting the structural, theoretical, and practical applications of this knowledge. By analyzing the core mechanisms involved, we can appreciate the design considerations and methodologies that govern the system. For instance, when implementing these concepts, it is essential to consider the trade-offs between efficiency and reliability, which are key priorities in the industry today.`;
     }
     
-    // Pad the text with extra sentences to meet the 380/460 word target
-    const targetWordCount = (subject.includes("Heritage") || subject.includes("Culture")) ? 460 : 380;
-    
-    const introFillers = [
-        `Fundamentally, the study of ${question.replace(/[?.]/g, '')} requires a comprehensive understanding of various interconnected principles. `,
-        `Historically, the evolution of concepts within ${subject} has been heavily influenced by these underlying parameters. `,
-        `A rigorous academic approach dictates that we must first define the boundary conditions surrounding this phenomenon. `
-    ];
-
-    const bodyFillers = [
-        `Additionally, a detailed evaluation reveals that the theoretical principles are highly aligned with modern system constraints. `,
-        `The structural integrity of this approach has been validated through numerous empirical studies and peer-reviewed observations. `,
-        `When implementing these concepts, it is essential to consider the trade-offs between efficiency, sustainability, and long-term viability. `,
-        `By examining the boundary conditions of this topic, one gains insights into potential optimization bottlenecks and systemic vulnerabilities. `,
-        `Furthermore, the integration of these methodologies often necessitates a multidisciplinary framework to ensure robust outcomes. `
-    ];
-
-    const concludingFillers = [
-        `In conclusion, the overarching significance of this topic cannot be overstated when mapping out future advancements in ${subject}. `,
-        `Ultimately, mastering these concepts facilitates a deeper appreciation for the intricate dynamics at play. `,
-        `Moving forward, continued research and analysis will be required to fully harness the potential of these mechanisms. `
-    ];
-
-    const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
-    
-    // Build a unique academic response
-    let padding = "";
-    padding += introFillers[Math.floor(Math.random() * introFillers.length)];
-    
-    const selectedBodyFillers = shuffle(bodyFillers).slice(0, 3);
-    padding += selectedBodyFillers.join("");
-    
-    padding += concludingFillers[Math.floor(Math.random() * concludingFillers.length)];
-
-    let currentWords = (matchedText + " " + padding).split(/\s+/).length;
-    
-    // If still short, inject an academic bulleted list
-    if (currentWords < targetWordCount) {
-        const bulletPoints = [
-            `• Primary functional characteristics and foundational theories.`,
-            `• Analytical models used to measure systemic efficiency.`,
-            `• Historical milestones that shaped current paradigms.`,
-            `• Practical applications in modern industrial or societal frameworks.`,
-            `• Limitations and constraints of the theoretical models.`,
-            `• Strategies for sustainable implementation and resource management.`,
-            `• Comparative analysis against alternative methodologies.`
-        ];
-        
-        const selectedBullets = shuffle(bulletPoints).slice(0, 4);
-        padding += `\n\nKey Academic Considerations:\n` + selectedBullets.join("\n") + `\n\n`;
-        currentWords += 40; 
-    }
-    
-    // Add additional body fillers if still vastly under target
-    while (currentWords < targetWordCount) {
-        padding += shuffle(bodyFillers)[0];
-        currentWords += 15;
-    }
-    
-    return matchedText + "\n\n" + padding;
+    return matchedText;
 }
 app.get("/", (req, res) => res.send("QuickJournal Engine Active 🚀"));
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
