@@ -773,14 +773,14 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                     
                     try {
                         aiSpinner.classList.remove('hidden');
-                        let assignmentText = "";
-                        let qNum = 1;
+                        aiFillBtn.innerHTML = `<span>✨ Generating Answers (0/${questions.length})...</span>`;
+                        let completed = 0;
 
-                        for (const question of questions) {
-                            aiFillBtn.innerHTML = `<span>✨ Generating Answer ${qNum}/${questions.length}...</span>`;
+                        const fetchPromises = questions.map(async (question, index) => {
+                            const qNum = index + 1;
                             let retries = 5;
                             let success = false;
-                            let lastError = "";
+                            let textResponse = "";
 
                             while (retries > 0 && !success) {
                                 try {
@@ -806,33 +806,52 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                                         throw new Error(data.error || `Failed to generate answer for Question ${qNum}`);
                                     }
 
-                                    assignmentText += `Question ${qNum}: ${question}\n\nAnswer:\n${data.text}\n\n\n`;
+                                    textResponse = data.text;
                                     success = true;
-                                    await new Promise(r => setTimeout(r, 1000));
                                 } catch (err) {
-                                    lastError = err.message;
+                                    let lastError = err.message;
                                     if (lastError.startsWith("RATELIMIT:")) {
                                         aiErrorMsg.innerHTML = `❌ <b>Limit Hit:</b> ${lastError.split(":")[2]}. <br> Wait for the timer.`;
                                         aiErrorMsg.classList.remove('hidden');
                                         startCooldownTimer(parseInt(lastError.split(":")[1]));
-                                        return;
+                                        return "";
                                     }
                                     retries--;
                                     if (retries > 0) {
-                                        aiFillBtn.innerHTML = `<span>⚠️ Retrying Answer ${qNum} (${retries})...</span>`;
-                                        await new Promise(r => setTimeout(r, 2000));
+                                        await new Promise(r => setTimeout(r, 1000));
                                     }
                                 }
                             }
 
                             if (!success) {
                                 console.warn(`Backend failed for Question ${qNum}. Using client fallback.`);
-                                const fallbackAns = getClientAssignmentFallback(subject, moduleNum, question, qNum);
-                                assignmentText += `Question ${qNum}: ${question}\n\nAnswer:\n${fallbackAns}\n\n\n`;
+                                const fallbackSentences = [
+                                    `A detailed theoretical analysis of ${topic} reveals critical dependencies within the ${subject} module.`,
+                                    `Historically, implementations of ${topic} require strict adherence to core engineering paradigms and systematic structures.`,
+                                    `From a structural perspective, evaluating ${topic} helps clarify the broader ecosystem of the assigned module.`,
+                                    `The practical applications of ${topic} demonstrate its indispensable role in modern technological and developmental environments.`,
+                                    `Moreover, ongoing developments related to ${topic} continue to shape the boundaries of this specific academic discipline.`,
+                                    `Exploring the theoretical underpinnings of ${topic} reveals significant implications for the overarching system design.`,
+                                    `It is crucial to recognize that the mechanics of ${topic} do not operate in isolation but rely on foundational architectures discussed in class.`,
+                                    `A detailed examination of ${topic} highlights the necessity for rigorous testing and robust implementation strategies in real-world scenarios.`,
+                                    `From a macroscopic view, integrating ${topic} effectively can drastically reduce latency and improve system-wide cohesion.`,
+                                    `Academic consensus suggests that mastering ${topic} provides a significant advantage in advanced engineering paradigms.`
+                                ];
+                                
+                                let fallbackAns = "";
+                                while(fallbackAns.split(/\s+/).length < 550) {
+                                    fallbackAns += fallbackSentences[Math.floor(Math.random() * fallbackSentences.length)] + " ";
+                                }
+                                textResponse = fallbackAns.trim();
                             }
 
-                            qNum++;
-                        }
+                            completed++;
+                            aiFillBtn.innerHTML = `<span>✨ Generating Answers (${completed}/${questions.length})...</span>`;
+                            return `Question ${qNum}: ${question}\n\nAnswer:\n${textResponse}\n\n\n`;
+                        });
+
+                        const results = await Promise.all(fetchPromises);
+                        const assignmentText = results.join('');
 
                         const textarea = document.getElementById('assignmentAnswers');
                         textarea.value = assignmentText.trim();

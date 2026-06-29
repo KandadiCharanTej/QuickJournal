@@ -97,8 +97,8 @@ async function generateWithAI(prompt, systemContent) {
         }
     }
     
-    // 🧬 TRUE TIME-BASED BALANCING
-    const startIdx = Math.floor(Date.now() / 100) % combos.length;
+    // 🧬 TRUE RANDOM LOAD BALANCING FOR CONCURRENT REQUESTS
+    const startIdx = Math.floor(Math.random() * combos.length);
 
     const defaultSystem = "You are a B.Tech student writing a deeply personal, human-like reflective journal. Use first-person 'I', personal analogies, and relatable class-room experiences. Write in a natural, thoughtful tone with smooth transitions.";
     const system = systemContent || defaultSystem;
