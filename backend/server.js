@@ -340,7 +340,7 @@ app.post("/api/generate-section", async (req, res) => {
     checkPoolExpiry(); // 🔄 Wipe pool if 24 hours have passed
     let resultSent = false;
     try {
-        const { subject, topic, sectionTag, moduleRoman, syllabus, styleInstruction } = req.body;
+        const { subject, topic, sectionTag, moduleRoman, syllabus, styleInstruction, totalQuestions } = req.body;
         const isAssignment = sectionTag === "ASSIGNMENT";
         
         // Include topic in poolKey for assignments so each question caches independently
@@ -359,13 +359,19 @@ app.post("/api/generate-section", async (req, res) => {
         }
 
         // 🤖 POOL NOT FULL → Generate fresh AI content AND add to pool
-        const targetWordCount = isAssignment ? 2000 : 425;
         const variationNumber = existingPool.length + 1;
 
         let systemContent = undefined;
         let prompt;
+        let targetWords = 600;
+        let targetParagraphs = 5;
 
         if (isAssignment) {
+            if (totalQuestions && totalQuestions > 0) {
+                targetWords = Math.floor(2150 / totalQuestions);
+                targetParagraphs = Math.max(3, Math.floor(targetWords / 120));
+            }
+
             systemContent = "You are an expert academic writer and professor creating an answer key for a university assignment. Write highly detailed, factually accurate, and structured academic content in third-person professional language. Under NO circumstances should you use words like 'I learned', 'I felt', 'The professor explained', or 'In this session'. This is NOT a reflective journal. It is a formal assignment answer.";
             
             // Force unique structural approaches based on variation
@@ -384,13 +390,13 @@ ASSIGNMENT/MODULE: ${moduleRoman}
 QUESTION: ${topic}
 
 CRITICAL INSTRUCTIONS (MUST FOLLOW):
-1. MANDATORY LENGTH: You MUST write a MINIMUM of 600 words for this specific question. If you write less than 600 words, you will fail. 
-2. MANDATORY STRUCTURE: You MUST write exactly 5 to 6 extremely long paragraphs. Each paragraph MUST be highly detailed and at least 100-150 words long. Do NOT write short paragraphs.
+1. MANDATORY LENGTH: You MUST write a MINIMUM of ${targetWords} words for this specific question. If you write less than ${targetWords} words, you will fail. 
+2. MANDATORY STRUCTURE: You MUST write exactly ${targetParagraphs} to ${targetParagraphs + 1} extremely long paragraphs. Each paragraph MUST be highly detailed and at least 100-150 words long. Do NOT write short paragraphs.
 3. Content Expansion: To reach the word count, you must provide extensive historical background, deep theoretical breakdowns, multiple comprehensive real-world case studies, and a thoughtful conclusion specifically related to this question. Expand on every single detail.
 4. FORMATTING (STRICTLY ENFORCED): You are completely FORBIDDEN from using bullet points, numbered lists, hyphens for lists, or any point-form text. You MUST write EXCLUSIVELY in long, continuous, flowing academic paragraphs.
 5. DO NOT use generic section headers like "Here is the answer" or "My Notes:".
 6. DO NOT use first-person pronouns ("I", "we", "my") or reflective phrases ("I understood").
-7. Begin the answer immediately without any introductory filler and DO NOT STOP until you have written at least 6 massive paragraphs.
+7. Begin the answer immediately without any introductory filler and DO NOT STOP until you have written at least ${targetParagraphs} massive paragraphs.
             `;
         } else {
             const sectionGuide = SECTION_PROMPTS[sectionTag] || SECTION_PROMPTS.EXP;
@@ -428,8 +434,9 @@ RULES:
         try {
             text = await generateWithAI(prompt, systemContent);
             
-            // If the AI generated less than 400 words, we ask it to expand once.
-            if (isAssignment && text.split(/\\s+/).length < 400) {
+            // If the AI generated less than the required amount, we ask it to expand once.
+            const minAllowed = Math.max(200, targetWords - 150);
+            if (isAssignment && text.split(/\\s+/).length < minAllowed) {
                 console.log(`[POOL] 🤖 Assignment answer too short (${text.split(/\\s+/).length} words). Expanding...`);
                 const continuePrompt = `
 You previously started answering a question about ${topic}. The answer is currently too short.
@@ -448,7 +455,7 @@ CRITICAL INSTRUCTION: Continue the answer exactly where you left off, adding at 
         }
 
         // Minimum length guard (We just pad slightly if it's completely broken)
-        const minWords = isAssignment ? 400 : 300;
+        const minWords = isAssignment ? Math.max(200, targetWords - 200) : 300;
         if (text.split(/\\s+/).length < minWords) {
             text += " " + getDynamicFallback(sectionTag, subject, topic).substring(0, 800);
         }

@@ -793,7 +793,8 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                                             sectionTag: "ASSIGNMENT",
                                             moduleRoman: moduleNum,
                                             syllabus: question,
-                                            styleInstruction: ""
+                                            styleInstruction: "",
+                                            totalQuestions: questions.length
                                         })
                                     });
 
