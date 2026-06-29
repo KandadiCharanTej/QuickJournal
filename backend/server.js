@@ -428,31 +428,18 @@ RULES:
         try {
             text = await generateWithAI(prompt, systemContent);
             
-            // --- AGGRESSIVE WORD COUNT ENFORCEMENT FOR ASSIGNMENTS ---
-            if (isAssignment) {
-                let attempts = 0;
-                let currentWords = text.split(/\s+/).length;
-                
-                while (currentWords < 2000 && attempts < 4) {
-                    console.log(`[POOL] 🤖 Assignment too short (${currentWords} words). Forcing AI to continue...`);
-                    const continuePrompt = `
-You are writing a massively detailed university essay about ${topic}.
-Here is what you have written so far:
+            // If the AI generated less than 400 words, we ask it to expand once.
+            if (isAssignment && text.split(/\\s+/).length < 400) {
+                console.log(`[POOL] 🤖 Assignment answer too short (${text.split(/\\s+/).length} words). Expanding...`);
+                const continuePrompt = `
+You previously started answering a question about ${topic}. The answer is currently too short.
+Here is what you wrote:
 
 ${text}
 
-CRITICAL INSTRUCTION: 
-1. Continue writing the essay exactly where it left off. 
-2. Do NOT repeat the text above. 
-3. Do NOT add an introduction. 
-4. Write the NEXT 500+ words of the essay, providing new deep theoretical analysis, extensive case studies, and advanced concepts.
-5. FORMATTING: NO BULLET POINTS. Write EXCLUSIVELY in long, continuous paragraphs.
-                    `;
-                    const additionalText = await generateWithAI(continuePrompt, systemContent);
-                    text += "\n\n" + additionalText.replace(/^(Sure|Here is|Continuing).*?\n/gi, "").trim();
-                    currentWords = text.split(/\s+/).length;
-                    attempts++;
-                }
+CRITICAL INSTRUCTION: Continue the answer exactly where you left off, adding at least 250 more words. Do NOT use any bullet points or lists. Write exclusively in long, detailed paragraphs providing academic depth and examples.`;
+                const additionalText = await generateWithAI(continuePrompt, systemContent);
+                text += "\\n\\n" + additionalText.replace(/^(Sure|Here is|Continuing).*?\\n/gi, "").trim();
             }
 
         } catch (aiErr) {
@@ -460,17 +447,10 @@ CRITICAL INSTRUCTION:
             text = getDynamicFallback(sectionTag, subject, topic);
         }
 
-        // Minimum length guard
-        const minWords = isAssignment ? (targetWordCount - 100) : 300;
-        if (text.split(/\s+/).length < minWords) {
-            if (isAssignment) {
-                // If it STILL couldn't reach 2000 words, aggressively pad with fallback data until it does
-                while (text.split(/\s+/).length < 2100) {
-                    text += "\n\n" + getDynamicFallback(sectionTag, subject, topic);
-                }
-            } else {
-                text += " " + getDynamicFallback(sectionTag, subject, topic).substring(0, 800);
-            }
+        // Minimum length guard (We just pad slightly if it's completely broken)
+        const minWords = isAssignment ? 400 : 300;
+        if (text.split(/\\s+/).length < minWords) {
+            text += " " + getDynamicFallback(sectionTag, subject, topic).substring(0, 800);
         }
 
         // Save to pool
