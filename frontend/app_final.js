@@ -826,16 +826,16 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                             if (!success) {
                                 console.warn(`Backend failed for Question ${qNum}. Using client fallback.`);
                                 const fallbackSentences = [
-                                    `A detailed theoretical analysis of ${topic} reveals critical dependencies within the ${subject} module.`,
-                                    `Historically, implementations of ${topic} require strict adherence to core engineering paradigms and systematic structures.`,
-                                    `From a structural perspective, evaluating ${topic} helps clarify the broader ecosystem of the assigned module.`,
-                                    `The practical applications of ${topic} demonstrate its indispensable role in modern technological and developmental environments.`,
-                                    `Moreover, ongoing developments related to ${topic} continue to shape the boundaries of this specific academic discipline.`,
-                                    `Exploring the theoretical underpinnings of ${topic} reveals significant implications for the overarching system design.`,
-                                    `It is crucial to recognize that the mechanics of ${topic} do not operate in isolation but rely on foundational architectures discussed in class.`,
-                                    `A detailed examination of ${topic} highlights the necessity for rigorous testing and robust implementation strategies in real-world scenarios.`,
-                                    `From a macroscopic view, integrating ${topic} effectively can drastically reduce latency and improve system-wide cohesion.`,
-                                    `Academic consensus suggests that mastering ${topic} provides a significant advantage in advanced engineering paradigms.`
+                                    `A detailed theoretical analysis of ${question} reveals critical dependencies within the ${subject} module.`,
+                                    `Historically, implementations of ${question} require strict adherence to core engineering paradigms and systematic structures.`,
+                                    `From a structural perspective, evaluating ${question} helps clarify the broader ecosystem of the assigned module.`,
+                                    `The practical applications of ${question} demonstrate its indispensable role in modern technological and developmental environments.`,
+                                    `Moreover, ongoing developments related to ${question} continue to shape the boundaries of this specific academic discipline.`,
+                                    `Exploring the theoretical underpinnings of ${question} reveals significant implications for the overarching system design.`,
+                                    `It is crucial to recognize that the mechanics of ${question} do not operate in isolation but rely on foundational architectures discussed in class.`,
+                                    `A detailed examination of ${question} highlights the necessity for rigorous testing and robust implementation strategies in real-world scenarios.`,
+                                    `From a macroscopic view, integrating ${question} effectively can drastically reduce latency and improve system-wide cohesion.`,
+                                    `Academic consensus suggests that mastering ${question} provides a significant advantage in advanced engineering paradigms.`
                                 ];
                                 
                                 let fallbackAns = "";
