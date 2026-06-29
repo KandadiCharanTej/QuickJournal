@@ -53,7 +53,12 @@ const GROQ_KEYS = [
     process.env.GROQ_API_KEY_2,
     process.env.GROQ_API_KEY_3,
     process.env.GROQ_API_KEY_4,
-    process.env.GROQ_API_KEY_5
+    process.env.GROQ_API_KEY_5,
+    process.env.GROQ_API_KEY_6,
+    process.env.GROQ_API_KEY_7,
+    process.env.GROQ_API_KEY_8,
+    process.env.GROQ_API_KEY_9,
+    process.env.GROQ_API_KEY_10
 ].filter(k => k && k.length > 10 && !k.includes("PASTE_YOUR"));
 
 const GROQ_MODELS = [
@@ -304,17 +309,17 @@ function getDynamicFallback(tag, subject, topic) {
 }
 
 /* ============================================
-   🚀 SMART VARIATION POOL (2000+ Journals/Day)
+   🚀 MASSIVE SMART VARIATION POOL (10,000+ Downloads)
    ============================================
    Strategy:
-   - For each subject+module+section combo, store up to 10 unique AI-generated variations.
-   - When a user requests: if pool has <10, generate fresh via AI AND save to pool.
-   - If pool has 10+, randomly pick from pool (instant, no API call needed).
-   - Each section has its own pool, so sections within one journal are ALWAYS different.
-   - 10 variations × 5 sections = 100,000 unique journal combinations.
+   - For each subject+module+section combo, store up to 100 unique AI-generated variations.
+   - 100 variations × 5 sections = 10 BILLION unique journal combinations.
+   - For an assignment with 4 questions = 100 MILLION unique assignment combinations.
+   - Guarantees >99.99% uniqueness even for a massive burst of 10,000 users.
+   - Only generates what it needs (if an old term has 200 users, it stops at 200).
 ============================================ */
 const variationPool = new Map(); // key: "subject_module_section" -> value: string[]
-const MAX_VARIATIONS = 20; // 20^5 = 3.2 million unique journal combinations
+const MAX_VARIATIONS = 100; // 100^5 = 10 Billion combinations
 let poolCreatedAt = Date.now();
 const POOL_LIFETIME_MS = 24 * 60 * 60 * 1000; // 24 hours
 
