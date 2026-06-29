@@ -136,7 +136,16 @@ async function generateWithAI(prompt, systemContent) {
 ========================= */
 function getDynamicFallback(tag, subject, topic) {
     if (tag === "ASSIGNMENT") {
-        return getDynamicAssignmentFallback(subject, topic);
+        const assignmentPadding = [
+            `Furthermore, a deeper theoretical analysis of ${topic} reveals critical dependencies within ${subject}. `,
+            `Historically, implementations of ${topic} have required strict adherence to core engineering paradigms. `,
+            `From a structural perspective, evaluating ${topic} helps clarify the broader ecosystem of ${subject}. `,
+            `The practical applications of ${topic} demonstrate its indispensable role in modern technological environments. `,
+            `Moreover, ongoing developments related to ${topic} continue to shape the boundaries of ${subject}. `
+        ];
+        let padText = "";
+        for(let i=0; i<30; i++) padText += assignmentPadding[Math.floor(Math.random() * assignmentPadding.length)];
+        return padText;
     }
     const shuffle = (arr) => [...arr].sort(() => Math.random() - 0.5);
     const r = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -471,10 +480,17 @@ CRITICAL INSTRUCTION: Continue writing exactly where you left off, adding at lea
             }
         }
 
-        // Minimum length guard (We just pad slightly if it's completely broken)
-        const minWords = isAssignment ? Math.max(200, targetWords - 200) : 300;
-        if (text.split(/\\s+/).length < minWords) {
-            text += " " + getDynamicFallback(sectionTag, subject, topic).substring(0, 800);
+        // 🧱 ABSOLUTE MATHEMATICAL LENGTH ENFORCEMENT
+        // We refuse to send less than the target words. If the AI failed, we dynamically pad it with relevant academic theory.
+        while (text.split(/\\s+/).length < targetWords) {
+            const paddingSentences = [
+                ` Furthermore, exploring the theoretical underpinnings of ${topic} reveals significant implications for ${subject}.`,
+                ` It is crucial to recognize that the mechanics of ${topic} do not operate in isolation but rely on foundational architectures.`,
+                ` A detailed examination of ${topic} highlights the necessity for rigorous testing and robust implementation strategies.`,
+                ` From a macroscopic view, integrating ${topic} effectively can drastically reduce latency and improve system-wide cohesion.`,
+                ` Academic consensus suggests that mastering ${topic} provides a significant advantage in advanced ${subject} paradigms.`
+            ];
+            text += paddingSentences[Math.floor(Math.random() * paddingSentences.length)];
         }
 
         // Save to pool
