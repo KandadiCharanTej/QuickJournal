@@ -376,21 +376,21 @@ app.post("/api/generate-section", async (req, res) => {
             else structuralInstruction = "Use a unique academic structural approach, ensuring no repetition from generic templates.";
 
             prompt = `
-Write a detailed university-level essay answer for the following assignment question.
+Write a massively detailed, university-level essay answer for the following assignment question.
 This is VARIATION #${variationNumber} — you must ensure the paragraph structure, phrasing, and examples are completely distinct from other variations.
 
 SUBJECT: ${subject}
 ASSIGNMENT/MODULE: ${moduleRoman}
 QUESTION: ${topic}
 
-CRITICAL INSTRUCTIONS:
-1. Target Length: You MUST write between 2000 and 2300 words. This is a comprehensive academic essay. Write at least 10 to 15 extensive, highly detailed paragraphs.
-2. Structural Approach: ${structuralInstruction}
-3. Content: Provide rich academic detail, deep theoretical explanations, historical contexts, and extensive case studies to expand the length naturally.
+CRITICAL INSTRUCTIONS (MUST FOLLOW):
+1. MANDATORY LENGTH: You MUST write a MINIMUM of 2000 words. If you write less than 2000 words, you will fail. 
+2. MANDATORY STRUCTURE: You MUST write exactly 15 to 20 extremely long paragraphs. Each paragraph MUST be highly detailed and at least 150 words long. Do NOT write short paragraphs.
+3. Content Expansion: To reach the word count, you must provide extensive historical background, deep theoretical breakdowns, multiple comprehensive real-world case studies, and a massive, thoughtful conclusion. Expand on every single tiny detail.
 4. FORMATTING (STRICTLY ENFORCED): You are completely FORBIDDEN from using bullet points, numbered lists, hyphens for lists, or any point-form text. You MUST write EXCLUSIVELY in long, continuous, flowing academic paragraphs.
 5. DO NOT use generic section headers like "Here is the answer" or "My Notes:".
 6. DO NOT use first-person pronouns ("I", "we", "my") or reflective phrases ("I understood").
-7. Begin the answer immediately without any introductory filler.
+7. Begin the answer immediately without any introductory filler and DO NOT STOP until you have written at least 15 massive paragraphs.
             `;
         } else {
             const sectionGuide = SECTION_PROMPTS[sectionTag] || SECTION_PROMPTS.EXP;
