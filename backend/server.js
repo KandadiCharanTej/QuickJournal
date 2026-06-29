@@ -111,7 +111,7 @@ async function generateWithAI(prompt, systemContent) {
                         { role: "system", content: system },
                         { role: "user", content: prompt }
                     ],
-                    max_tokens: 4500,
+                    max_tokens: 6000,
                     temperature: 0.95
                 })
             });
@@ -359,7 +359,7 @@ app.post("/api/generate-section", async (req, res) => {
         }
 
         // 🤖 POOL NOT FULL → Generate fresh AI content AND add to pool
-        const targetWordCount = isAssignment ? 2500 : 425;
+        const targetWordCount = isAssignment ? 2000 : 425;
         const variationNumber = existingPool.length + 1;
 
         let systemContent = undefined;
@@ -384,13 +384,13 @@ ASSIGNMENT/MODULE: ${moduleRoman}
 QUESTION: ${topic}
 
 STRICT INSTRUCTIONS:
-- Target Length: 2500 words.
+- Target Length: 2000-2300 words. This is a very comprehensive assignment. You MUST write at least 10 to 15 extensive, highly detailed paragraphs to meet this length requirement.
 - Structural Approach: ${structuralInstruction}
-- Content: Provide rich academic detail, definitions, explanations, and facts.
-- Formatting: Use natural paragraphs. You may include short bullet points (e.g., • Types, • Features, • Effects) but integrate them naturally.
+- Content: Provide rich academic detail, deep theoretical explanations, historical contexts, and extensive case studies to expand the length naturally.
+- Formatting: Write primarily in long, continuous academic paragraphs. DO NOT just provide lists or points. Avoid bullet points, or limit them to a strict maximum of 3 items in the entire text.
 - DO NOT use generic section headers like "Here is the answer" or "My Notes:".
 - DO NOT use first-person pronouns ("I", "we", "my") or reflective phrases ("I understood").
-- Begin the answer immediately.
+- Begin the answer immediately without introductory filler.
             `;
         } else {
             const sectionGuide = SECTION_PROMPTS[sectionTag] || SECTION_PROMPTS.EXP;
