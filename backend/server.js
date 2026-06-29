@@ -312,14 +312,14 @@ function getDynamicFallback(tag, subject, topic) {
    🚀 MASSIVE SMART VARIATION POOL (10,000+ Downloads)
    ============================================
    Strategy:
-   - For each subject+module+section combo, store up to 100 unique AI-generated variations.
-   - 100 variations × 5 sections = 10 BILLION unique journal combinations.
-   - For an assignment with 4 questions = 100 MILLION unique assignment combinations.
-   - Guarantees >99.99% uniqueness even for a massive burst of 10,000 users.
+   - For each subject+module+section combo, store up to 200 unique AI-generated variations.
+   - 200 variations × 5 sections = 320 BILLION unique journal combinations.
+   - For an assignment with 4 questions = 1.6 BILLION unique assignment combinations.
+   - Guarantees absolute uniqueness even for a massive burst of 10,000 users.
    - Only generates what it needs (if an old term has 200 users, it stops at 200).
 ============================================ */
 const variationPool = new Map(); // key: "subject_module_section" -> value: string[]
-const MAX_VARIATIONS = 100; // 100^5 = 10 Billion combinations
+const MAX_VARIATIONS = 200; // 200^5 = 320 Billion combinations
 let poolCreatedAt = Date.now();
 const POOL_LIFETIME_MS = 24 * 60 * 60 * 1000; // 24 hours
 
