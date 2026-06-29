@@ -376,21 +376,21 @@ app.post("/api/generate-section", async (req, res) => {
             else structuralInstruction = "Use a unique academic structural approach, ensuring no repetition from generic templates.";
 
             prompt = `
-Write a detailed university-level answer for the following assignment question.
+Write a detailed university-level essay answer for the following assignment question.
 This is VARIATION #${variationNumber} — you must ensure the paragraph structure, phrasing, and examples are completely distinct from other variations.
 
 SUBJECT: ${subject}
 ASSIGNMENT/MODULE: ${moduleRoman}
 QUESTION: ${topic}
 
-STRICT INSTRUCTIONS:
-- Target Length: 2000-2300 words. This is a very comprehensive assignment. You MUST write at least 10 to 15 extensive, highly detailed paragraphs to meet this length requirement.
-- Structural Approach: ${structuralInstruction}
-- Content: Provide rich academic detail, deep theoretical explanations, historical contexts, and extensive case studies to expand the length naturally.
-- Formatting: Write primarily in long, continuous academic paragraphs. DO NOT just provide lists or points. Avoid bullet points, or limit them to a strict maximum of 3 items in the entire text.
-- DO NOT use generic section headers like "Here is the answer" or "My Notes:".
-- DO NOT use first-person pronouns ("I", "we", "my") or reflective phrases ("I understood").
-- Begin the answer immediately without introductory filler.
+CRITICAL INSTRUCTIONS:
+1. Target Length: You MUST write between 2000 and 2300 words. This is a comprehensive academic essay. Write at least 10 to 15 extensive, highly detailed paragraphs.
+2. Structural Approach: ${structuralInstruction}
+3. Content: Provide rich academic detail, deep theoretical explanations, historical contexts, and extensive case studies to expand the length naturally.
+4. FORMATTING (STRICTLY ENFORCED): You are completely FORBIDDEN from using bullet points, numbered lists, hyphens for lists, or any point-form text. You MUST write EXCLUSIVELY in long, continuous, flowing academic paragraphs.
+5. DO NOT use generic section headers like "Here is the answer" or "My Notes:".
+6. DO NOT use first-person pronouns ("I", "we", "my") or reflective phrases ("I understood").
+7. Begin the answer immediately without any introductory filler.
             `;
         } else {
             const sectionGuide = SECTION_PROMPTS[sectionTag] || SECTION_PROMPTS.EXP;
