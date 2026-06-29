@@ -439,24 +439,36 @@ RULES:
         try {
             text = await generateWithAI(prompt, systemContent);
             
-            // If the AI generated less than the required amount, we ask it to expand once.
+            // If the AI generated less than the required amount, aggressively expand until target is reached
             const minAllowed = Math.max(200, targetWords - 150);
-            if (isAssignment && text.split(/\\s+/).length < minAllowed) {
-                console.log(`[POOL] 🤖 Assignment answer too short (${text.split(/\\s+/).length} words). Expanding...`);
-                const continuePrompt = `
+            if (isAssignment) {
+                let attempts = 0;
+                while (text.split(/\\s+/).length < minAllowed && attempts < 4) {
+                    console.log(`[POOL] 🤖 Answer too short (${text.split(/\\s+/).length} words). Expanding...`);
+                    const continuePrompt = `
 You previously started answering a question about ${topic}. The answer is currently too short.
-Here is what you wrote:
+Here is what you wrote so far:
 
 ${text}
 
-CRITICAL INSTRUCTION: Continue the answer exactly where you left off, adding at least 250 more words. Do NOT use any bullet points or lists. Write exclusively in long, detailed paragraphs providing academic depth and examples.`;
-                const additionalText = await generateWithAI(continuePrompt, systemContent);
-                text += "\\n\\n" + additionalText.replace(/^(Sure|Here is|Continuing).*?\\n/gi, "").trim();
+CRITICAL INSTRUCTION: Continue writing exactly where you left off, adding at least 250 more words of detailed theoretical analysis and case studies. Do NOT use bullet points.`;
+                    
+                    try {
+                        const additionalText = await generateWithAI(continuePrompt, systemContent);
+                        text += "\\n\\n" + additionalText.replace(/^(Sure|Here is|Continuing).*?\\n/gi, "").trim();
+                    } catch (expandErr) {
+                        console.log(`[POOL] ⚠️ Expansion failed, keeping what we have.`);
+                        break; // Stop trying to expand, but keep the text we successfully generated
+                    }
+                    attempts++;
+                }
             }
 
         } catch (aiErr) {
-            console.log(`[POOL] ⚠️ AI failed, using fallback for ${sectionTag}`);
-            text = getDynamicFallback(sectionTag, subject, topic);
+            console.log(`[POOL] ⚠️ AI failed entirely, using fallback for ${sectionTag}`);
+            if (!text || text.split(/\\s+/).length < 50) {
+                text = getDynamicFallback(sectionTag, subject, topic);
+            }
         }
 
         // Minimum length guard (We just pad slightly if it's completely broken)
