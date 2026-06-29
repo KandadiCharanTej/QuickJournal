@@ -384,13 +384,13 @@ ASSIGNMENT/MODULE: ${moduleRoman}
 QUESTION: ${topic}
 
 CRITICAL INSTRUCTIONS (MUST FOLLOW):
-1. MANDATORY LENGTH: You MUST write a MINIMUM of 2000 words. If you write less than 2000 words, you will fail. 
-2. MANDATORY STRUCTURE: You MUST write exactly 15 to 20 extremely long paragraphs. Each paragraph MUST be highly detailed and at least 150 words long. Do NOT write short paragraphs.
-3. Content Expansion: To reach the word count, you must provide extensive historical background, deep theoretical breakdowns, multiple comprehensive real-world case studies, and a massive, thoughtful conclusion. Expand on every single tiny detail.
+1. MANDATORY LENGTH: You MUST write a MINIMUM of 600 words for this specific question. If you write less than 600 words, you will fail. 
+2. MANDATORY STRUCTURE: You MUST write exactly 5 to 6 extremely long paragraphs. Each paragraph MUST be highly detailed and at least 100-150 words long. Do NOT write short paragraphs.
+3. Content Expansion: To reach the word count, you must provide extensive historical background, deep theoretical breakdowns, multiple comprehensive real-world case studies, and a thoughtful conclusion specifically related to this question. Expand on every single detail.
 4. FORMATTING (STRICTLY ENFORCED): You are completely FORBIDDEN from using bullet points, numbered lists, hyphens for lists, or any point-form text. You MUST write EXCLUSIVELY in long, continuous, flowing academic paragraphs.
 5. DO NOT use generic section headers like "Here is the answer" or "My Notes:".
 6. DO NOT use first-person pronouns ("I", "we", "my") or reflective phrases ("I understood").
-7. Begin the answer immediately without any introductory filler and DO NOT STOP until you have written at least 15 massive paragraphs.
+7. Begin the answer immediately without any introductory filler and DO NOT STOP until you have written at least 6 massive paragraphs.
             `;
         } else {
             const sectionGuide = SECTION_PROMPTS[sectionTag] || SECTION_PROMPTS.EXP;
