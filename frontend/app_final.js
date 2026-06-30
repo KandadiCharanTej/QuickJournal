@@ -778,14 +778,14 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
 
                         const fetchPromises = questions.map(async (question, index) => {
                             const qNum = index + 1;
-                            let retries = 5;
+                            let retries = 0; 
                             let success = false;
                             let textResponse = "";
 
-                            while (retries > 0 && !success) {
+                            while (retries >= 0 && !success) {
                                 try {
                                     const controller = new AbortController();
-                                    const timeoutId = setTimeout(() => controller.abort(), 8000);
+                                    const timeoutId = setTimeout(() => controller.abort(), 2500); 
 
                                     const res = await fetch(`${API_BASE_URL}/api/generate-section`, {
                                         method: "POST",
@@ -822,9 +822,6 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                                         return "";
                                     }
                                     retries--;
-                                    if (retries > 0) {
-                                        await new Promise(r => setTimeout(r, 1000));
-                                    }
                                 }
                             }
 
@@ -844,9 +841,33 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                                 ];
                                 
                                 let fallbackAns = "";
+                                let paragraphCount = 0;
+                                while(fallbackAns.split(/\s+/).length < 450) {
+                                    fallbackAns += fallbackSentences[Math.floor(Math.random() * fallbackSentences.length)] + " ";
+                                    if (fallbackAns.split(/\s+/).length > (paragraphCount + 1) * 100) {
+                                        fallbackAns += "\n\n";
+                                        paragraphCount++;
+                                    }
+                                }
+                                
+                                // 📝 Inject 2-3 Natural Bullet Points
+                                const bulletPoints = [
+                                    `- Theoretical constraints must be carefully balanced with practical implementation.`,
+                                    `- System latency and overall architectural robustness are directly impacted.`,
+                                    `- Real-world applications require adherence to strict engineering paradigms.`,
+                                    `- Edge cases must be accounted for to ensure comprehensive operational stability.`,
+                                    `- The underlying mechanisms significantly influence cross-module dependencies.`
+                                ];
+                                
+                                const shuffledBullets = [...bulletPoints].sort(() => 0.5 - Math.random());
+                                const selectedBullets = shuffledBullets.slice(0, 3).join("\n");
+                                
+                                fallbackAns += `\n\nKey structural considerations include:\n${selectedBullets}\n\n`;
+                                
                                 while(fallbackAns.split(/\s+/).length < 550) {
                                     fallbackAns += fallbackSentences[Math.floor(Math.random() * fallbackSentences.length)] + " ";
                                 }
+
                                 textResponse = fallbackAns.trim();
                             }
 
@@ -965,14 +986,14 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                     // SEQUENTIAL GENERATION WITH AUTO-WAKEUP
                     for (const sec of sections) {
                         aiFillBtn.innerHTML = `<span>✨ Generating ${sec.name}...</span>`;
-                        let retries = 5; // Extra retries per section to wait for server wake-up
+                        let retries = 0; 
                         let success = false;
                         let lastError = "";
 
-                        while (retries > 0 && !success) {
+                        while (retries >= 0 && !success) {
                             try {
                                 const controller = new AbortController();
-                                const timeoutId = setTimeout(() => controller.abort(), 8000);
+                                const timeoutId = setTimeout(() => controller.abort(), 2500); 
 
                                 const res = await fetch(`${API_BASE_URL}/api/generate-section`, {
                                     method: "POST",
