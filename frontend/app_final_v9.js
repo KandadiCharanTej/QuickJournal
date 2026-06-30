@@ -686,7 +686,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
         while(text.split(/\s+/).length < 425 && extraIdx < extraPool.length) {
             text += extraPool[extraIdx];
             sentenceCount++;
-            if (sentenceCount % 3 === 0) {
+            if (sentenceCount % 5 === 0) {
                 text += "\n\n";
             }
             extraIdx++;
