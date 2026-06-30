@@ -234,7 +234,7 @@ function getDynamicFallback(tag, subject, topic) {
     };
 
     const pool = pools[tag] || pools.EXP;
-    let text = r(pool.starters) + "\n\n" + r(pool.fillers) + "\n\n";
+    let text = r(pool.starters) + r(pool.fillers) + "\n\n";
 
     // 📝 NATURAL BULLET POINT INJECTOR (Weighted & Varied)
     const weights = { LEARN: 0.7, APP: 0.7, EXP: 0.4, FEEL: 0.2, CONC: 0.1 };

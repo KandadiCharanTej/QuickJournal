@@ -615,7 +615,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
             `I am eager to see how ${topic} will be used in future modules. `
         ];
 
-        let text = r(pool.intros) + "\n\n" + r(pool.bodies) + "\n\n" + r(conclusions) + "\n\n";
+        let text = r(pool.intros) + r(pool.bodies) + r(conclusions) + "\n\n";
 
         // 📝 NATURAL BULLET POINT INJECTOR (Weighted & Varied)
         const weights = { LEARN: 0.7, APP: 0.7, EXP: 0.4, FEEL: 0.2, CONC: 0.1 };
