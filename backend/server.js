@@ -234,7 +234,7 @@ function getDynamicFallback(tag, subject, topic) {
     };
 
     const pool = pools[tag] || pools.EXP;
-    let text = r(pool.starters) + r(pool.fillers);
+    let text = r(pool.starters) + "\n\n" + r(pool.fillers) + "\n\n";
 
     // 📝 NATURAL BULLET POINT INJECTOR (Weighted & Varied)
     const weights = { LEARN: 0.7, APP: 0.7, EXP: 0.4, FEEL: 0.2, CONC: 0.1 };
@@ -302,13 +302,21 @@ function getDynamicFallback(tag, subject, topic) {
         `Understanding the limitations of ${topic} is just as important as knowing its strengths. `,
         `I've found that ${subject} requires a different way of thinking compared to my other classes. `,
         `The clarity of the lecture made even the most difficult parts of ${topic} accessible. `,
-        `I'm going to try to explain ${topic} to a classmate to test my own understanding. `,
-        `The session reminded me why I chose to study ${subject} in the first place. `
+        `I'm going to try to apply some of these ${topic} techniques to my own coding practice. `,
+        `The session was a great reminder of why I enjoy studying ${subject} so much. `,
+        `I realized that my previous knowledge of ${topic} was only scratching the surface. `,
+        `The way ${subject} integrates different technologies through ${topic} is very clever. `,
+        `I feel a sense of pride in having tackled such a difficult topic like ${topic} today. `
     ]);
 
     let extraIdx = 0;
+    let sentenceCount = 0;
     while (text.split(/\s+/).length < 480 && extraIdx < extraPool.length) {
         text += extraPool[extraIdx];
+        sentenceCount++;
+        if (sentenceCount % 3 === 0) {
+            text += "\n\n";
+        }
         extraIdx++;
     }
     

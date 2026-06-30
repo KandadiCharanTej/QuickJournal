@@ -615,25 +615,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
             `I am eager to see how ${topic} will be used in future modules. `
         ];
 
-        // 📝 DYNAMIC BULLET POINT INJECTOR (Random 2-4 points)
-        let bulletSection = "";
-        if (Math.random() > 0.5) { 
-            const points = [
-                `Developing a deeper grasp of ${topic} mechanics.`,
-                `Identifying the synergy between ${topic} and ${subject}.`,
-                `Applying optimized logic to real-world ${subject} cases.`,
-                `Evaluating the long-term impact of ${topic} on the field.`,
-                `Streamlining workflows using ${topic} best practices.`,
-                `Understanding the core architecture of ${topic} systems.`,
-                `Analyzing efficiency gains through ${topic} implementation.`,
-                `Collaborating with peers to solve ${subject} challenges.`
-            ];
-            const count = Math.floor(Math.random() * 3) + 2;
-            const selected = shuffle(points).slice(0, count);
-            bulletSection = "\n\nKey Insights & Takeaways:\n" + selected.map(p => "• " + p).join("\n") + "\n\n";
-        }
-
-        let text = r(pool.intros) + r(pool.bodies) + r(conclusions);
+        let text = r(pool.intros) + "\n\n" + r(pool.bodies) + "\n\n" + r(conclusions) + "\n\n";
 
         // 📝 NATURAL BULLET POINT INJECTOR (Weighted & Varied)
         const weights = { LEARN: 0.7, APP: 0.7, EXP: 0.4, FEEL: 0.2, CONC: 0.1 };
@@ -683,8 +665,8 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
             `I'm planning to revisit the ${subject} materials to reinforce my understanding of ${topic}. `,
             `The interactive nature of the class allowed for a lot of productive questions on ${topic}. `,
             `I'm starting to see how ${topic} fits into the larger curriculum of my degree. `,
-            `The sheer versatility of ${subject} is something that continues to impress me. `,
-            `I took careful notes on the specific implementation details for ${topic} shared today. `,
+            `The sheer versatility of ${subject} as a discipline is something I am only now beginning to appreciate. `,
+            `I took detailed notes on the specific implementation details for ${topic} shared today. `,
             `The class ended with a look at where ${topic} is heading in the next few years. `,
             `I feel like I've gained a much clearer perspective on the value of ${topic} today. `,
             `The practical demonstrations were key to making ${subject} concepts feel real. `,
@@ -700,8 +682,13 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
         ]);
 
         let extraIdx = 0;
+        let sentenceCount = 0;
         while(text.split(/\s+/).length < 425 && extraIdx < extraPool.length) {
             text += extraPool[extraIdx];
+            sentenceCount++;
+            if (sentenceCount % 3 === 0) {
+                text += "\n\n";
+            }
             extraIdx++;
         }
 
