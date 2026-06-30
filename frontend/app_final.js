@@ -784,9 +784,13 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
 
                             while (retries > 0 && !success) {
                                 try {
+                                    const controller = new AbortController();
+                                    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
                                     const res = await fetch(`${API_BASE_URL}/api/generate-section`, {
                                         method: "POST",
                                         headers: { "Content-Type": "application/json" },
+                                        signal: controller.signal,
                                         body: JSON.stringify({
                                             subject,
                                             topic: question,
@@ -797,6 +801,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                                             totalQuestions: questions.length
                                         })
                                     });
+                                    clearTimeout(timeoutId);
 
                                     const data = await res.json();
                                     if (!res.ok) {
@@ -966,9 +971,13 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
 
                         while (retries > 0 && !success) {
                             try {
+                                const controller = new AbortController();
+                                const timeoutId = setTimeout(() => controller.abort(), 8000);
+
                                 const res = await fetch(`${API_BASE_URL}/api/generate-section`, {
                                     method: "POST",
                                     headers: { "Content-Type": "application/json" },
+                                    signal: controller.signal,
                                     body: JSON.stringify({ 
                                         subject, 
                                         moduleRoman, 
@@ -979,6 +988,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                                         requestSeed: Date.now() // 🚀 Forces AI to be fresh every time
                                     })
                                 });
+                                clearTimeout(timeoutId);
 
                                 const data = await res.json();
 
