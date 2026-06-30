@@ -259,12 +259,10 @@ function getDynamicFallback(tag, subject, topic) {
         const count = Math.floor(Math.random() * 4) + 2; // 2 to 5 points
         const selected = shuffle(points).slice(0, count);
         
-        const headers = ["Key Takeaways:", "Core Concepts:", "Technical Observations:", "Practical Insights:", "My Notes:", ""];
-        const header = r(headers);
         const bulletStyles = ["• ", "– ", "  - ", "➤ "];
         const style = r(bulletStyles);
         
-        const bulletText = (header ? `\n\n${header}\n` : "\n\n") + selected.map(p => style + p).join("\n") + "\n\n";
+        const bulletText = "\n\n" + selected.map(p => style + p).join("\n") + "\n\n";
         
         // Randomly decide to append or prepend or mix (mostly append for natural flow)
         if (Math.random() > 0.8) {

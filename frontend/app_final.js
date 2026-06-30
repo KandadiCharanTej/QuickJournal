@@ -657,12 +657,10 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
             const count = Math.floor(Math.random() * 4) + 2; // 2 to 5 points
             const selected = shuffle(points).slice(0, count);
             
-            const headers = ["Key Takeaways:", "Core Concepts:", "Technical Observations:", "Practical Insights:", "My Notes:", ""];
-            const header = r(headers);
             const bulletStyles = ["• ", "– ", "  - ", "➤ "];
             const style = r(bulletStyles);
             
-            const bulletText = (header ? `\n\n${header}\n` : "\n\n") + selected.map(p => style + p).join("\n") + "\n\n";
+            const bulletText = "\n\n" + selected.map(p => style + p).join("\n") + "\n\n";
             
             if (Math.random() > 0.8) {
                 text = bulletText + text;
@@ -777,6 +775,9 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                         let completed = 0;
 
                         const fetchPromises = questions.map(async (question, index) => {
+                            // ⏱️ Stagger the starts of each query slightly to update progress counter progressively
+                            await new Promise(r => setTimeout(r, index * 300));
+
                             const qNum = index + 1;
                             let retries = 0; 
                             let success = false;
@@ -840,9 +841,13 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                                     `Academic consensus suggests that mastering ${question} provides a significant advantage in advanced engineering paradigms.`
                                 ];
                                 
+                                // 📐 Dynamic Word Count (Safe Target of 2050 words total)
+                                const targetWordsPerQ = Math.floor(2050 / questions.length);
+                                const firstStageLimit = Math.max(100, targetWordsPerQ - 100);
+
                                 let fallbackAns = "";
                                 let paragraphCount = 0;
-                                while(fallbackAns.split(/\s+/).length < 450) {
+                                while(fallbackAns.split(/\s+/).length < firstStageLimit) {
                                     fallbackAns += fallbackSentences[Math.floor(Math.random() * fallbackSentences.length)] + " ";
                                     if (fallbackAns.split(/\s+/).length > (paragraphCount + 1) * 100) {
                                         fallbackAns += "\n\n";
@@ -850,21 +855,21 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                                     }
                                 }
                                 
-                                // 📝 Inject 2-3 Natural Bullet Points
+                                // 📝 Inject 2-3 Natural Bullet Points (No headers like "Core Concepts:")
                                 const bulletPoints = [
-                                    `- Theoretical constraints must be carefully balanced with practical implementation.`,
-                                    `- System latency and overall architectural robustness are directly impacted.`,
-                                    `- Real-world applications require adherence to strict engineering paradigms.`,
-                                    `- Edge cases must be accounted for to ensure comprehensive operational stability.`,
-                                    `- The underlying mechanisms significantly influence cross-module dependencies.`
+                                    `• Theoretical constraints must be carefully balanced with practical implementation.`,
+                                    `• System latency and overall architectural robustness are directly impacted.`,
+                                    `• Real-world applications require adherence to strict engineering paradigms.`,
+                                    `• Edge cases must be accounted for to ensure comprehensive operational stability.`,
+                                    `• The underlying mechanisms significantly influence cross-module dependencies.`
                                 ];
                                 
                                 const shuffledBullets = [...bulletPoints].sort(() => 0.5 - Math.random());
                                 const selectedBullets = shuffledBullets.slice(0, 3).join("\n");
                                 
-                                fallbackAns += `\n\nKey structural considerations include:\n${selectedBullets}\n\n`;
+                                fallbackAns += `\n\n${selectedBullets}\n\n`;
                                 
-                                while(fallbackAns.split(/\s+/).length < 550) {
+                                while(fallbackAns.split(/\s+/).length < targetWordsPerQ) {
                                     fallbackAns += fallbackSentences[Math.floor(Math.random() * fallbackSentences.length)] + " ";
                                 }
 
@@ -983,9 +988,11 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                     aiFillBtn.innerHTML = `<span>✨ Generating Content...</span>`;
                     aiSpinner.classList.remove('hidden');
 
-                    // SEQUENTIAL GENERATION WITH AUTO-WAKEUP
-                    for (const sec of sections) {
-                        aiFillBtn.innerHTML = `<span>✨ Generating ${sec.name}...</span>`;
+                    let completed = 0;
+                    const fetchPromises = sections.map(async (sec, index) => {
+                        // ⏱️ Stagger the starts slightly to update progressive counter cleanly
+                        await new Promise(r => setTimeout(r, index * 300));
+
                         let retries = 0; 
                         let success = false;
                         let lastError = "";
@@ -1024,32 +1031,31 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                                 textarea.value = data.text;
                                 textarea.dispatchEvent(new Event('input'));
                                 success = true;
-                                await new Promise(r => setTimeout(r, 1000)); 
 
                             } catch (err) {
                                 lastError = err.message;
                                 if (lastError.startsWith("RATELIMIT:")) {
-                                    // Handle rate limits with the timer
                                     aiErrorMsg.innerHTML = `❌ <b>Limit Hit:</b> ${lastError.split(":")[2]}. <br> Wait for the timer.`;
                                     aiErrorMsg.classList.remove('hidden');
                                     startCooldownTimer(parseInt(lastError.split(":")[1]));
-                                    return; // Stop everything
+                                    throw err;
                                 }
                                 retries--;
-                                if (retries > 0) {
-                                    aiFillBtn.innerHTML = `<span>⚠️ Retrying ${sec.name} (${retries})...</span>`;
-                                    await new Promise(r => setTimeout(r, 2000));
-                                }
                             }
                         }
 
                         if (!success) {
-                            console.warn(`Backend failed for ${sec.name} after retries: ${lastError}. Using client fallback.`);
+                            console.warn(`Backend failed for ${sec.name}. Using client fallback.`);
                             const textarea = document.getElementById(sec.id);
                             textarea.value = getClientFallback(sec.tag, subject, topic);
                             textarea.dispatchEvent(new Event('input'));
                         }
-                    }
+
+                        completed++;
+                        aiFillBtn.innerHTML = `<span>✨ Generating Answers (${completed}/${sections.length})...</span>`;
+                    });
+
+                    await Promise.all(fetchPromises);
 
                     aiFillBtn.innerHTML = `<span>✅ All Sections Generated!</span>`;
                     aiSpinner.classList.add('hidden');
@@ -1448,9 +1454,9 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                     badge.className = "text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-bold";
                 }
             } else {
-                if (words >= 450) {
+                if (words >= 410) {
                     badge.className = "text-[10px] bg-emerald-100 px-2 py-0.5 rounded text-emerald-600 font-bold";
-                } else if (words >= 350) {
+                } else if (words >= 310) {
                     badge.className = "text-[10px] bg-amber-100 px-2 py-0.5 rounded text-amber-600 font-bold";
                 } else {
                     badge.className = "text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-bold";
