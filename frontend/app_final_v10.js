@@ -639,12 +639,12 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
             const count = Math.floor(Math.random() * 4) + 2; // 2 to 5 points
             const selected = shuffle(points).slice(0, count);
             
-            const bulletText = "\n\n" + selected.map(p => "• " + p).join("\n") + "\n\n";
+            const bulletText = selected.map(p => "• " + p).join("\n");
             
             if (Math.random() > 0.8) {
-                text = bulletText + text;
+                text = bulletText + "\n\n" + text.trim();
             } else {
-                text += bulletText;
+                text = text.trim() + "\n\n" + bulletText + "\n\n";
             }
         }
 
@@ -686,7 +686,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
         while(text.split(/\s+/).length < 425 && extraIdx < extraPool.length) {
             text += extraPool[extraIdx];
             sentenceCount++;
-            if (sentenceCount % 5 === 0) {
+            if (sentenceCount % 8 === 0) {
                 text += "\n\n";
             }
             extraIdx++;
@@ -865,9 +865,9 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                                     const shuffledBullets = [...bulletPoints].sort(() => 0.5 - Math.random());
                                     const selectedBullets = shuffledBullets.slice(0, 3).join("\n");
                                     
-                                    fallbackAns += `\n\n${selectedBullets}\n\n`;
+                                    fallbackAns = fallbackAns.trim() + "\n\n" + selectedBullets + "\n\n";
                                 } else {
-                                    fallbackAns += `\n\n`;
+                                    fallbackAns = fallbackAns.trim() + "\n\n";
                                 }
                                 
                                 while(fallbackAns.split(/\s+/).length < targetWordsPerQ) {
