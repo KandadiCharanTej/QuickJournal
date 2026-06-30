@@ -639,7 +639,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
         const weights = { LEARN: 0.7, APP: 0.7, EXP: 0.4, FEEL: 0.2, CONC: 0.1 };
         const threshold = weights[tag] || 0.4;
 
-        if (Math.random() < threshold) { 
+        if ((tag === "LEARN" || tag === "APP") && Math.random() < threshold) { 
             const points = [
                 `Developing a deeper grasp of ${topic} mechanics.`,
                 `Identifying the synergy between ${topic} and ${subject}.`,
@@ -657,10 +657,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
             const count = Math.floor(Math.random() * 4) + 2; // 2 to 5 points
             const selected = shuffle(points).slice(0, count);
             
-            const bulletStyles = ["• ", "– ", "  - ", "➤ "];
-            const style = r(bulletStyles);
-            
-            const bulletText = "\n\n" + selected.map(p => style + p).join("\n") + "\n\n";
+            const bulletText = "\n\n" + selected.map(p => "• " + p).join("\n") + "\n\n";
             
             if (Math.random() > 0.8) {
                 text = bulletText + text;
@@ -772,6 +769,18 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                     try {
                         aiSpinner.classList.remove('hidden');
                         aiFillBtn.innerHTML = `<span>✨ Generating Answers (0/${questions.length})...</span>`;
+                        
+                        // Choose exactly 2 or 3 random question indices to have bullet points
+                        const bulletIndices = [];
+                        const pool = Array.from({length: questions.length}, (_, i) => i);
+                        const count = Math.round(Math.random()) + 2; // 2 or 3 questions
+                        for (let k = 0; k < count; k++) {
+                            if (pool.length > 0) {
+                                const randIdx = Math.floor(Math.random() * pool.length);
+                                bulletIndices.push(pool.splice(randIdx, 1)[0]);
+                            }
+                        }
+
                         let completed = 0;
 
                         const fetchPromises = questions.map(async (question, index) => {
@@ -779,6 +788,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                             await new Promise(r => setTimeout(r, index * 300));
 
                             const qNum = index + 1;
+                            const hasBullets = bulletIndices.includes(index);
                             let retries = 0; 
                             let success = false;
                             let textResponse = "";
@@ -855,19 +865,23 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                                     }
                                 }
                                 
-                                // 📝 Inject 2-3 Natural Bullet Points (No headers like "Core Concepts:")
-                                const bulletPoints = [
-                                    `• Theoretical constraints must be carefully balanced with practical implementation.`,
-                                    `• System latency and overall architectural robustness are directly impacted.`,
-                                    `• Real-world applications require adherence to strict engineering paradigms.`,
-                                    `• Edge cases must be accounted for to ensure comprehensive operational stability.`,
-                                    `• The underlying mechanisms significantly influence cross-module dependencies.`
-                                ];
-                                
-                                const shuffledBullets = [...bulletPoints].sort(() => 0.5 - Math.random());
-                                const selectedBullets = shuffledBullets.slice(0, 3).join("\n");
-                                
-                                fallbackAns += `\n\n${selectedBullets}\n\n`;
+                                if (hasBullets) {
+                                    // 📝 Inject 2-3 Natural Bullet Points (No headers like "Core Concepts:")
+                                    const bulletPoints = [
+                                        `• Theoretical constraints must be carefully balanced with practical implementation.`,
+                                        `• System latency and overall architectural robustness are directly impacted.`,
+                                        `• Real-world applications require adherence to strict engineering paradigms.`,
+                                        `• Edge cases must be accounted for to ensure comprehensive operational stability.`,
+                                        `• The underlying mechanisms significantly influence cross-module dependencies.`
+                                    ];
+                                    
+                                    const shuffledBullets = [...bulletPoints].sort(() => 0.5 - Math.random());
+                                    const selectedBullets = shuffledBullets.slice(0, 3).join("\n");
+                                    
+                                    fallbackAns += `\n\n${selectedBullets}\n\n`;
+                                } else {
+                                    fallbackAns += `\n\n`;
+                                }
                                 
                                 while(fallbackAns.split(/\s+/).length < targetWordsPerQ) {
                                     fallbackAns += fallbackSentences[Math.floor(Math.random() * fallbackSentences.length)] + " ";
