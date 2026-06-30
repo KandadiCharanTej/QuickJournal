@@ -988,10 +988,10 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                     aiFillBtn.innerHTML = `<span>✨ Generating Content...</span>`;
                     aiSpinner.classList.remove('hidden');
 
-                    let completed = 0;
                     const fetchPromises = sections.map(async (sec, index) => {
                         // ⏱️ Stagger the starts slightly to update progressive counter cleanly
                         await new Promise(r => setTimeout(r, index * 300));
+                        aiFillBtn.innerHTML = `<span>✨ Generating ${sec.name}...</span>`;
 
                         let retries = 0; 
                         let success = false;
@@ -1050,9 +1050,6 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                             textarea.value = getClientFallback(sec.tag, subject, topic);
                             textarea.dispatchEvent(new Event('input'));
                         }
-
-                        completed++;
-                        aiFillBtn.innerHTML = `<span>✨ Generating Answers (${completed}/${sections.length})...</span>`;
                     });
 
                     await Promise.all(fetchPromises);
