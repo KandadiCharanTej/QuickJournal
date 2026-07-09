@@ -1363,53 +1363,9 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
     const milestoneBadge = document.getElementById('milestoneBadge');
     const milestoneModal = document.getElementById('milestoneModal');
     // ---------------- MODAL LOGIC ----------------
-    const announcementModal = document.getElementById('announcementModal');
-    const closeAnnouncement = document.getElementById('closeAnnouncement');
-    const announcementOverlay = document.getElementById('announcementOverlay');
-    const exploreNowBtn = document.getElementById('exploreNowBtn');
-    const term4Badge = document.getElementById('term4Badge');
-    
+
     const closeMilestone = document.getElementById('closeMilestone');
     const modalOverlay = document.getElementById('modalOverlay');
-
-    if (announcementModal) {
-        let wasAutoShown = false;
-
-        const showAnnouncement = () => {
-            announcementModal.classList.remove('hidden');
-            setTimeout(() => {
-                announcementModal.classList.add('active');
-            }, 10);
-        };
-
-        const hideAnnouncement = () => {
-            announcementModal.classList.remove('active');
-            setTimeout(() => {
-                announcementModal.classList.add('hidden');
-            }, 500);
-            
-            // Increment count only if it was auto-shown
-            if (wasAutoShown) {
-                let count = parseInt(localStorage.getItem('term4PopupCount') || '0', 10);
-                localStorage.setItem('term4PopupCount', (count + 1).toString());
-                wasAutoShown = false;
-            }
-        };
-
-        if (term4Badge) term4Badge.addEventListener('click', showAnnouncement);
-        if (closeAnnouncement) closeAnnouncement.addEventListener('click', hideAnnouncement);
-        if (announcementOverlay) announcementOverlay.addEventListener('click', hideAnnouncement);
-        if (exploreNowBtn) exploreNowBtn.addEventListener('click', hideAnnouncement);
-
-        // Show automatically up to 5 times
-        let showCount = parseInt(localStorage.getItem('term4PopupCount') || '0', 10);
-        if (showCount < 5) {
-            setTimeout(() => {
-                wasAutoShown = true;
-                showAnnouncement();
-            }, 1000);
-        }
-    }
 
     if (milestoneBadge && milestoneModal) {
         const showMilestone = () => {
@@ -1429,6 +1385,94 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
         milestoneBadge.addEventListener('click', showMilestone);
         if (closeMilestone) closeMilestone.addEventListener('click', hideMilestone);
         if (modalOverlay) modalOverlay.addEventListener('click', hideMilestone);
+    }
+
+    // ---------------- NAAVIK MODAL ----------------
+    const naavikBadge = document.getElementById('naavikBadge');
+    const naavikModal = document.getElementById('naavikModal');
+    const naavikOverlay = document.getElementById('naavikOverlay');
+    const closeNaavikModalBtn = document.getElementById('closeNaavikModalBtn');
+    const exploreNaavikBtn = document.getElementById('exploreNaavikBtn');
+    const instaNaavikBtn = document.getElementById('instaNaavikBtn');
+    const copyNaavikLinkBtn = document.getElementById('copyNaavikLinkBtn');
+
+    if (naavikModal) {
+        let wasNaavikAutoShown = false;
+
+        const showNaavik = () => {
+            naavikModal.classList.remove('hidden');
+            setTimeout(() => {
+                naavikModal.classList.add('active');
+            }, 10);
+            
+            // Analytics
+            let openedCount = parseInt(localStorage.getItem('naavik_popup_opened') || '0', 10);
+            localStorage.setItem('naavik_popup_opened', (openedCount + 1).toString());
+        };
+
+        const hideNaavik = () => {
+            naavikModal.classList.remove('active');
+            setTimeout(() => {
+                naavikModal.classList.add('hidden');
+            }, 350);
+            
+            // Increment auto-show count only if it was auto-shown
+            if (wasNaavikAutoShown) {
+                let count = parseInt(localStorage.getItem('naavikPopupCount') || '0', 10);
+                localStorage.setItem('naavikPopupCount', (count + 1).toString());
+                wasNaavikAutoShown = false;
+            }
+        };
+
+        if (naavikBadge) naavikBadge.addEventListener('click', showNaavik);
+        if (closeNaavikModalBtn) closeNaavikModalBtn.addEventListener('click', hideNaavik);
+        if (naavikOverlay) naavikOverlay.addEventListener('click', hideNaavik);
+        
+        if (exploreNaavikBtn) {
+            exploreNaavikBtn.addEventListener('click', () => {
+                let count = parseInt(localStorage.getItem('naavik_explore_clicked') || '0', 10);
+                localStorage.setItem('naavik_explore_clicked', (count + 1).toString());
+            });
+        }
+        
+        if (instaNaavikBtn) {
+            instaNaavikBtn.addEventListener('click', () => {
+                let count = parseInt(localStorage.getItem('naavik_instagram_clicked') || '0', 10);
+                localStorage.setItem('naavik_instagram_clicked', (count + 1).toString());
+            });
+        }
+
+        if (copyNaavikLinkBtn) {
+            copyNaavikLinkBtn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText('https://join-naavik.vercel.app/');
+                    const copyText = document.getElementById('copyText');
+                    const copyIcon = document.getElementById('copyIcon');
+                    
+                    if (copyText) copyText.innerText = 'Copied!';
+                    if (copyIcon) {
+                        copyIcon.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+                        copyIcon.classList.add('text-emerald-500');
+                    }
+                    
+                    setTimeout(() => {
+                        if (copyText) copyText.innerText = 'Copy Link';
+                        if (copyIcon) {
+                            copyIcon.innerHTML = '<rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>';
+                            copyIcon.classList.remove('text-emerald-500');
+                        }
+                    }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                }
+            });
+        }
+
+        // Show Naavik automatically every time the user opens the page
+        setTimeout(() => {
+            wasNaavikAutoShown = true;
+            showNaavik();
+        }, 2500); 
     }
 
     // ---------------- WORD COUNT TRACKING ----------------
