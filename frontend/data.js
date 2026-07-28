@@ -272,5 +272,62 @@ const academicData = {
                 }
             }
         }
+    },
+    
+    // =========================================================
+    //  YEAR II
+    // =========================================================
+    "II": {
+        // ----- TERM 1 -----
+        "1": {
+            "Data Structures using C++": {
+                "1": { title: "Introduction to C++ Programming", syllabus: "Evolution of C++, Features of C++, Structure of a C++ Program, Tokens, Keywords, Identifiers, Variables, Constants, Data Types, Operators, Input and Output Streams, Type Conversion." },
+                "2": { title: "Control Statements", syllabus: "Decision Making Statements, Looping Statements, Functions." },
+                "3": { title: "Arrays – 1D", syllabus: "One-Dimensional Numeric Arrays, Array Declaration and Initialization, Passing Arrays to Functions, Operations on single dimensional Arrays." },
+                "4": { title: "Arrays – 2D", syllabus: "Two-Dimensional Numeric Arrays, Matrix Operations, Operations on Two dimensional Arrays." },
+                "5": { title: "String Arrays", syllabus: "String representation and built-in methods; character frequency and comparison techniques; string traversal and reversal; word-level manipulation and tokenization; character mapping and pattern matching." },
+                "6": { title: "Structures", syllabus: "Introduction and need for structures, structure declaration and initialization, accessing members, arrays of structures, nested structures, and structures with functions." },
+                "7": { title: "Data Structures performance Analysis", syllabus: "Introduction to data structures, type of datastructures, Characteristics of Algorithms, Abstract Data Types, Time Complexity, Space Complexity, Asymptotic Notations." },
+                "8": { title: "Stacks", syllabus: "Stack ADT, Stack Operations, Stack Implementation using Arrays, Applications of Stacks." },
+                "9": { title: "Queues", syllabus: "Queue ADT, Queue Operations Queues Implementation using Arrays, Types and Applications of Queues." },
+                "10": { title: "STL Fundamentals & Containers", syllabus: "Pairs and vectors with dynamic resizing and indexing; iterators and built-in utility functions, Deque, stack, and queue operations; sets and maps." }
+            },
+            "Advanced Database Management Systems": {
+                "1": { title: "Relational Query Languages & Extended ER Models", syllabus: "Introduction to relational query languages and relational algebra operations such as Selection, Projection, Union, Composition, and Cartesian Product. Entity Relationship (ER) modeling, ER diagrams, naming conventions, subclasses, superclasses, inheritance, specialization, generalization, aggregation, and modeling of union types using categories." },
+                "2": { title: "Fundamentals of Normalization", syllabus: "Schema refinement techniques to improve database design by eliminating redundancy and anomalies. Functional dependencies, types of functional dependencies, and normalization concepts with First Normal Form (1NF) and Second Normal Form (2NF)." },
+                "3": { title: "Advanced Normalization", syllabus: "Advanced normalization techniques including Third Normal Form (3NF), Boyce-Codd Normal Form (BCNF), Fourth Normal Form (4NF), and Fifth Normal Form (5NF). Functional dependency analysis, decomposition techniques, and denormalization for performance optimization." },
+                "4": { title: "Transactions in DBMS", syllabus: "Introduction to database transactions, transaction management, and ACID properties to ensure reliable data processing. Transaction life cycle, transaction states, scheduling concepts, and the need for concurrency control in multi-user environments." },
+                "5": { title: "Concurrency Control", syllabus: "Concurrency control mechanisms for maintaining database consistency during simultaneous transactions. Locking techniques including shared and exclusive locks, timestamp-based protocols, serializability concepts, and deadlock handling methods." },
+                "6": { title: "Storage and File Structure", syllabus: "Database storage architecture, RAID technology, and file organization methods for efficient data storage and retrieval. Organization of records in files, storage structures, and management of metadata through the data dictionary." },
+                "7": { title: "Database Recovery Techniques", syllabus: "Recovery mechanisms to restore databases after transaction, system, or media failures. Recovery concepts, shadow paging, log-based recovery, database backup strategies, and recovery from catastrophic failures." },
+                "8": { title: "Introduction to NoSQL Databases and MongoDB", syllabus: "Overview of NoSQL databases, their characteristics, and comparison with relational databases. Introduction to MongoDB architecture, advantages, types of NoSQL databases, installation, and environment setup using MongoDB Atlas and Compass." },
+                "9": { title: "Performing CRUD Operations in MongoDB", syllabus: "Connecting to MongoDB Atlas and performing Create, Read, Update, and Delete (CRUD) operations on collections and documents. Managing databases using MongoDB commands, filtering records, and importing/exporting data." },
+                "10": { title: "Advanced Querying and Data Aggregation in MongoDB", syllabus: "Advanced querying using conditional, comparison, and logical operators for efficient data retrieval. Sorting, limiting results, aggregation framework, grouping operations, and handling complex data types such as embedded documents and arrays." }
+            },
+            "Probability Theory and Statistical Analysis": {
+                "1": { title: "Introduction to Statistics", syllabus: "Introduction to statistics, representation of small datasets using frequency tables, histograms, ogives, stem and leaf plots, measures of central tendency, measures of variability, Chebyshev’s inequality, normal datasets, skewness of data, and representation of two quantitative variables on a scatter plot." },
+                "2": { title: "Introduction to Probability", syllabus: "Basics of probability, axioms of probability, conditional probability, Bayes’ theorem, independent and dependent events." },
+                "3": { title: "Random Variables", syllabus: "Random variables, types of random variables, probability distribution function, mean, variance, and standard deviation of discrete random variables, numericals on mean and variance, probability density function." },
+                "4": { title: "Discrete Probability Distributions", syllabus: "Binomial distribution, moment generating function, mean and variance of binomial distribution, Poisson distribution, mean and variance of Poisson distribution, relationship between binomial and Poisson distributions." },
+                "5": { title: "Continuous Probability Distributions", syllabus: "Normal distribution and its properties, use of normal distribution table, numericals on normal distribution, mean and variance of normal distribution, uniform, gamma, exponential, and beta distributions." },
+                "6": { title: "Sampling & Estimation", syllabus: "Introduction to sampling and types of sampling, sampling distributions, central limit theorem, t-distribution, chi-squared distribution, F-distribution, estimation, point and interval estimation." },
+                "7": { title: "Testing of Hypothesis – I", syllabus: "Testing of hypothesis, null and alternate hypotheses, type I and type II errors, level of significance, testing of hypothesis for mean." },
+                "8": { title: "Testing of Hypothesis – II", syllabus: "Testing of hypothesis for all proportions, and numericals on all hypothesis testing models." },
+                "9": { title: "Correlation", syllabus: "Correlation and covariance, types of correlation, coefficient of correlation, Spearman’s Rank correlation and coefficient." },
+                "10": { title: "Regression", syllabus: "simple linear regression, Multiple linear regression with more than two independent variables, nonlinear regression, polynomial regression." }
+            },
+            "Foundation of Data Science": {
+                "1": { title: "Basics of Data Science", syllabus: "Introduction: AI, Machine Learning, and Data Science, what is Data Science, Data Science Classification, Data Science Process. Data Types, Data Collections, Data Pre-processing." },
+                "2": { title: "Tool Boxes for Data Scientist", syllabus: "Fundamental python libraries for Data Scientist, SciPy and sci - kitLearn, matplotlib, seaborn, PyBrain, Pylearn2; Data preprocessing techniques - read, select, filter, manipulate, sort, group, rank and plot the data. Normalizations." },
+                "3": { title: "Data Analysis and Data Analytics", syllabus: "Descriptive Analysis - Variables, Frequency Distribution, Measures of Centrality and Dispersion of a Distribution. Diagnostic Analytics - Correlations. Predictive Analytics, Prescriptive Analytics, Exploratory Analysis and Mechanistic Analysis." },
+                "4": { title: "Dimensionality Reduction and Feature Engineering", syllabus: "Principal Component Analysis (PCA), Linear Discriminant Analysis (LDA) and t-SNE, Singular Value Decomposition (SVD) , Feature Extraction and Feature Selection, Feature Transformation, Creating Interaction Features." },
+                "5": { title: "Data Models", syllabus: "Overview of Data Models: Regression, Classification, Clustering, Advanced Regression Techniques: Implementing Multiple, Ridge, and Lasso Regression, Classification Models: Logistic Regression and Decision Trees, Clustering Models: K-Means and Hierarchical Clustering." },
+                "6": { title: "Model Evaluation", syllabus: "Evaluation metrics types, Training vs. validation vs. testing, Regression Model Evaluation Metrics, Classification Model Evaluation Metrics, Clustering Metrics, Cross-Validation, Overfitting and underfitting." },
+                "7": { title: "Recommendation Systems", syllabus: "Overview, Collaborative Filtering, Content-Based Filtering, Advanced Techniques in Collaborative Filtering, Hybrid Recommendation Systems, Evaluating Recommendation Systems, Real-World Applications." },
+                "8": { title: "Data Visualization", syllabus: "Overview, Types of Data Visualizations, Basic Plotting with Python Matplotlib Features, Advanced visualizations using Seaborn, Interactive Visualization, Visualization for Exploratory Data Analysis (EDA), Data Visualization with Geospatial Data." },
+                "9": { title: "Advanced Data Visualization Techniques", syllabus: "3D plotting, subplots with complex layouts, Facet grids, heatmaps with hierarchical clustering, Dashboards with Plotly and advanced interactivity, Data Visualization for Big Data, Introduction to BI tools: Tableau, Power BI." },
+                "10": { title: "Ethics and Data Science", syllabus: "Doing Good Data Science, Data Ownership, The Five Cs, Implementing the Five Cs, Ethics and Security Training, Developing Guiding Principles, Building Ethics into a Data-Driven Culture, Regulation, Building Our Future, Case Study" }
+            }
+        }
     }
 };

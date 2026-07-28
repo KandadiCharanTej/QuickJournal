@@ -1278,7 +1278,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
             const safeName = data.name.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
             const safeReg = data.reg.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
             const safeSub = data.sub.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
-            const docType = isTerm4 ? "Assignment" : "ReflectiveJournal";
+            const docType = isTerm4 ? "Assignment" : "RJ";
             const cleanFilename = `${safeName}_${safeReg}_${docType}_${safeSub}-${moduleRoman}`;
             doc.save(`${cleanFilename}.pdf`);
             incrementJournalCounter();
@@ -1514,4 +1514,17 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
     // Initialize UI on load
     updateUI();
     initJournalCounter();
+
+    // Synchronously set default selections to Year II, Term 1
+    const yearSelect = document.getElementById('year');
+    if (yearSelect) {
+        yearSelect.value = "II";
+        yearSelect.dispatchEvent(new Event('change'));
+        
+        const termSelect = document.getElementById('term');
+        if (termSelect) {
+            termSelect.value = "1";
+            termSelect.dispatchEvent(new Event('change'));
+        }
+    }
 });
