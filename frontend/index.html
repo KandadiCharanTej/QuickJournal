@@ -26,55 +26,76 @@
     <!-- 1. Glass Navbar -->
     <nav
         class="glass-nav sticky top-0 z-50 px-6 py-4 flex justify-between items-center w-full max-w-7xl mx-auto rounded-b-2xl">
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 cursor-pointer" id="navBrand">
             <!-- Added the user's NIAT x Aurora logo -->
             <img src="logo.png" alt="NIAT Aurora" class="h-10 object-contain" onerror="this.style.display='none'">
             <span
                 class="text-2xl mt-1 font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-fuchsia-500">QuickJournal</span>
             
         </div>
-        <div class="hidden sm:block text-sm font-semibold text-slate-500">
-            Powered for NIAT x Aurora Students
+        <div class="flex items-center gap-4">
+            <button type="button" id="navHomeBtn" class="hidden text-sm font-bold text-violet-700 hover:text-violet-900 px-3 py-1.5 rounded-lg bg-violet-100 hover:bg-violet-200 transition-colors">
+                ← Back to Home
+            </button>
+            <div class="hidden sm:block text-sm font-semibold text-slate-500">
+                Powered for NIAT x Aurora Students
+            </div>
         </div>
     </nav>
 
+    <!-- 2. Landing Page Sections Wrap -->
+    <div id="landingSections" class="w-full">
     <!-- 2. Hero Section -->
     <section
-        class="min-h-[80vh] w-full flex flex-col items-center justify-center px-4 text-center relative z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-100/50 via-slate-50 to-slate-50">
+        class="min-h-[85vh] w-full flex flex-col items-center justify-center px-4 text-center relative z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-100/60 via-slate-50 to-slate-50 overflow-hidden py-16">
+        <div class="bg-blob-purple"></div>
+        <div class="bg-blob-pink"></div>
+        
         <div
-            class="inline-block mb-4 mt-8 px-4 py-1.5 rounded-full border border-violet-200 bg-white text-sm font-bold text-violet-700 shadow-sm">
-            ✨ AI-Powered Academic Assistant
+            class="reveal reveal-scale inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full border border-violet-200 bg-white/90 backdrop-blur-md text-xs sm:text-sm font-bold text-violet-700 shadow-sm hover:shadow transition-all">
+            <span class="flex h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
+            <span class="flex h-2 w-2 rounded-full bg-emerald-500 -ml-4"></span>
+            ✨ AI Academic Engine • 1,200+ Journals Generated
         </div>
+
         <h1
-            class="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-800 mt-4 mb-6 leading-tight max-w-4xl drop-shadow-sm">
-            Write Smart. Submit Faster.
+            class="reveal reveal-scale delay-100 text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-slate-900 leading-[1.15] max-w-5xl drop-shadow-sm">
+            Craft Perfect Reflective Journals.<br class="hidden sm:inline">
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-violet-600 via-fuchsia-600 to-indigo-600">In Seconds with AI.</span>
         </h1>
-        <p class="text-lg md:text-xl text-slate-500 max-w-2xl mb-10 font-medium leading-relaxed">
-            Generate complete reflective journals in seconds using AI — structured, human-like, and ready to submit
-            exactly as your professors expect.
+
+        <p class="reveal delay-200 text-base sm:text-xl text-slate-600 max-w-3xl mt-6 mb-10 font-medium leading-relaxed">
+            Generate natural, university-ready reflective journals with proper formatting, personalized content, and one-click PDF downloads.
         </p>
-        <a href="#generator" class="btn-glow px-8 py-4 rounded-xl text-lg flex items-center gap-2 group shadow-xl">
-            Generate Journal Now
-            <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor"
-                viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3">
-                </path>
-            </svg>
-        </a>
+
+        <div class="reveal delay-300 flex flex-col sm:flex-row items-center gap-4">
+            <a href="#generator" class="btn-glow px-8 py-4 rounded-xl text-lg font-bold flex items-center gap-3 shadow-2xl transition-all hover:scale-[1.02]">
+                🚀 Launch Generator
+                <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                </svg>
+            </a>
+            <a href="#howItWorks" class="px-7 py-4 rounded-xl text-base font-bold bg-white/80 hover:bg-white text-slate-700 border border-slate-200 shadow-sm transition-all hover:border-violet-300 hover:shadow">
+                💡 How It Works
+            </a>
+        </div>
     </section>
 
     <!-- 3. Features Section -->
     <section class="py-24 px-4 w-full max-w-7xl mx-auto relative z-10">
-        <div class="text-center mb-16">
-            <h2
-                class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-500 mb-4">
-                Engineered for Excellence</h2>
-            <p class="text-slate-500 font-medium">Stop wasting hours on formatting and generic summaries.</p>
+        <div class="reveal text-center mb-16">
+            <span class="text-xs font-extrabold uppercase tracking-widest text-violet-600 bg-violet-100/80 px-3 py-1 rounded-full border border-violet-200">
+                ✨ Core Features
+            </span>
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-3 mb-3">
+                Engineered for Academic Excellence
+            </h2>
+            <p class="text-slate-500 font-medium max-w-lg mx-auto">Stop wasting hours on repetitive formatting and generic summaries.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Card 1 -->
-            <div class="glass-panel p-8 rounded-2xl hover-lift">
+            <div class="reveal reveal-scale delay-100 glass-panel p-8 rounded-2xl hover-lift">
                 <div
                     class="w-12 h-12 rounded-lg bg-violet-100 border border-violet-200 flex items-center justify-center mb-6 text-violet-600 text-xl shadow-sm">
                     ⚡</div>
@@ -83,7 +104,7 @@
                     journal instantly with highly context-aware AI models that understand exactly what you need.</p>
             </div>
             <!-- Card 2 -->
-            <div class="glass-panel p-8 rounded-2xl hover-lift">
+            <div class="reveal reveal-scale delay-200 glass-panel p-8 rounded-2xl hover-lift">
                 <div
                     class="w-12 h-12 rounded-lg bg-violet-100 border border-violet-200 flex items-center justify-center mb-6 text-violet-600 text-xl shadow-sm">
                     📄</div>
@@ -92,7 +113,7 @@
                     Aurora letterhead, cover tables, and exact formatting margins required for submission.</p>
             </div>
             <!-- Card 3 -->
-            <div class="glass-panel p-8 rounded-2xl hover-lift">
+            <div class="reveal reveal-scale delay-300 glass-panel p-8 rounded-2xl hover-lift">
                 <div
                     class="w-12 h-12 rounded-lg bg-violet-100 border border-violet-200 flex items-center justify-center mb-6 text-violet-600 text-xl shadow-sm">
                     🎓</div>
@@ -101,7 +122,7 @@
                     Experience, Feelings, Learning, Application, and Conclusion exactly as graded.</p>
             </div>
             <!-- Card 4 -->
-            <div class="glass-panel p-8 rounded-2xl hover-lift">
+            <div class="reveal reveal-scale delay-400 glass-panel p-8 rounded-2xl hover-lift">
                 <div
                     class="w-12 h-12 rounded-lg bg-violet-100 border border-violet-200 flex items-center justify-center mb-6 text-violet-600 text-xl shadow-sm">
                     🧠</div>
@@ -110,7 +131,7 @@
                     reflection points, academic transitions, and natural student phrasing.</p>
             </div>
             <!-- Card 5 -->
-            <div class="glass-panel p-8 rounded-2xl hover-lift lg:col-span-2">
+            <div class="reveal reveal-scale delay-500 glass-panel p-8 rounded-2xl hover-lift lg:col-span-2">
                 <div class="flex items-start gap-6">
                     <div
                         class="w-12 h-12 shrink-0 rounded-lg bg-violet-100 border border-violet-200 flex items-center justify-center mt-1 text-violet-600 text-xl shadow-sm">
@@ -127,15 +148,21 @@
     </section>
 
     <!-- 4. How It Works -->
-    <section class="py-24 px-4 bg-white border-y border-slate-200 relative z-10 w-full shadow-sm">
+    <section id="howItWorks" class="py-24 px-4 bg-white border-y border-slate-200 relative z-10 w-full shadow-sm scroll-mt-20">
         <div class="max-w-5xl mx-auto text-center">
-            <h2 class="text-3xl font-bold text-slate-800 mb-16">How It Works</h2>
+            <div class="reveal text-center mb-16">
+                <span class="text-xs font-extrabold uppercase tracking-widest text-violet-600 bg-violet-100/80 px-3 py-1 rounded-full border border-violet-200">
+                    ⚡ Simple Workflow
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-3 mb-2">How It Works</h2>
+                <p class="text-slate-500 font-medium">Generate your reflective journal entry in 3 effortless steps</p>
+            </div>
 
             <div class="flex flex-col md:flex-row justify-between relative gap-10">
                 <div class="step-glow-line hidden md:block"></div>
 
                 <div
-                    class="relative z-10 flex flex-col items-center glass-panel p-6 rounded-2xl flex-1 border-violet-200 hover:border-violet-400 transition-colors bg-white">
+                    class="reveal reveal-left delay-100 relative z-10 flex flex-col items-center glass-panel p-6 rounded-2xl flex-1 border-violet-200 hover:border-violet-400 transition-colors bg-white">
                     <div
                         class="w-12 h-12 rounded-full bg-violet-600 border-4 border-white flex items-center justify-center text-white font-bold mb-4 shadow-lg shadow-violet-500/30">
                         1</div>
@@ -145,7 +172,7 @@
                 </div>
 
                 <div
-                    class="relative z-10 flex flex-col items-center glass-panel p-6 rounded-2xl flex-1 border-violet-200 hover:border-violet-400 transition-colors bg-white">
+                    class="reveal reveal-scale delay-200 relative z-10 flex flex-col items-center glass-panel p-6 rounded-2xl flex-1 border-violet-200 hover:border-violet-400 transition-colors bg-white">
                     <div
                         class="w-12 h-12 rounded-full bg-violet-600 border-4 border-white flex items-center justify-center text-white font-bold mb-4 shadow-lg shadow-violet-500/30">
                         2</div>
@@ -155,7 +182,7 @@
                 </div>
 
                 <div
-                    class="relative z-10 flex flex-col items-center glass-panel p-6 rounded-2xl flex-1 border-violet-200 hover:border-violet-400 transition-colors bg-gradient-to-b from-violet-50 to-white">
+                    class="reveal reveal-right delay-300 relative z-10 flex flex-col items-center glass-panel p-6 rounded-2xl flex-1 border-violet-200 hover:border-violet-400 transition-colors bg-gradient-to-b from-violet-50 to-white">
                     <div
                         class="w-12 h-12 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 border-4 border-white flex items-center justify-center text-white font-bold mb-4 shadow-lg shadow-fuchsia-500/40">
                         3</div>
@@ -169,7 +196,7 @@
 
     <!-- 5. Journal Preview Section -->
     <section class="py-24 px-4 w-full max-w-6xl mx-auto relative z-10 flex flex-col lg:flex-row items-center gap-16">
-        <div class="flex-1">
+        <div class="reveal reveal-left flex-1">
             <h2
                 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-500 mb-6">
                 Pixel-Perfect Formatting.</h2>
@@ -195,7 +222,7 @@
                 </li>
             </ul>
         </div>
-        <div class="flex-1 preview-tilt-container perspective w-full max-w-md">
+        <div class="reveal reveal-right delay-200 flex-1 preview-tilt-container perspective w-full max-w-md">
             <div class="preview-tilt p-6 text-xs text-black border border-slate-200">
                 <div class="border-b-4 border-black pb-4 mb-4 text-center pb-2">
                     <h3 class="text-lg font-bold uppercase" style="font-family: serif;">Aurora Higher Education</h3>
@@ -221,23 +248,28 @@
                         Learning:</span> Mastered iteration including while and for loops...</div>
             </div>
         </div>
-    </section>
+    </div>
+    </div>
 
     <!-- 8. Generator App (The core form) -->
-    <section id="generator" class="py-24 px-4 w-full max-w-5xl mx-auto relative z-10 scroll-mt-20">
+    <section id="generator" class="py-20 px-4 w-full max-w-5xl mx-auto relative z-10 scroll-mt-20">
         <div class="text-center mb-10">
-            <h2
-                class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-violet-600 to-fuchsia-500 mb-3">
-                Dashboard</h2>
-            <p class="text-slate-500 font-medium">Complete the steps below to build your document.</p>
+            <span class="text-xs font-extrabold uppercase tracking-widest text-violet-600 bg-violet-100/80 px-3.5 py-1.5 rounded-full border border-violet-200 shadow-sm">
+                🎓 Generator Dashboard
+            </span>
+            <h2 class="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-violet-600 via-fuchsia-600 to-indigo-600 mt-3 mb-2">
+                Build Your Document
+            </h2>
+            <p class="text-slate-500 font-medium">Select your options below to construct your reflective journal PDF.</p>
         </div>
 
-        <main class="w-full bg-white border border-slate-200 rounded-2xl p-6 sm:p-10 shadow-xl relative">
+        <main class="reveal reveal-scale w-full bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-indigo-600"></div>
             <div class="flex items-center justify-between mb-10 relative">
                 <div
-                    class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-[3px] bg-slate-100 z-0 rounded-full hidden sm:block">
+                    class="absolute left-0 top-[20px] -translate-y-1/2 w-full h-[3px] bg-slate-100 z-0 rounded-full hidden sm:block">
                 </div>
-                <div class="absolute left-0 top-1/2 -translate-y-1/2 h-[3px] bg-violet-600 z-0 rounded-full transition-all duration-300 hidden sm:block shadow-sm"
+                <div class="absolute left-0 top-[20px] -translate-y-1/2 h-[3px] bg-gradient-to-r from-emerald-500 via-violet-500 to-violet-600 z-0 rounded-full transition-all duration-300 hidden sm:block shadow-sm"
                     id="progress-bar" style="width: 0%;"></div>
 
                 <div class="step-indicator relative z-10 flex flex-col items-center gap-3" id="indicator-1">
@@ -298,8 +330,8 @@
                             <label class="block text-sm font-bold text-slate-700 mb-2">Year</label>
                             <select id="year" required class="form-input w-full px-4 py-3 rounded-lg shadow-sm">
                                 <option value="" disabled>Select Year</option>
-                                <option value="I">Year I</option>
-                                <option value="II" selected>Year II</option>
+                                <option value="I">I Year</option>
+                                <option value="II" selected>II Year</option>
                             </select>
                         </div>
                         <div>
@@ -336,7 +368,7 @@
                                 <option value="">Select Subject First</option>
                             </select>
                         </div>
-                        <div>
+                        <div id="globalDateContainer">
                             <label class="block text-sm font-bold text-slate-700 mb-2">Date <span
                                     class="font-normal text-slate-400">(Entry & Submission)</span></label>
                             <input type="date" id="journalDate" required
@@ -352,26 +384,7 @@
                 </div>
 
                 <div id="step-3" class="step-content">
-                    <!-- Progress UI for Complete Subject Generation -->
-                    <div id="completeSubjectProgress" class="hidden mb-8 p-6 bg-slate-50 border border-slate-200 rounded-xl shadow-inner">
-                        <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                            <svg class="animate-spin w-5 h-5 text-violet-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Generating Complete Subject...
-                        </h3>
-                        <div class="w-full bg-slate-200 rounded-full h-2.5 mb-4">
-                            <div id="completeSubjectProgressBar" class="bg-violet-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
-                        </div>
-                        <div id="completeSubjectLog" class="text-sm font-medium text-slate-600 space-y-2 max-h-48 overflow-y-auto">
-                            <!-- Progress items will be injected here -->
-                        </div>
-                        <div id="completeSubjectSummary" class="hidden mt-4 pt-4 border-t border-slate-200 font-bold text-slate-800"></div>
-                        <button type="button" id="retryFailedBtn" class="hidden mt-4 px-4 py-2 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded-lg font-bold text-sm transition-colors border border-rose-200">
-                            Regenerate Failed Modules
-                        </button>
-                    </div>
+                    <!-- Progress UI for Complete Subject Generation (Removed in favor of per-module cards) -->
 
                     <div id="step3Header" class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 border-b border-slate-100 pb-4 gap-4">
                         <h2 class="text-xl font-bold text-slate-800">Journal Content</h2>
@@ -394,12 +407,12 @@
                         Failed to connect to AI. Please check your API key or fill the boxes manually.
                     </div>
 
-                    <div class="space-y-6">
+                    <div id="singleModuleContainer" class="space-y-6">
                         <!-- Term 4 Assignment UI (Hidden by default) -->
                         <div id="term4AssignmentContainer" class="hidden">
                             <label class="flex justify-between items-center text-sm font-bold text-slate-700 mb-2">
                                 <span>Assignment Answers <span class="text-slate-400 font-medium">(Predefined Questions)</span></span>
-                                <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-bold" id="wc-assignmentAnswers">0 words</span>
+                                <span class="text-[10px] bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded font-bold" id="wc-assignmentAnswers">0 words</span>
                             </label>
                             <textarea id="assignmentAnswers"
                                 class="form-input w-full px-4 py-3 rounded-lg leading-relaxed shadow-sm h-[400px]"
@@ -409,7 +422,7 @@
                         <div>
                             <label class="flex justify-between items-center text-sm font-bold text-slate-700 mb-2">
                                 <span>1. Experience <span class="text-slate-400 font-medium">(Class Content)</span></span>
-                                <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-bold" id="wc-experience">0 words</span>
+                                <span class="text-[10px] bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded font-bold" id="wc-experience">0 words</span>
                             </label>
                             <textarea id="experience" required
                                 class="form-input w-full px-4 py-3 rounded-lg leading-relaxed shadow-sm"
@@ -418,7 +431,7 @@
                         <div>
                             <label class="flex justify-between items-center text-sm font-bold text-slate-700 mb-2">
                                 <span>2. Feelings <span class="text-slate-400 font-medium">(Emotional Reactions)</span></span>
-                                <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-bold" id="wc-feelings">0 words</span>
+                                <span class="text-[10px] bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded font-bold" id="wc-feelings">0 words</span>
                             </label>
                             <textarea id="feelings" required
                                 class="form-input w-full px-4 py-3 rounded-lg leading-relaxed shadow-sm"
@@ -427,7 +440,7 @@
                         <div>
                             <label class="flex justify-between items-center text-sm font-bold text-slate-700 mb-2">
                                 <span>3. Learning <span class="text-slate-400 font-medium">(Key Insights)</span></span>
-                                <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-bold" id="wc-learning">0 words</span>
+                                <span class="text-[10px] bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded font-bold" id="wc-learning">0 words</span>
                             </label>
                             <textarea id="learning" required
                                 class="form-input w-full px-4 py-3 rounded-lg leading-relaxed shadow-sm"
@@ -436,7 +449,7 @@
                         <div>
                             <label class="flex justify-between items-center text-sm font-bold text-slate-700 mb-2">
                                 <span>4. Application <span class="text-slate-400 font-medium">(Practical Use)</span></span>
-                                <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-bold" id="wc-application">0 words</span>
+                                <span class="text-[10px] bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded font-bold" id="wc-application">0 words</span>
                             </label>
                             <textarea id="application" required
                                 class="form-input w-full px-4 py-3 rounded-lg leading-relaxed shadow-sm"
@@ -445,11 +458,24 @@
                         <div>
                             <label class="flex justify-between items-center text-sm font-bold text-slate-700 mb-2">
                                 <span>5. Conclusion</span>
-                                <span class="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 font-bold" id="wc-conclusion">0 words</span>
+                                <span class="text-[10px] bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded font-bold" id="wc-conclusion">0 words</span>
                             </label>
                             <textarea id="conclusion" required
                                 class="form-input w-full px-4 py-3 rounded-lg leading-relaxed shadow-sm"
                                 placeholder="Summarize your overall experience and final thoughts..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div id="multiModuleContainer" class="hidden space-y-6">
+                        <!-- Module cards will be dynamically injected here by JS -->
+                        
+                        <div id="multiModuleActions" class="flex flex-col sm:flex-row gap-4 mt-8 border-t border-slate-200 pt-6">
+                            <button type="button" id="generateAllModulesBtn" class="flex-1 py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl shadow-md transition-all text-center flex justify-center items-center gap-2">
+                                ✨ Generate All Pending
+                            </button>
+                            <button type="button" id="downloadAllZipBtn" class="flex-1 py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow-md transition-all text-center flex justify-center items-center gap-2">
+                                📦 Download All (ZIP)
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -493,16 +519,18 @@
     </section>
 
     <!-- 6. Call-To-Action Section -->
-    <section
-        class="py-24 px-4 text-center border-t border-slate-200 bg-gradient-to-t from-violet-50 to-transparent relative z-10 w-full">
-        <h2 class="text-4xl font-bold text-slate-800 mb-6">Start Generating Now</h2>
-        <p class="text-slate-600 mb-10 max-w-xl mx-auto font-medium">Join hundreds of successful students submitting
-            flawless reflective journals instantly without the stress of manual formatting.</p>
-        <a href="#generator"
-            class="btn-glow px-10 py-4 mx-auto rounded-xl text-lg inline-block font-semibold shadow-xl">
-            Launch Generator
-        </a>
-    </section>
+    <div id="landingCtaSection" class="w-full">
+        <section
+            class="py-24 px-4 text-center border-t border-slate-200 bg-gradient-to-t from-violet-50 to-transparent relative z-10 w-full">
+            <h2 class="text-4xl font-bold text-slate-800 mb-6">Start Generating Now</h2>
+            <p class="text-slate-600 mb-10 max-w-xl mx-auto font-medium">Join hundreds of successful students submitting
+                flawless reflective journals instantly without the stress of manual formatting.</p>
+            <a href="#generator"
+                class="btn-glow px-10 py-4 mx-auto rounded-xl text-lg inline-block font-semibold shadow-xl">
+                Launch Generator
+            </a>
+        </section>
+    </div>
 
     <!-- 🚀 Premium Responsive Footer - QuickJournal -->
     <footer class="bg-white border-t border-slate-200 pt-8 pb-6 relative z-10 w-full mt-auto">

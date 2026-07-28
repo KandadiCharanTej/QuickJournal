@@ -44,42 +44,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateStep3Layout() {
         const term = termSel.value;
+        const genMode = document.querySelector('input[name="genMode"]:checked').value;
         const term4Container = document.getElementById('term4AssignmentContainer');
         const defaultJournalFields = [
             'experience', 'feelings', 'learning', 'application', 'conclusion'
         ];
+        
+        const singleContainer = document.getElementById('singleModuleContainer');
+        const multiContainer = document.getElementById('multiModuleContainer');
+        const aiFillBtn = document.getElementById('aiFillBtn');
+        const generateBtn = document.getElementById('generateBtn');
 
-        if (term === '4') {
-            // Show term 4 container
-            if (term4Container) term4Container.classList.remove('hidden');
-            // Hide default journal fields and disable their required validation
-            defaultJournalFields.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.closest('div').classList.add('hidden');
-                    el.removeAttribute('required');
-                }
-            });
-            // Show and set required for assignmentAnswers
-            const assignmentTextarea = document.getElementById('assignmentAnswers');
-            if (assignmentTextarea) {
-                assignmentTextarea.setAttribute('required', 'required');
-            }
+        if (genMode === 'complete') {
+            if(singleContainer) singleContainer.classList.add('hidden');
+            if(multiContainer) multiContainer.classList.remove('hidden');
+            if(aiFillBtn) aiFillBtn.classList.add('hidden');
+            if(generateBtn) generateBtn.classList.add('hidden');
+            renderMultiModuleCards();
         } else {
-            // Hide term 4 container
-            if (term4Container) term4Container.classList.add('hidden');
-            // Show default journal fields and restore required validation
-            defaultJournalFields.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    el.closest('div').classList.remove('hidden');
-                    el.setAttribute('required', 'required');
+            if(singleContainer) singleContainer.classList.remove('hidden');
+            if(multiContainer) multiContainer.classList.add('hidden');
+            if(aiFillBtn) aiFillBtn.classList.remove('hidden');
+            if(generateBtn) generateBtn.classList.remove('hidden');
+
+            if (term === '4') {
+                // Show term 4 container
+                if (term4Container) term4Container.classList.remove('hidden');
+                // Hide default journal fields and disable their required validation
+                defaultJournalFields.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.closest('div').classList.add('hidden');
+                        el.removeAttribute('required');
+                    }
+                });
+                // Show and set required for assignmentAnswers
+                const assignmentTextarea = document.getElementById('assignmentAnswers');
+                if (assignmentTextarea) {
+                    assignmentTextarea.setAttribute('required', 'required');
                 }
-            });
-            // Disable required for assignmentAnswers
-            const assignmentTextarea = document.getElementById('assignmentAnswers');
-            if (assignmentTextarea) {
-                assignmentTextarea.removeAttribute('required');
+            } else {
+                // Hide term 4 container
+                if (term4Container) term4Container.classList.add('hidden');
+                // Show default journal fields and restore required validation
+                defaultJournalFields.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.closest('div').classList.remove('hidden');
+                        el.setAttribute('required', 'required');
+                    }
+                });
+                // Disable required for assignmentAnswers
+                const assignmentTextarea = document.getElementById('assignmentAnswers');
+                if (assignmentTextarea) {
+                    assignmentTextarea.removeAttribute('required');
+                }
             }
         }
     }
@@ -87,17 +106,23 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateUI() {
         for (let i = 1; i <= totalSteps; i++) {
             document.getElementById(`step-${i}`).classList.remove('active');
-            const indicator = document.getElementById(`indicator-${i}`).firstElementChild;
+            const indicatorWrap = document.getElementById(`indicator-${i}`);
+            if (!indicatorWrap) continue;
+            const indicator = indicatorWrap.querySelector('div');
+            const label = indicatorWrap.querySelector('span');
 
             if (i < currentStep) {
-                indicator.className = "w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center font-bold shadow-md transition-colors";
-                indicator.innerHTML = "✓";
+                indicator.className = "w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold shadow-md shadow-emerald-500/30 transition-all border-2 border-white";
+                indicator.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`;
+                if (label) label.className = "text-xs font-extrabold text-violet-700 hidden sm:block";
             } else if (i === currentStep) {
-                indicator.className = "w-10 h-10 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold shadow-lg shadow-violet-500/40 transition-colors";
+                indicator.className = "w-10 h-10 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold shadow-lg shadow-violet-500/40 transition-all border-2 border-white ring-4 ring-violet-100";
                 indicator.innerHTML = i;
+                if (label) label.className = "text-xs font-extrabold text-violet-700 hidden sm:block";
             } else {
-                indicator.className = "w-10 h-10 rounded-full bg-slate-100 border border-slate-200 text-slate-400 flex items-center justify-center font-bold transition-colors";
+                indicator.className = "w-10 h-10 rounded-full bg-slate-100 border-2 border-slate-200 text-slate-400 flex items-center justify-center font-bold transition-all shadow-sm";
                 indicator.innerHTML = i;
+                if (label) label.className = "text-xs font-bold text-slate-400 hidden sm:block";
             }
         }
 
@@ -120,7 +145,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (currentStep === 3) {
             updateStep3Layout();
+            setupSingleModuleWordCount();
         }
+    }
+
+    function setupSingleModuleWordCount() {
+        const fields = [
+            { taId: 'experience', wcId: 'wc-experience' },
+            { taId: 'feelings', wcId: 'wc-feelings' },
+            { taId: 'learning', wcId: 'wc-learning' },
+            { taId: 'application', wcId: 'wc-application' },
+            { taId: 'conclusion', wcId: 'wc-conclusion' },
+            { taId: 'assignmentAnswers', wcId: 'wc-assignmentAnswers' }
+        ];
+
+        fields.forEach(({ taId, wcId }) => {
+            const ta = document.getElementById(taId);
+            const wc = document.getElementById(wcId);
+            if (ta && wc && !ta.dataset.wcBound) {
+                ta.dataset.wcBound = "true";
+                const update = () => {
+                    const count = ta.value.trim() === '' ? 0 : ta.value.trim().split(/\s+/).length;
+                    wc.innerText = `${count} words`;
+                    if (count >= 420) {
+                        wc.className = "text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded font-bold";
+                    } else {
+                        wc.className = "text-[10px] bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded font-bold";
+                    }
+                };
+                ta.addEventListener('input', update);
+                update();
+            }
+        });
     }
 
     // 📊 JOURNAL COUNTER TRACKING (localStorage)
@@ -267,12 +323,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     genModeRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
+            const globalDateContainer = document.getElementById('globalDateContainer');
+            const journalDate = document.getElementById('journalDate');
             if (e.target.value === 'complete') {
                 assessmentNoContainer.style.display = 'none';
+                assessSel.required = false; // Skip validation when hidden
                 topicInp.value = "Topics auto-generate for all modules";
+                if(globalDateContainer) globalDateContainer.style.display = 'none';
+                if(journalDate) journalDate.required = false;
             } else {
                 assessmentNoContainer.style.display = 'block';
+                assessSel.required = true;
                 assessSel.dispatchEvent(new Event('change')); 
+                if(globalDateContainer) globalDateContainer.style.display = 'block';
+                if(journalDate) journalDate.required = true;
             }
         });
     });
@@ -290,7 +354,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 assessSel.innerHTML += `<option value="${num}">Assessment ${num}</option>`;
             });
         } else {
-            // Populate module dropdown with "Module I - Title" labels from data.js
             assessSel.innerHTML = '<option value="" disabled selected>Select Module</option>';
             const romanNumerals = ["I","II","III","IV","V","VI","VII","VIII","IX","X"];
             Object.keys(modules).forEach(num => {
@@ -302,6 +365,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         enableSelect(assessSel);
         topicInp.value = "";
+
+        // Reset AI fill button state on new subject selection
+        const aiFillBtn = document.getElementById('aiFillBtn');
+        if (aiFillBtn) {
+            aiFillBtn.disabled = false;
+            aiFillBtn.className = "flex items-center justify-center gap-2 px-5 py-2.5 bg-violet-100 hover:bg-violet-200 text-violet-700 font-bold rounded-lg transition-colors border border-violet-200 shadow-sm hover:shadow-md";
+            aiFillBtn.innerHTML = `<span>✨</span> <span>Auto-Fill with AI</span>`;
+        }
     });
 
     // When module is selected, show the module title in the topic box
@@ -324,6 +395,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if(!dateStr) return "";
         const p = dateStr.split("-");
         return `${p[2]}-${p[1]}-${p[0]}`;
+    }
+
+    function formatYearTermPDF(year, term) {
+        const termOrdinals = { "1": "1st", "2": "2nd", "3": "3rd", "4": "4th" };
+        const termStr = termOrdinals[term] || `${term}th`;
+        return `${year} Year & ${termStr} Term`;
     }
 
     // 🛠️ CLIENT-SIDE ASSIGNMENT FALLBACK DATABASE & GENERATOR
@@ -906,13 +983,10 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                         textarea.value = assignmentText.trim();
                         textarea.dispatchEvent(new Event('input'));
 
-                        aiFillBtn.innerHTML = `<span>✅ Assignment Generated!</span>`;
+                        aiFillBtn.innerHTML = `<span>✓ Generated</span>`;
+                        aiFillBtn.className = "flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-100 text-emerald-700 font-bold rounded-lg transition-colors border border-emerald-200 shadow-sm opacity-80 cursor-default";
+                        aiFillBtn.disabled = true;
                         aiSpinner.classList.add('hidden');
-                        
-                        setTimeout(() => {
-                            aiFillBtn.disabled = false;
-                            aiFillBtn.innerHTML = originalBtnHTML;
-                        }, 3000);
 
                     } catch (error) {
                         console.error("AI Generation Critical Error:", error);
@@ -1072,13 +1146,10 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
 
                     await Promise.all(fetchPromises);
 
-                    aiFillBtn.innerHTML = `<span>✅ All Sections Generated!</span>`;
+                    aiFillBtn.innerHTML = `<span>✓ Generated</span>`;
+                    aiFillBtn.className = "flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-100 text-emerald-700 font-bold rounded-lg transition-colors border border-emerald-200 shadow-sm opacity-80 cursor-default";
+                    aiFillBtn.disabled = true;
                     aiSpinner.classList.add('hidden');
-                    
-                    setTimeout(() => {
-                        aiFillBtn.disabled = false;
-                        aiFillBtn.innerHTML = originalBtnHTML;
-                    }, 3000);
 
                 } catch (error) {
                     console.error("AI Generation Critical Error:", error);
@@ -1152,7 +1223,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                 name: document.getElementById('studentName').value,
                 reg: document.getElementById('regNumber').value,
                 sec: document.getElementById('classSection').value,
-                yt: `Year ${yearSel.value} - Term ${termSel.value}`,
+                yt: formatYearTermPDF(yearSel.value, termSel.value),
                 sub: subjSel.value,
                 assNum: moduleLabel,
                 date: formatDate(document.getElementById('journalDate').value),
@@ -1328,346 +1399,605 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
         }
     });
 
+    // Global state for multi-module generation
+    let completeSubjectState = {};
+    
+    // We remove the old completeSubject generation handler since we use the per-module UI now
     async function handleCompleteSubjectGeneration() {
-        const successMsg = document.getElementById('successMsg');
-        successMsg.classList.add('hidden');
-        successMsg.classList.remove('active');
+        console.warn('handleCompleteSubjectGeneration is deprecated. Use per-module generation instead.');
+    }
+        
+    function getOpeningStyle(tag) {
+        const styles = {
+            EXP: ["Start by describing the visual setting of the classroom.", "Start with the first topic the professor mentioned.", "Start with a specific example that was written on the board.", "Start with the initial curiosity you felt entering the class."],
+            FEEL: ["Start with a moment of confusion you experienced.", "Start with a sense of excitement you felt about a concept.", "Start with a question that popped into your head.", "Start with how your mood shifted during the lecture."],
+            LEARN: ["Start with the most important technical insight.", "Start by clarifying a concept you previously misunderstood.", "Start with a 'lightbulb' moment you had.", "Start with a core principle that defines this module."],
+            APP: ["Start with a specific career goal where this applies.", "Start with a personal project idea inspired by this.", "Start with a real-life problem this theory solves.", "Start with how you will explain this to a teammate."],
+            CONC: ["Start with how your perspective has matured.", "Start with a final summary of your progress.", "Start with a look towards the next academic challenge.", "Start with the most memorable takeaway."]
+        };
+        const options = styles[tag] || styles.EXP;
+        return options[Math.floor(Math.random() * options.length)];
+    }
 
-        const btnText = document.getElementById('btnText');
-        const generateBtn = document.getElementById('generateBtn');
-        const progressContainer = document.getElementById('completeSubjectProgress');
-        const progressBar = document.getElementById('completeSubjectProgressBar');
-        const progressLog = document.getElementById('completeSubjectLog');
-        const summary = document.getElementById('completeSubjectSummary');
-        const retryBtn = document.getElementById('retryFailedBtn');
-        const step3Header = document.getElementById('step3Header');
+    const sectionsDefinition = [
+        { tag: "EXP", name: "Experience", hint: `Format: Objective summary of topics covered. Tone: Academic and observational. Instruction: ${getOpeningStyle('EXP')}. DO NOT start with 'I experienced' or 'In this class'.` },
+        { tag: "FEEL", name: "Feelings", hint: `Format: Emotional or intellectual response to the difficulty or interest of the topic. Tone: Honest but professional. Instruction: ${getOpeningStyle('FEEL')}. DO NOT start with 'I felt' or 'My feelings were'.` },
+        { tag: "LEARN", name: "Learning", hint: `Format: Highlight key insights or fundamental concepts gained. Tone: Simple language with academic clarity. Instruction: ${getOpeningStyle('LEARN')}. DO NOT start with 'I learned' or 'The key insight was'.` },
+        { tag: "APP", name: "Application", hint: `Format: Describe real-life/career application and practical utility. Tone: Use relatable examples. Instruction: ${getOpeningStyle('APP')}. DO NOT start with 'I will apply' or 'This can be applied'.` },
+        { tag: "CONC", name: "Conclusion", hint: `Format: Overall learning, shaping of thinking/knowledge. Tone: Depth of reflection. Instruction: ${getOpeningStyle('CONC')}. DO NOT start with 'In conclusion' or 'To summarize'.` }
+    ];
+
+    function renderMultiModuleCards() {
+        const container = document.getElementById('multiModuleContainer');
+        if (!container) return;
         
-        if (btnText) btnText.innerText = "Generating Complete Subject...";
-        generateBtn.disabled = true;
-        if(step3Header) step3Header.classList.add('hidden');
-        const txtAreasContainer = document.querySelector('#step-3 > div.space-y-6');
-        if(txtAreasContainer) txtAreasContainer.classList.add('hidden');
-        
-        progressContainer.classList.remove('hidden');
-        progressLog.innerHTML = '';
-        summary.classList.add('hidden');
-        retryBtn.classList.add('hidden');
-        
-        const zip = new JSZip();
+        // Clear previous cards, keep action buttons
+        const actionsHtml = document.getElementById('multiModuleActions').outerHTML;
+        container.innerHTML = '';
         
         const year = yearSel.value;
         const term = termSel.value;
         const sub = subjSel.value;
         const modules = academicData[year]?.[term]?.[sub] || {};
-        const moduleKeys = Object.keys(modules);
+        const isTerm4 = (term === '4');
+
+        completeSubjectState = {};
+        const romanNumerals = ["I","II","III","IV","V","VI","VII","VIII","IX","X"];
+
+        // Add a global date picker for convenience
+        const globalDateRow = document.createElement('div');
+        globalDateRow.className = "mb-4 p-4 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between";
+        globalDateRow.innerHTML = `
+            <span class="text-sm font-bold text-slate-700">Set Date for All Modules:</span>
+            <input type="date" id="global-multi-date" class="form-input px-3 py-1.5 text-sm rounded border border-slate-300">
+        `;
+        container.appendChild(globalDateRow);
         
-        const totalModules = moduleKeys.length;
-        let successCount = 0;
-        let failedModules = [];
-
-        const logProgress = (msg, isSuccess, isError) => {
-            const div = document.createElement('div');
-            div.className = 'flex items-center gap-2';
-            if(isSuccess) {
-                div.innerHTML = `<span class="text-emerald-500 font-bold">✓</span> <span class="text-emerald-700">${msg}</span>`;
-            } else if(isError) {
-                div.innerHTML = `<span class="text-rose-500 font-bold">✗</span> <span class="text-rose-700">${msg}</span>`;
-            } else {
-                div.innerHTML = `<span class="text-slate-400">⏳</span> <span class="text-slate-700">${msg}</span>`;
-            }
-            progressLog.appendChild(div);
-            progressLog.scrollTop = progressLog.scrollHeight;
-        };
-
-        const updateProgressBar = (completed) => {
-            const p = (completed / totalModules) * 100;
-            progressBar.style.width = `${p}%`;
-        };
-
-        const getBase64ImageFromURL = (url) => {
-            return new Promise((resolve, reject) => {
-                var img = new Image();
-                img.setAttribute("crossOrigin", "anonymous");
-                img.onload = () => {
-                    var canvas = document.createElement("canvas");
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    var ctx = canvas.getContext("2d");
-                    ctx.drawImage(img, 0, 0);
-                    resolve(canvas.toDataURL("image/png"));
-                };
-                img.onerror = error => reject(error);
-                img.src = url;
+        const globalDateInput = globalDateRow.querySelector('#global-multi-date');
+        globalDateInput.onchange = (e) => {
+            const val = e.target.value;
+            Object.keys(completeSubjectState).forEach(num => {
+                completeSubjectState[num].date = val;
+                const dInput = document.getElementById(`date-input-${num}`);
+                if (dInput) dInput.value = val;
             });
         };
 
-        const headerImageData = await getBase64ImageFromURL('header.png').catch(() => null);
-
-        const getOpeningStyle = (tag) => {
-            const styles = {
-                EXP: ["Start by describing the visual setting of the classroom.", "Start with the first topic the professor mentioned.", "Start with a specific example that was written on the board.", "Start with the initial curiosity you felt entering the class."],
-                FEEL: ["Start with a moment of confusion you experienced.", "Start with a sense of excitement you felt about a concept.", "Start with a question that popped into your head.", "Start with how your mood shifted during the lecture."],
-                LEARN: ["Start with the most important technical insight.", "Start by clarifying a concept you previously misunderstood.", "Start with a 'lightbulb' moment you had.", "Start with a core principle that defines this module."],
-                APP: ["Start with a specific career goal where this applies.", "Start with a personal project idea inspired by this.", "Start with a real-life problem this theory solves.", "Start with how you will explain this to a teammate."],
-                CONC: ["Start with how your perspective has matured.", "Start with a final summary of your progress.", "Start with a look towards the next academic challenge.", "Start with the most memorable takeaway."]
-            };
-            const options = styles[tag] || styles.EXP;
-            return options[Math.floor(Math.random() * options.length)];
-        };
-
-        const sections = [
-            { tag: "EXP", name: "Experience", hint: `Format: Objective summary of topics covered. Tone: Academic and observational. Instruction: ${getOpeningStyle('EXP')}. DO NOT start with 'I experienced' or 'In this class'.` },
-            { tag: "FEEL", name: "Feelings", hint: `Format: Emotional or intellectual response to the difficulty or interest of the topic. Tone: Honest but professional. Instruction: ${getOpeningStyle('FEEL')}. DO NOT start with 'I felt' or 'My feelings were'.` },
-            { tag: "LEARN", name: "Learning", hint: `Format: Highlight key insights or fundamental concepts gained. Tone: Simple language with academic clarity. Instruction: ${getOpeningStyle('LEARN')}. DO NOT start with 'I learned' or 'The key insight was'.` },
-            { tag: "APP", name: "Application", hint: `Format: Describe real-life/career application and practical utility. Tone: Use relatable examples. Instruction: ${getOpeningStyle('APP')}. DO NOT start with 'I will apply' or 'This can be applied'.` },
-            { tag: "CONC", name: "Conclusion", hint: `Format: Overall learning, shaping of thinking/knowledge. Tone: Depth of reflection. Instruction: ${getOpeningStyle('CONC')}. DO NOT start with 'In conclusion' or 'To summarize'.` }
-        ];
-
-        async function processModule(num) {
+        Object.keys(modules).forEach((num) => {
             const moduleData = modules[num];
-            const title = moduleData.title || `Module ${num}`;
-            const syllabus = moduleData.syllabus || "";
-            const romanNumerals = ["I","II","III","IV","V","VI","VII","VIII","IX","X"];
-            const moduleRoman = romanNumerals[parseInt(num) - 1] || num;
+            const title = moduleData.title || (isTerm4 ? `Assessment ${num}` : `Module ${num}`);
+            const roman = isTerm4 ? num : (romanNumerals[parseInt(num) - 1] || num);
+
+            completeSubjectState[num] = {
+                status: 'pending', // pending, generating, generated, failed
+                date: '',
+                content: {
+                    EXP: '', FEEL: '', LEARN: '', APP: '', CONC: '', ASSIGN: ''
+                },
+                topic: title,
+                cleanTitle: title,
+                roman: roman
+            };
+
+            const card = document.createElement('div');
+            card.id = `mod-card-${num}`;
+            card.className = "bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden mb-4";
             
-            const topicStr = `${title} (${syllabus.split(',')[0]}...)`;
+            const header = document.createElement('div');
+            header.className = "p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 cursor-pointer";
+            header.onclick = () => {
+                const body = document.getElementById(`mod-body-${num}`);
+                body.classList.toggle('hidden');
+            };
 
-            const loadingId = `mod-loading-${num}`;
-            const loadingDiv = document.createElement('div');
-            loadingDiv.id = loadingId;
-            loadingDiv.className = 'flex items-center gap-2 mb-2 text-violet-600 font-semibold';
-            loadingDiv.innerHTML = `<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating Module ${moduleRoman}: ${title}...`;
-            progressLog.appendChild(loadingDiv);
-            progressLog.scrollTop = progressLog.scrollHeight;
+            const titleDiv = document.createElement('div');
+            titleDiv.innerHTML = `<h3 class="font-bold text-slate-800">${isTerm4 ? 'Assessment' : 'Module'} ${roman}: ${title}</h3>`;
+            
+            const controlsDiv = document.createElement('div');
+            controlsDiv.className = "flex flex-wrap items-center gap-2";
+            controlsDiv.onclick = (e) => e.stopPropagation();
 
-            let modSuccess = false;
-            let generatedContent = {};
+            const dateInput = document.createElement('input');
+            dateInput.id = `date-input-${num}`;
+            dateInput.type = 'date';
+            dateInput.className = "form-input px-3 py-1.5 text-sm rounded border border-slate-300";
+            dateInput.onchange = (e) => { completeSubjectState[num].date = e.target.value; };
+            
+            const genBtn = document.createElement('button');
+            genBtn.id = `gen-btn-${num}`;
+            genBtn.className = "px-3 py-1.5 bg-violet-100 hover:bg-violet-200 text-violet-700 font-bold text-sm rounded transition-colors";
+            genBtn.innerText = "✨ Generate";
+            genBtn.onclick = () => generateModuleWithAI(num);
 
-            try {
-                for (const sec of sections) {
-                    let retries = 1; 
-                    let secSuccess = false;
-                    
-                    while (retries >= 0 && !secSuccess) {
-                        try {
-                            const controller = new AbortController();
-                            const timeoutId = setTimeout(() => controller.abort(), 12000); 
+            const downloadBtn = document.createElement('button');
+            downloadBtn.id = `dl-btn-${num}`;
+            downloadBtn.className = "px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
+            downloadBtn.innerText = "📄 Download";
+            downloadBtn.disabled = true;
+            downloadBtn.onclick = () => generatePDFForModule(num);
 
-                            const res = await fetch(`${API_BASE_URL}/api/generate-section`, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                signal: controller.signal,
-                                body: JSON.stringify({ 
-                                    subject: sub, 
-                                    moduleRoman, 
-                                    topic: topicStr, 
-                                    syllabus, 
-                                    sectionTag: sec.tag,
-                                    styleInstruction: sec.hint,
-                                    requestSeed: Date.now()
-                                })
-                            });
-                            clearTimeout(timeoutId);
-                            const data = await res.json();
-                            
-                            if (!res.ok) {
-                                if (data.retryAfter) {
-                                    await new Promise(r => setTimeout(r, parseInt(data.retryAfter) * 1000));
-                                    throw new Error("Rate limit");
-                                }
-                                throw new Error("API failed");
+            controlsDiv.appendChild(dateInput);
+            controlsDiv.appendChild(genBtn);
+            controlsDiv.appendChild(downloadBtn);
+
+            header.appendChild(titleDiv);
+            header.appendChild(controlsDiv);
+
+            const body = document.createElement('div');
+            body.id = `mod-body-${num}`;
+            body.className = "hidden p-4 space-y-4 bg-white";
+
+            if (isTerm4) {
+                body.innerHTML += `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Assignment Answers</label>
+                        <textarea id="ta-${num}-ASSIGN" class="w-full form-input px-3 py-2 text-sm rounded border border-slate-300 h-32"></textarea>
+                    </div>`;
+            } else {
+                ['EXP', 'FEEL', 'LEARN', 'APP', 'CONC'].forEach(tag => {
+                    const sectionName = sectionsDefinition.find(s => s.tag === tag).name;
+                    body.innerHTML += `
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1 flex justify-between">
+                                <span>${sectionName}</span>
+                                <span id="wc-${num}-${tag}" class="text-[10px] bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded font-bold">0 words</span>
+                            </label>
+                            <textarea id="ta-${num}-${tag}" class="w-full form-input px-3 py-2 text-sm rounded border border-slate-300 h-24"></textarea>
+                        </div>`;
+                });
+            }
+
+            card.appendChild(header);
+            card.appendChild(body);
+            container.appendChild(card);
+
+            // Attach event listeners safely after DOM insertion
+            if (isTerm4) {
+                const ta = document.getElementById(`ta-${num}-ASSIGN`);
+                if (ta) {
+                    ta.addEventListener('input', (e) => {
+                        completeSubjectState[num].content.ASSIGN = e.target.value;
+                    });
+                }
+            } else {
+                ['EXP', 'FEEL', 'LEARN', 'APP', 'CONC'].forEach(tag => {
+                    const ta = document.getElementById(`ta-${num}-${tag}`);
+                    const wc = document.getElementById(`wc-${num}-${tag}`);
+                    if (ta && wc) {
+                        ta.addEventListener('input', (e) => {
+                            const val = e.target.value;
+                            completeSubjectState[num].content[tag] = val;
+                            const count = val.trim() === '' ? 0 : val.trim().split(/\s+/).length;
+                            wc.innerText = `${count} words`;
+                            if (count >= 420) {
+                                wc.className = "text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded font-bold";
+                            } else {
+                                wc.className = "text-[10px] bg-slate-100 text-slate-500 border border-slate-200 px-2 py-0.5 rounded font-bold";
                             }
-                            generatedContent[sec.tag] = data.text;
-                            secSuccess = true;
-                            // Wait briefly to avoid hitting rate limits too fast
-                            await new Promise(r => setTimeout(r, 600));
-                        } catch (err) {
-                            retries--;
-                            if(retries < 0) throw err;
+                        });
+                    }
+                });
+            }
+        });
+
+        // Restore action buttons
+        container.insertAdjacentHTML('beforeend', actionsHtml);
+        
+        document.getElementById('generateAllModulesBtn').onclick = generateAllPendingModules;
+        document.getElementById('downloadAllZipBtn').onclick = downloadAllAsZip;
+    }
+
+    async function generateModuleWithAI(num) {
+        const state = completeSubjectState[num];
+        
+        if (!state.date) {
+            alert("Please select a date for this module before generating.");
+            return;
+        }
+
+        const genBtn = document.getElementById(`gen-btn-${num}`);
+        const dlBtn = document.getElementById(`dl-btn-${num}`);
+        
+        const year = yearSel.value;
+        const term = termSel.value;
+        const sub = subjSel.value;
+        const isTerm4 = (term === '4');
+        const modules = academicData[year]?.[term]?.[sub] || {};
+        const syllabus = modules[num]?.syllabus || "";
+
+        state.status = 'generating';
+        
+        // Auto-open accordion when generation starts
+        const body = document.getElementById(`mod-body-${num}`);
+        if (body && body.classList.contains('hidden')) {
+            body.classList.remove('hidden');
+        }
+
+        genBtn.disabled = true;
+        genBtn.innerHTML = `<svg class="animate-spin w-4 h-4 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating...`;
+
+        let success = true;
+
+        if (isTerm4) {
+            // For Term 4, we use the fallback or just generate one block
+            state.content.ASSIGN = getClientAssignmentFallback(sub, state.roman, state.cleanTitle, state.roman);
+            document.getElementById(`ta-${num}-ASSIGN`).value = state.content.ASSIGN;
+        } else {
+            for (let i = 0; i < sectionsDefinition.length; i++) {
+                const sec = sectionsDefinition[i];
+                
+                // Update UI to show progress
+                genBtn.innerHTML = `<svg class="animate-spin w-4 h-4 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating ${sec.name}...`;
+
+                let retries = 0; // Fail faster on batch
+                let secSuccess = false;
+                while (retries >= 0 && !secSuccess) {
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 2500); // Fast timeout
+
+                        const res = await fetch(`${API_BASE_URL}/api/generate-section`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            signal: controller.signal,
+                            body: JSON.stringify({ 
+                                subject: sub, 
+                                moduleRoman: state.roman, 
+                                topic: state.cleanTitle, 
+                                syllabus, 
+                                sectionTag: sec.tag,
+                                styleInstruction: sec.hint,
+                                requestSeed: Date.now()
+                            })
+                        });
+                        clearTimeout(timeoutId);
+                        const data = await res.json();
+                        
+                        if (!res.ok) {
+                            if (data.retryAfter) {
+                                await new Promise(r => setTimeout(r, parseInt(data.retryAfter) * 1000));
+                                throw new Error("Rate limit");
+                            }
+                            throw new Error(data.error || "API failed");
+                        }
+                        
+                        state.content[sec.tag] = data.text;
+                        const textarea = document.getElementById(`ta-${num}-${sec.tag}`);
+                        textarea.value = data.text;
+                        textarea.dispatchEvent(new Event('input')); // Trigger word count
+                        secSuccess = true;
+                    } catch (err) {
+                        console.error(`Error generating section ${sec.tag} for module ${num}:`, err);
+                        retries--;
+                        if (retries < 0) {
+                            success = false;
+                            state.content[sec.tag] = getClientFallback(sec.tag, sub, state.cleanTitle);
+                            const textarea = document.getElementById(`ta-${num}-${sec.tag}`);
+                            textarea.value = state.content[sec.tag];
+                            textarea.dispatchEvent(new Event('input')); // Trigger word count
+                        } else {
                             await new Promise(r => setTimeout(r, 2000));
                         }
                     }
                 }
-                modSuccess = true;
-            } catch (err) {
-                console.error("Module generation failed: ", err);
             }
-
-            const loader = document.getElementById(loadingId);
-            if(loader) loader.remove();
-
-            if (!modSuccess) {
-                logProgress(`Module ${moduleRoman}: ${title} failed to generate.`, false, true);
-                failedModules.push(num);
-                return;
-            }
-
-            // Create PDF for this module
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ format: 'a4', orientation: 'portrait' });
-            
-            const dataObj = {
-                name: document.getElementById('studentName').value,
-                reg: document.getElementById('regNumber').value,
-                sec: document.getElementById('classSection').value,
-                yt: `Year ${yearSel.value} - Term ${termSel.value}`,
-                sub: sub,
-                assNum: moduleRoman,
-                date: formatDate(document.getElementById('journalDate').value),
-                topic: topicStr,
-                exp: generatedContent["EXP"],
-                feel: generatedContent["FEEL"],
-                learn: generatedContent["LEARN"],
-                app: generatedContent["APP"],
-                conc: generatedContent["CONC"]
-            };
-
-            const pageWidth = doc.internal.pageSize.width;
-            let startY = 45; 
-
-            doc.autoTable({
-                startY: startY, margin: { top: 45 }, theme: 'grid',
-                styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
-                body: [
-                    [{ content: 'Student Name', styles: { fontStyle: 'bold', cellWidth: 50 } }, { content: dataObj.name, colSpan: 2, styles: { fontStyle: 'bold' } }],
-                    [{ content: 'Student Registration Number', styles: { fontStyle: 'bold' } }, { content: dataObj.reg }, { content: `Class & Section: ${dataObj.sec}`, styles: { fontStyle: 'bold' } }],
-                    [{ content: 'Study Level : UG/PG', styles: { fontStyle: 'bold' } }, { content: 'UG' }, { content: `Year & Term: ${dataObj.yt}`, styles: { fontStyle: 'bold' } }],
-                    [{ content: 'Subject Name', styles: { fontStyle: 'bold' } }, { content: dataObj.sub, colSpan: 2, styles: { fontStyle: 'bold' } }]
-                ],
-            });
-
-            doc.autoTable({
-                startY: doc.lastAutoTable.finalY + 5, margin: { top: 45 }, theme: 'grid',
-                styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
-                body: [
-                    [{ content: 'Name of the Assessment', styles: { fontStyle: 'bold', cellWidth: 60 } }, { content: `Reflective Journal - ${dataObj.assNum}` }],
-                    [{ content: 'Date of Submission', styles: { fontStyle: 'bold' } }, { content: dataObj.date }]
-                ],
-            });
-
-            let currentY = doc.lastAutoTable.finalY + 15;
-            doc.setFont("times", "bold");
-            doc.setFontSize(14);
-            doc.text(`Reflective Journal - ${dataObj.assNum}`, pageWidth/2, currentY, { align: "center" });
-            currentY += 8;
-
-            doc.autoTable({
-                startY: currentY, theme: 'plain',
-                styles: { font: 'times', fontSize: 12, textColor: [0, 0, 0], cellPadding: 2 },
-                body: [
-                    [{ content: 'Topic: ', styles: { fontStyle: 'bold', cellWidth: 15 } }, { content: dataObj.topic }]
-                ],
-            });
-
-            currentY = doc.lastAutoTable.finalY + 5;
-            doc.setFont("times", "normal");
-            doc.setFontSize(12);
-            doc.text("Journal Entry:", 14, currentY);
-            currentY += 8;
-
-            const sectionsContent = [
-                { title: "1. Experience", body: dataObj.exp },
-                { title: "2. Feelings", body: dataObj.feel },
-                { title: "3. Learning", body: dataObj.learn },
-                { title: "4. Application", body: dataObj.app },
-                { title: "5. Conclusion", body: dataObj.conc }
-            ];
-
-            sectionsContent.forEach(sec => {
-                if (currentY > 260) { doc.addPage(); currentY = 45; }
-                doc.setFont("times", "bold");
-                doc.text(sec.title, 14, currentY);
-                currentY += 6;
-                doc.setFont("times", "normal");
-                const splitText = doc.splitTextToSize(sec.body, pageWidth - 28);
-                const textHeight = splitText.length * 6;
-                if (currentY + textHeight > 270) {
-                    let linesAvailable = Math.floor((270 - currentY) / 6);
-                    if (linesAvailable > 0) {
-                        doc.text(splitText.slice(0, linesAvailable), 14, currentY, { align: 'justify', lineHeightFactor: 1.5 });
-                    }
-                    doc.addPage();
-                    currentY = 45;
-                    doc.text(splitText.slice(linesAvailable), 14, currentY, { align: 'justify', lineHeightFactor: 1.5 });
-                    currentY += (splitText.length - linesAvailable) * 6 + 6;
-                } else {
-                    doc.text(splitText, 14, currentY, { align: 'justify', lineHeightFactor: 1.5 });
-                    currentY += textHeight + 6;
-                }
-            });
-
-            const pageCount = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                if (headerImageData) {
-                    doc.addImage(headerImageData, 'PNG', 0, 0, 210, 35);
-                } else {
-                    doc.setFont("helvetica", "bold");
-                    doc.setFontSize(22);
-                    doc.text("AURORA HIGHER EDUCATION", pageWidth/2, 20, { align: "center" });
-                    doc.setFontSize(12);
-                    doc.setFont("helvetica", "normal");
-                    doc.text("Deemed-to-be-University Estd.u/s.03 of UGC Act 1956", pageWidth/2, 27, { align: "center" });
-                    doc.setFontSize(10);
-                    doc.text("Uppal, Hyderabad, Telangana | Bhongir, Yadadri, Telangana", pageWidth/2, 33, { align: "center" });
-                }
-            }
-
-            const pdfBlob = doc.output('blob');
-            const safeName = dataObj.name.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
-            const safeReg = dataObj.reg.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
-            const safeSub = dataObj.sub.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
-            zip.file(`${safeName}_${safeReg}_RJ_${safeSub}-${moduleRoman}.pdf`, pdfBlob);
-            
-            logProgress(`✓ Module ${moduleRoman}: ${title} Complete`, true, false);
-            successCount++;
-            updateProgressBar(successCount + failedModules.length);
         }
 
-        for(let i=0; i<totalModules; i++) {
-            await processModule(moduleKeys[i]);
-        }
-
-        summary.classList.remove('hidden');
-        summary.innerHTML = `Generated: ${successCount} / ${totalModules} PDFs`;
-
-        if (failedModules.length > 0) {
-            summary.innerHTML += `<br><span class="text-rose-600">Failed: ${failedModules.length} Modules</span>`;
-            retryBtn.classList.remove('hidden');
-            
-            retryBtn.onclick = async () => {
-                retryBtn.classList.add('hidden');
-                const modulesToRetry = [...failedModules];
-                failedModules = [];
-                for(let i=0; i<modulesToRetry.length; i++) {
-                    await processModule(modulesToRetry[i]);
-                }
-                summary.innerHTML = `Generated: ${successCount} / ${totalModules} PDFs`;
-                if(failedModules.length === 0) {
-                    downloadZip();
-                } else {
-                    summary.innerHTML += `<br><span class="text-rose-600">Failed: ${failedModules.length} Modules</span>`;
-                    retryBtn.classList.remove('hidden');
-                }
-            };
+        if (success) {
+            state.status = 'generated';
+            genBtn.innerText = "✓ Done";
+            genBtn.className = "px-3 py-1.5 bg-emerald-100 text-emerald-700 font-bold text-sm rounded transition-colors opacity-80 cursor-default";
+            genBtn.disabled = true;
+            dlBtn.disabled = false;
         } else {
-            downloadZip();
+            state.status = 'generated';
+            genBtn.innerText = "✓ Done";
+            genBtn.className = "px-3 py-1.5 bg-emerald-100 text-emerald-700 font-bold text-sm rounded transition-colors opacity-80 cursor-default";
+            genBtn.disabled = true;
+            dlBtn.disabled = false;
         }
 
-        function downloadZip() {
-            const safeSub = sub.replace(/[^a-zA-Z0-9\s]/g, '');
-            zip.generateAsync({type:"blob"}).then(function(content) {
-                const a = document.createElement("a");
-                a.href = URL.createObjectURL(content);
-                a.download = `${safeSub}.zip`;
-                a.click();
-            });
-            successMsg.classList.remove('hidden');
-            successMsg.classList.add('active');
-            
-            if (btnText) btnText.innerText = "Download Complete Subject ZIP";
-            generateBtn.disabled = false;
+        // Auto-close accordion after generation
+        if (body && !body.classList.contains('hidden')) {
+            body.classList.add('hidden');
         }
+    }
+
+    async function generateAllPendingModules() {
+        const btn = document.getElementById('generateAllModulesBtn');
+        btn.disabled = true;
+        btn.innerText = "⏳ Generating...";
+
+        // Ensure global date is set if required, or at least first pending module has date
+        let hasDate = true;
+        for (const num in completeSubjectState) {
+            if (!completeSubjectState[num].date) hasDate = false;
+        }
+        if (!hasDate) {
+            const globalDate = document.getElementById('global-multi-date').value;
+            if (!globalDate) {
+                alert("Please set a global date for all modules before generating all.");
+                btn.disabled = false;
+                btn.innerText = "✨ Generate All Pending";
+                return;
+            } else {
+                Object.keys(completeSubjectState).forEach(num => {
+                    completeSubjectState[num].date = globalDate;
+                    const dInput = document.getElementById(`date-input-${num}`);
+                    if (dInput) dInput.value = globalDate;
+                });
+            }
+        }
+        
+        for (const num in completeSubjectState) {
+            if (completeSubjectState[num].status === 'pending' || completeSubjectState[num].status === 'failed') {
+                // Auto-scroll to module
+                const card = document.getElementById(`mod-card-${num}`);
+                if (card) {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Open accordion if closed
+                    const body = document.getElementById(`mod-body-${num}`);
+                    if (body.classList.contains('hidden')) {
+                        body.classList.remove('hidden');
+                    }
+                }
+                
+                await generateModuleWithAI(num);
+                // Pause slightly before jumping to next
+                await new Promise(r => setTimeout(r, 500));
+            }
+        }
+        
+        btn.innerText = "✨ Generate All Pending";
+        btn.disabled = false;
+    }
+
+    const getBase64ImageFromURL = (url) => {
+        return new Promise((resolve, reject) => {
+            var img = new Image();
+            img.setAttribute("crossOrigin", "anonymous");
+            img.onload = () => {
+                var canvas = document.createElement("canvas");
+                canvas.width = img.width;
+                canvas.height = img.height;
+                var ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0);
+                resolve(canvas.toDataURL("image/png"));
+            };
+            img.onerror = error => reject(error);
+            img.src = url;
+        });
+    };
+
+    async function getPDFBlobForModule(num, preloadedHeaderImage = null) {
+        const state = completeSubjectState[num];
+        const isTerm4 = (termSel.value === '4');
+        const headerImageData = preloadedHeaderImage || await getBase64ImageFromURL('header.png').catch(() => null);
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ format: 'a4', orientation: 'portrait' });
+        
+        const dataObj = {
+            name: document.getElementById('studentName').value,
+            reg: document.getElementById('regNumber').value,
+            sec: document.getElementById('classSection').value,
+            yt: formatYearTermPDF(yearSel.value, termSel.value),
+            sub: subjSel.value,
+            assNum: state.roman,
+            date: formatDate(state.date || document.getElementById('journalDate').value || new Date().toISOString().split('T')[0]),
+            topic: state.topic,
+            assign: state.content.ASSIGN,
+            exp: state.content.EXP,
+            feel: state.content.FEEL,
+            learn: state.content.LEARN,
+            app: state.content.APP,
+            conc: state.content.CONC
+        };
+
+        const pageWidth = doc.internal.pageSize.width;
+        let startY = 45; 
+
+        doc.autoTable({
+            startY: startY, margin: { top: 45 }, theme: 'grid',
+            styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
+            body: [
+                [{ content: 'Student Name', styles: { fontStyle: 'bold', cellWidth: 50 } }, { content: dataObj.name, colSpan: 2, styles: { fontStyle: 'bold' } }],
+                [{ content: 'Student Registration Number', styles: { fontStyle: 'bold' } }, { content: dataObj.reg }, { content: `Class & Section: ${dataObj.sec}`, styles: { fontStyle: 'bold' } }],
+                [{ content: 'Study Level : UG/PG', styles: { fontStyle: 'bold' } }, { content: 'UG' }, { content: `Year & Term: ${dataObj.yt}`, styles: { fontStyle: 'bold' } }],
+                [{ content: 'Subject Name', styles: { fontStyle: 'bold' } }, { content: dataObj.sub, colSpan: 2, styles: { fontStyle: 'bold' } }]
+            ],
+        });
+
+        doc.autoTable({
+            startY: doc.lastAutoTable.finalY + 5, margin: { top: 45 }, theme: 'grid',
+            styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
+            body: [
+                [{ content: isTerm4 ? 'Assessment' : 'Name of the Assessment', styles: { fontStyle: 'bold', cellWidth: isTerm4 ? 50 : 60 } }, { content: `${isTerm4 ? "Assignment" : "Reflective Journal"} - ${dataObj.assNum}` }],
+                [{ content: 'Date of Submission', styles: { fontStyle: 'bold' } }, { content: dataObj.date }]
+            ],
+        });
+
+        let currentY = doc.lastAutoTable.finalY + 15;
+        doc.setFont("times", "bold");
+        doc.setFontSize(14);
+        doc.text(`${isTerm4 ? "Assignment" : "Reflective Journal"} - ${dataObj.assNum}`, pageWidth/2, currentY, { align: "center" });
+        currentY += 8;
+
+        let qaY;
+        if (!isTerm4) {
+            // Table 3: Topic Header
+            currentY += 8;
+            doc.autoTable({
+                startY: currentY,
+                margin: { top: 45 },
+                theme: 'grid',
+                styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
+                body: [
+                    [{ content: 'Date', styles: { fontStyle: 'normal', textColor: [192, 0, 0], cellWidth: 40 } }, { content: dataObj.date }],
+                    [{ content: `Journal Entry\nTopic`, styles: { fontStyle: 'normal', textColor: [192, 0, 0] } }, { content: dataObj.topic }]
+                ],
+            });
+            qaY = doc.lastAutoTable.finalY;
+        } else {
+            qaY = currentY + 10;
+        }
+
+        // Formal Boxed Content Sections
+        const drawContentSection = (title, content, startPosY) => {
+            doc.autoTable({
+                startY: startPosY,
+                margin: { top: 45 },
+                theme: 'grid',
+                styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 4 },
+                columnStyles: { 0: { cellWidth: 40, fontStyle: 'bold' } },
+                body: [[title, content || ""]],
+            });
+        };
+
+        if (isTerm4) {
+            const qaBlocks = [];
+            const regex = /Question\s*(\d+):?\s*([\s\S]*?)\n+Answer:\s*([\s\S]*?)(?=\n*Question\s*\d+:|$)/gi;
+            let match;
+            while ((match = regex.exec(dataObj.assign)) !== null) {
+                qaBlocks.push({
+                    qNum: match[1],
+                    question: match[2].trim(),
+                    answer: match[3].trim()
+                });
+            }
+
+            let bodyData = [];
+            qaBlocks.forEach((block) => {
+                bodyData.push([{ content: `Question ${block.qNum}: ${block.question}`, styles: { fontStyle: 'bold', fontSize: 11 } }]);
+                bodyData.push([{ content: `Answer:\n\n${block.answer}`, styles: { fontStyle: 'normal' } }]);
+            });
+
+            doc.autoTable({
+                startY: qaY,
+                margin: { top: 45 },
+                theme: 'grid',
+                styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 6 },
+                body: bodyData,
+                didParseCell: function(data) {
+                    // If it's a Question cell (even row index 0, 2, 4...)
+                    if (data.row.index % 2 === 0) {
+                        data.cell.styles.lineWidth = { top: 0.2, right: 0.2, bottom: 0, left: 0.2 };
+                    } else {
+                        data.cell.styles.lineWidth = { top: 0, right: 0.2, bottom: 0.2, left: 0.2 };
+                    }
+                }
+            });
+        } else {
+            drawContentSection('1. Experience\n(Class Content)', dataObj.exp, qaY);
+            drawContentSection('2. Feelings\n(Emotional Reactions)', dataObj.feel, doc.lastAutoTable.finalY);
+            drawContentSection('3. Learning\n(Key Insights)', dataObj.learn, doc.lastAutoTable.finalY);
+            drawContentSection('4. Application\n(Practical Use)', dataObj.app, doc.lastAutoTable.finalY);
+            drawContentSection('5. Conclusion', dataObj.conc, doc.lastAutoTable.finalY);
+        }
+
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            if (headerImageData) {
+                doc.addImage(headerImageData, 'PNG', 0, 0, 210, 35);
+            } else {
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(22);
+                doc.text("AURORA HIGHER EDUCATION", pageWidth/2, 20, { align: "center" });
+                doc.setFontSize(12);
+                doc.setFont("helvetica", "normal");
+                doc.text("Deemed-to-be-University Estd.u/s.03 of UGC Act 1956", pageWidth/2, 27, { align: "center" });
+                doc.setFontSize(10);
+                doc.text("Uppal, Hyderabad, Telangana | Bhongir, Yadadri, Telangana", pageWidth/2, 33, { align: "center" });
+            }
+        }
+
+        return doc.output('blob');
+    }
+
+    async function generatePDFForModule(num) {
+        const btn = document.getElementById(`dl-btn-${num}`);
+        if (btn) btn.innerText = "⏳";
+        try {
+            const blob = await getPDFBlobForModule(num);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const state = completeSubjectState[num];
+            const safeName = document.getElementById('studentName').value.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+            const safeReg = document.getElementById('regNumber').value.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+            const safeSub = subjSel.value.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+            const docType = (termSel.value === '4') ? "Assignment" : "RJ";
+            const cleanFilename = `${safeName}_${safeReg}_${docType}_${safeSub}-${state.roman}`;
+            a.download = `${cleanFilename}.pdf`;
+            a.click();
+            URL.revokeObjectURL(url);
+            incrementJournalCounter();
+
+            const successMsg = document.getElementById('successMsg');
+            if (successMsg) {
+                const successMsgText = document.getElementById('successMsgText');
+                if (successMsgText) successMsgText.innerText = "PDF Generated Successfully!";
+                successMsg.classList.remove('hidden');
+                successMsg.classList.add('active');
+                successMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        } catch (err) {
+            console.error("Single module PDF download error:", err);
+        } finally {
+            if (btn) btn.innerText = "📄 Download";
+        }
+    }
+
+    async function downloadAllAsZip() {
+        const btn = document.getElementById('downloadAllZipBtn');
+        btn.disabled = true;
+        btn.innerText = "📦 Zipping...";
+        
+        const zip = new JSZip();
+        let addedCount = 0;
+        
+        // Pre-cache header image once for lightning fast zip generation
+        const cachedHeader = await getBase64ImageFromURL('header.png').catch(() => null);
+        
+        for (const num in completeSubjectState) {
+            const state = completeSubjectState[num];
+            // Allow download if generated
+            if (state.status === 'generated' || state.status === 'failed') {
+                const blob = await getPDFBlobForModule(num, cachedHeader);
+                const safeName = document.getElementById('studentName').value.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+                const safeReg = document.getElementById('regNumber').value.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+                const safeSub = subjSel.value.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+                const docType = (termSel.value === '4') ? "Assignment" : "RJ";
+                const cleanFilename = `${safeName}_${safeReg}_${docType}_${safeSub}-${state.roman}`;
+                zip.file(`${cleanFilename}.pdf`, blob);
+                addedCount++;
+            }
+        }
+        
+        if (addedCount > 0) {
+            const content = await zip.generateAsync({type:"blob"});
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(content);
+            const safeSub = subjSel.value.replace(/[^a-zA-Z0-9\s]/g, '');
+            a.download = `${safeSub}_All_RJs.zip`;
+            a.click();
+            incrementJournalCounter();
+
+            const successMsg = document.getElementById('successMsg');
+            if (successMsg) {
+                const successMsgText = document.getElementById('successMsgText');
+                if (successMsgText) successMsgText.innerText = "All Modules ZIP Downloaded Successfully!";
+                successMsg.classList.remove('hidden');
+                successMsg.classList.add('active');
+                successMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        } else {
+            alert("No modules generated yet!");
+        }
+        
+        btn.innerText = "📦 Download All (ZIP)";
+        btn.disabled = false;
     }
 
     // ---------------- RESET / NEW JOURNAL ----------------
@@ -1879,9 +2209,41 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
         updateCount();
     });
 
+    // 💾 STUDENT DETAILS PERSISTENCE (auto-save & default restore)
+    function initStudentDetailsPersistence() {
+        const studentName = document.getElementById('studentName');
+        const regNumber = document.getElementById('regNumber');
+        const classSection = document.getElementById('classSection');
+
+        if (studentName) {
+            const savedName = localStorage.getItem('saved_student_name');
+            if (savedName) studentName.value = savedName;
+            studentName.addEventListener('input', () => {
+                localStorage.setItem('saved_student_name', studentName.value);
+            });
+        }
+
+        if (regNumber) {
+            const savedReg = localStorage.getItem('saved_reg_number');
+            if (savedReg) regNumber.value = savedReg;
+            regNumber.addEventListener('input', () => {
+                localStorage.setItem('saved_reg_number', regNumber.value);
+            });
+        }
+
+        if (classSection) {
+            const savedSec = localStorage.getItem('saved_class_section');
+            if (savedSec) classSection.value = savedSec;
+            classSection.addEventListener('input', () => {
+                localStorage.setItem('saved_class_section', classSection.value);
+            });
+        }
+    }
+
     // Initialize UI on load
     updateUI();
     initJournalCounter();
+    initStudentDetailsPersistence();
 
     // Synchronously set default selections to Year II, Term 1
     const yearSelect = document.getElementById('year');
@@ -1895,4 +2257,59 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
             termSelect.dispatchEvent(new Event('change'));
         }
     }
+
+    // ---------------- PAGE VIEW ROUTING (HOME vs GENERATOR DEDICATED VIEW) ----------------
+    function showGeneratorView() {
+        const landing = document.getElementById('landingSections');
+        const cta = document.getElementById('landingCtaSection');
+        const navHomeBtn = document.getElementById('navHomeBtn');
+        if (landing) landing.classList.add('hidden');
+        if (cta) cta.classList.add('hidden');
+        if (navHomeBtn) navHomeBtn.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showHomeView() {
+        const landing = document.getElementById('landingSections');
+        const cta = document.getElementById('landingCtaSection');
+        const navHomeBtn = document.getElementById('navHomeBtn');
+        if (landing) landing.classList.remove('hidden');
+        if (cta) cta.classList.remove('hidden');
+        if (navHomeBtn) navHomeBtn.classList.add('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.querySelectorAll('a[href="#generator"]').forEach(el => {
+        el.addEventListener('click', (e) => {
+            e.preventDefault();
+            showGeneratorView();
+        });
+    });
+
+    const navHomeBtn = document.getElementById('navHomeBtn');
+    if (navHomeBtn) navHomeBtn.addEventListener('click', showHomeView);
+
+    const navBrand = document.getElementById('navBrand');
+    if (navBrand) navBrand.addEventListener('click', showHomeView);
+
+    // ---------------- SCROLL REVEAL ANIMATIONS ----------------
+    function initScrollReveal() {
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.12
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    }
+
+    initScrollReveal();
 });
