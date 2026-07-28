@@ -261,7 +261,24 @@ document.addEventListener('DOMContentLoaded', () => {
         updateAssessmentLabel();
     });
 
+    const generationModeContainer = document.getElementById('generationModeContainer');
+    const genModeRadios = document.querySelectorAll('input[name="genMode"]');
+    const assessmentNoContainer = document.getElementById('assessmentNoContainer');
+
+    genModeRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.value === 'complete') {
+                assessmentNoContainer.style.display = 'none';
+                topicInp.value = "Topics auto-generate for all modules";
+            } else {
+                assessmentNoContainer.style.display = 'block';
+                assessSel.dispatchEvent(new Event('change')); 
+            }
+        });
+    });
+
     subjSel.addEventListener('change', () => {
+        generationModeContainer.style.display = 'block';
         const year = yearSel.value;
         const term = termSel.value;
         const sub  = subjSel.value;
@@ -1081,6 +1098,15 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
     // ---------------- FORM SUBMIT & PDF GENERATION ----------------
     document.getElementById('journalForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        
+        const isCompleteSubject = document.querySelector('input[name="genMode"]:checked').value === "complete";
+        
+        if (isCompleteSubject) {
+            if(!validateCurrentStep(true)) return; // Pass true to skip assessmentNo validation
+            await handleCompleteSubjectGeneration();
+            return;
+        }
+
         if(!validateCurrentStep()) return;
 
         const successMsg = document.getElementById('successMsg');
@@ -1301,6 +1327,348 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
             }
         }
     });
+
+    async function handleCompleteSubjectGeneration() {
+        const successMsg = document.getElementById('successMsg');
+        successMsg.classList.add('hidden');
+        successMsg.classList.remove('active');
+
+        const btnText = document.getElementById('btnText');
+        const generateBtn = document.getElementById('generateBtn');
+        const progressContainer = document.getElementById('completeSubjectProgress');
+        const progressBar = document.getElementById('completeSubjectProgressBar');
+        const progressLog = document.getElementById('completeSubjectLog');
+        const summary = document.getElementById('completeSubjectSummary');
+        const retryBtn = document.getElementById('retryFailedBtn');
+        const step3Header = document.getElementById('step3Header');
+        
+        if (btnText) btnText.innerText = "Generating Complete Subject...";
+        generateBtn.disabled = true;
+        if(step3Header) step3Header.classList.add('hidden');
+        const txtAreasContainer = document.querySelector('#step-3 > div.space-y-6');
+        if(txtAreasContainer) txtAreasContainer.classList.add('hidden');
+        
+        progressContainer.classList.remove('hidden');
+        progressLog.innerHTML = '';
+        summary.classList.add('hidden');
+        retryBtn.classList.add('hidden');
+        
+        const zip = new JSZip();
+        
+        const year = yearSel.value;
+        const term = termSel.value;
+        const sub = subjSel.value;
+        const modules = academicData[year]?.[term]?.[sub] || {};
+        const moduleKeys = Object.keys(modules);
+        
+        const totalModules = moduleKeys.length;
+        let successCount = 0;
+        let failedModules = [];
+
+        const logProgress = (msg, isSuccess, isError) => {
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-2';
+            if(isSuccess) {
+                div.innerHTML = `<span class="text-emerald-500 font-bold">✓</span> <span class="text-emerald-700">${msg}</span>`;
+            } else if(isError) {
+                div.innerHTML = `<span class="text-rose-500 font-bold">✗</span> <span class="text-rose-700">${msg}</span>`;
+            } else {
+                div.innerHTML = `<span class="text-slate-400">⏳</span> <span class="text-slate-700">${msg}</span>`;
+            }
+            progressLog.appendChild(div);
+            progressLog.scrollTop = progressLog.scrollHeight;
+        };
+
+        const updateProgressBar = (completed) => {
+            const p = (completed / totalModules) * 100;
+            progressBar.style.width = `${p}%`;
+        };
+
+        const getBase64ImageFromURL = (url) => {
+            return new Promise((resolve, reject) => {
+                var img = new Image();
+                img.setAttribute("crossOrigin", "anonymous");
+                img.onload = () => {
+                    var canvas = document.createElement("canvas");
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    var ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL("image/png"));
+                };
+                img.onerror = error => reject(error);
+                img.src = url;
+            });
+        };
+
+        const headerImageData = await getBase64ImageFromURL('header.png').catch(() => null);
+
+        const getOpeningStyle = (tag) => {
+            const styles = {
+                EXP: ["Start by describing the visual setting of the classroom.", "Start with the first topic the professor mentioned.", "Start with a specific example that was written on the board.", "Start with the initial curiosity you felt entering the class."],
+                FEEL: ["Start with a moment of confusion you experienced.", "Start with a sense of excitement you felt about a concept.", "Start with a question that popped into your head.", "Start with how your mood shifted during the lecture."],
+                LEARN: ["Start with the most important technical insight.", "Start by clarifying a concept you previously misunderstood.", "Start with a 'lightbulb' moment you had.", "Start with a core principle that defines this module."],
+                APP: ["Start with a specific career goal where this applies.", "Start with a personal project idea inspired by this.", "Start with a real-life problem this theory solves.", "Start with how you will explain this to a teammate."],
+                CONC: ["Start with how your perspective has matured.", "Start with a final summary of your progress.", "Start with a look towards the next academic challenge.", "Start with the most memorable takeaway."]
+            };
+            const options = styles[tag] || styles.EXP;
+            return options[Math.floor(Math.random() * options.length)];
+        };
+
+        const sections = [
+            { tag: "EXP", name: "Experience", hint: `Format: Objective summary of topics covered. Tone: Academic and observational. Instruction: ${getOpeningStyle('EXP')}. DO NOT start with 'I experienced' or 'In this class'.` },
+            { tag: "FEEL", name: "Feelings", hint: `Format: Emotional or intellectual response to the difficulty or interest of the topic. Tone: Honest but professional. Instruction: ${getOpeningStyle('FEEL')}. DO NOT start with 'I felt' or 'My feelings were'.` },
+            { tag: "LEARN", name: "Learning", hint: `Format: Highlight key insights or fundamental concepts gained. Tone: Simple language with academic clarity. Instruction: ${getOpeningStyle('LEARN')}. DO NOT start with 'I learned' or 'The key insight was'.` },
+            { tag: "APP", name: "Application", hint: `Format: Describe real-life/career application and practical utility. Tone: Use relatable examples. Instruction: ${getOpeningStyle('APP')}. DO NOT start with 'I will apply' or 'This can be applied'.` },
+            { tag: "CONC", name: "Conclusion", hint: `Format: Overall learning, shaping of thinking/knowledge. Tone: Depth of reflection. Instruction: ${getOpeningStyle('CONC')}. DO NOT start with 'In conclusion' or 'To summarize'.` }
+        ];
+
+        async function processModule(num) {
+            const moduleData = modules[num];
+            const title = moduleData.title || `Module ${num}`;
+            const syllabus = moduleData.syllabus || "";
+            const romanNumerals = ["I","II","III","IV","V","VI","VII","VIII","IX","X"];
+            const moduleRoman = romanNumerals[parseInt(num) - 1] || num;
+            
+            const topicStr = `${title} (${syllabus.split(',')[0]}...)`;
+
+            const loadingId = `mod-loading-${num}`;
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = loadingId;
+            loadingDiv.className = 'flex items-center gap-2 mb-2 text-violet-600 font-semibold';
+            loadingDiv.innerHTML = `<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating Module ${moduleRoman}: ${title}...`;
+            progressLog.appendChild(loadingDiv);
+            progressLog.scrollTop = progressLog.scrollHeight;
+
+            let modSuccess = false;
+            let generatedContent = {};
+
+            try {
+                for (const sec of sections) {
+                    let retries = 1; 
+                    let secSuccess = false;
+                    
+                    while (retries >= 0 && !secSuccess) {
+                        try {
+                            const controller = new AbortController();
+                            const timeoutId = setTimeout(() => controller.abort(), 12000); 
+
+                            const res = await fetch(`${API_BASE_URL}/api/generate-section`, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                signal: controller.signal,
+                                body: JSON.stringify({ 
+                                    subject: sub, 
+                                    moduleRoman, 
+                                    topic: topicStr, 
+                                    syllabus, 
+                                    sectionTag: sec.tag,
+                                    styleInstruction: sec.hint,
+                                    requestSeed: Date.now()
+                                })
+                            });
+                            clearTimeout(timeoutId);
+                            const data = await res.json();
+                            
+                            if (!res.ok) {
+                                if (data.retryAfter) {
+                                    await new Promise(r => setTimeout(r, parseInt(data.retryAfter) * 1000));
+                                    throw new Error("Rate limit");
+                                }
+                                throw new Error("API failed");
+                            }
+                            generatedContent[sec.tag] = data.text;
+                            secSuccess = true;
+                            // Wait briefly to avoid hitting rate limits too fast
+                            await new Promise(r => setTimeout(r, 600));
+                        } catch (err) {
+                            retries--;
+                            if(retries < 0) throw err;
+                            await new Promise(r => setTimeout(r, 2000));
+                        }
+                    }
+                }
+                modSuccess = true;
+            } catch (err) {
+                console.error("Module generation failed: ", err);
+            }
+
+            const loader = document.getElementById(loadingId);
+            if(loader) loader.remove();
+
+            if (!modSuccess) {
+                logProgress(`Module ${moduleRoman}: ${title} failed to generate.`, false, true);
+                failedModules.push(num);
+                return;
+            }
+
+            // Create PDF for this module
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ format: 'a4', orientation: 'portrait' });
+            
+            const dataObj = {
+                name: document.getElementById('studentName').value,
+                reg: document.getElementById('regNumber').value,
+                sec: document.getElementById('classSection').value,
+                yt: `Year ${yearSel.value} - Term ${termSel.value}`,
+                sub: sub,
+                assNum: moduleRoman,
+                date: formatDate(document.getElementById('journalDate').value),
+                topic: topicStr,
+                exp: generatedContent["EXP"],
+                feel: generatedContent["FEEL"],
+                learn: generatedContent["LEARN"],
+                app: generatedContent["APP"],
+                conc: generatedContent["CONC"]
+            };
+
+            const pageWidth = doc.internal.pageSize.width;
+            let startY = 45; 
+
+            doc.autoTable({
+                startY: startY, margin: { top: 45 }, theme: 'grid',
+                styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
+                body: [
+                    [{ content: 'Student Name', styles: { fontStyle: 'bold', cellWidth: 50 } }, { content: dataObj.name, colSpan: 2, styles: { fontStyle: 'bold' } }],
+                    [{ content: 'Student Registration Number', styles: { fontStyle: 'bold' } }, { content: dataObj.reg }, { content: `Class & Section: ${dataObj.sec}`, styles: { fontStyle: 'bold' } }],
+                    [{ content: 'Study Level : UG/PG', styles: { fontStyle: 'bold' } }, { content: 'UG' }, { content: `Year & Term: ${dataObj.yt}`, styles: { fontStyle: 'bold' } }],
+                    [{ content: 'Subject Name', styles: { fontStyle: 'bold' } }, { content: dataObj.sub, colSpan: 2, styles: { fontStyle: 'bold' } }]
+                ],
+            });
+
+            doc.autoTable({
+                startY: doc.lastAutoTable.finalY + 5, margin: { top: 45 }, theme: 'grid',
+                styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
+                body: [
+                    [{ content: 'Name of the Assessment', styles: { fontStyle: 'bold', cellWidth: 60 } }, { content: `Reflective Journal - ${dataObj.assNum}` }],
+                    [{ content: 'Date of Submission', styles: { fontStyle: 'bold' } }, { content: dataObj.date }]
+                ],
+            });
+
+            let currentY = doc.lastAutoTable.finalY + 15;
+            doc.setFont("times", "bold");
+            doc.setFontSize(14);
+            doc.text(`Reflective Journal - ${dataObj.assNum}`, pageWidth/2, currentY, { align: "center" });
+            currentY += 8;
+
+            doc.autoTable({
+                startY: currentY, theme: 'plain',
+                styles: { font: 'times', fontSize: 12, textColor: [0, 0, 0], cellPadding: 2 },
+                body: [
+                    [{ content: 'Topic: ', styles: { fontStyle: 'bold', cellWidth: 15 } }, { content: dataObj.topic }]
+                ],
+            });
+
+            currentY = doc.lastAutoTable.finalY + 5;
+            doc.setFont("times", "normal");
+            doc.setFontSize(12);
+            doc.text("Journal Entry:", 14, currentY);
+            currentY += 8;
+
+            const sectionsContent = [
+                { title: "1. Experience", body: dataObj.exp },
+                { title: "2. Feelings", body: dataObj.feel },
+                { title: "3. Learning", body: dataObj.learn },
+                { title: "4. Application", body: dataObj.app },
+                { title: "5. Conclusion", body: dataObj.conc }
+            ];
+
+            sectionsContent.forEach(sec => {
+                if (currentY > 260) { doc.addPage(); currentY = 45; }
+                doc.setFont("times", "bold");
+                doc.text(sec.title, 14, currentY);
+                currentY += 6;
+                doc.setFont("times", "normal");
+                const splitText = doc.splitTextToSize(sec.body, pageWidth - 28);
+                const textHeight = splitText.length * 6;
+                if (currentY + textHeight > 270) {
+                    let linesAvailable = Math.floor((270 - currentY) / 6);
+                    if (linesAvailable > 0) {
+                        doc.text(splitText.slice(0, linesAvailable), 14, currentY, { align: 'justify', lineHeightFactor: 1.5 });
+                    }
+                    doc.addPage();
+                    currentY = 45;
+                    doc.text(splitText.slice(linesAvailable), 14, currentY, { align: 'justify', lineHeightFactor: 1.5 });
+                    currentY += (splitText.length - linesAvailable) * 6 + 6;
+                } else {
+                    doc.text(splitText, 14, currentY, { align: 'justify', lineHeightFactor: 1.5 });
+                    currentY += textHeight + 6;
+                }
+            });
+
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                if (headerImageData) {
+                    doc.addImage(headerImageData, 'PNG', 0, 0, 210, 35);
+                } else {
+                    doc.setFont("helvetica", "bold");
+                    doc.setFontSize(22);
+                    doc.text("AURORA HIGHER EDUCATION", pageWidth/2, 20, { align: "center" });
+                    doc.setFontSize(12);
+                    doc.setFont("helvetica", "normal");
+                    doc.text("Deemed-to-be-University Estd.u/s.03 of UGC Act 1956", pageWidth/2, 27, { align: "center" });
+                    doc.setFontSize(10);
+                    doc.text("Uppal, Hyderabad, Telangana | Bhongir, Yadadri, Telangana", pageWidth/2, 33, { align: "center" });
+                }
+            }
+
+            const pdfBlob = doc.output('blob');
+            const safeName = dataObj.name.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+            const safeReg = dataObj.reg.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+            const safeSub = dataObj.sub.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+            zip.file(`${safeName}_${safeReg}_RJ_${safeSub}-${moduleRoman}.pdf`, pdfBlob);
+            
+            logProgress(`✓ Module ${moduleRoman}: ${title} Complete`, true, false);
+            successCount++;
+            updateProgressBar(successCount + failedModules.length);
+        }
+
+        for(let i=0; i<totalModules; i++) {
+            await processModule(moduleKeys[i]);
+        }
+
+        summary.classList.remove('hidden');
+        summary.innerHTML = `Generated: ${successCount} / ${totalModules} PDFs`;
+
+        if (failedModules.length > 0) {
+            summary.innerHTML += `<br><span class="text-rose-600">Failed: ${failedModules.length} Modules</span>`;
+            retryBtn.classList.remove('hidden');
+            
+            retryBtn.onclick = async () => {
+                retryBtn.classList.add('hidden');
+                const modulesToRetry = [...failedModules];
+                failedModules = [];
+                for(let i=0; i<modulesToRetry.length; i++) {
+                    await processModule(modulesToRetry[i]);
+                }
+                summary.innerHTML = `Generated: ${successCount} / ${totalModules} PDFs`;
+                if(failedModules.length === 0) {
+                    downloadZip();
+                } else {
+                    summary.innerHTML += `<br><span class="text-rose-600">Failed: ${failedModules.length} Modules</span>`;
+                    retryBtn.classList.remove('hidden');
+                }
+            };
+        } else {
+            downloadZip();
+        }
+
+        function downloadZip() {
+            const safeSub = sub.replace(/[^a-zA-Z0-9\s]/g, '');
+            zip.generateAsync({type:"blob"}).then(function(content) {
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(content);
+                a.download = `${safeSub}.zip`;
+                a.click();
+            });
+            successMsg.classList.remove('hidden');
+            successMsg.classList.add('active');
+            
+            if (btnText) btnText.innerText = "Download Complete Subject ZIP";
+            generateBtn.disabled = false;
+        }
+    }
 
     // ---------------- RESET / NEW JOURNAL ----------------
     const resetBtn = document.getElementById('resetBtn');
