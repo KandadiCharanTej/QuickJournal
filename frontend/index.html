@@ -38,7 +38,7 @@
                 ← Back to Home
             </button>
             <div class="hidden sm:block text-sm font-semibold text-slate-500">
-                Powered for NIAT x Aurora Students
+                Built for NIAT × Aurora Students
             </div>
         </div>
     </nav>
@@ -50,6 +50,8 @@
         class="min-h-[85vh] w-full flex flex-col items-center justify-center px-4 text-center relative z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-100/60 via-slate-50 to-slate-50 overflow-hidden py-16">
         <div class="bg-blob-purple"></div>
         <div class="bg-blob-pink"></div>
+        <!-- Subtle Radial Glow behind Hero Heading -->
+        <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-violet-400/15 via-fuchsia-400/15 to-transparent rounded-full blur-[90px] pointer-events-none"></div>
         
         <div
             class="reveal reveal-scale inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full border border-violet-200 bg-white/90 backdrop-blur-md text-xs sm:text-sm font-bold text-violet-700 shadow-sm hover:shadow transition-all">
@@ -59,24 +61,69 @@
         </div>
 
         <h1
-            class="reveal reveal-scale delay-100 text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-slate-900 leading-[1.15] max-w-5xl drop-shadow-sm">
-            Craft Perfect Reflective Journals.<br class="hidden sm:inline">
-            <span class="bg-clip-text text-transparent bg-gradient-to-r from-violet-600 via-fuchsia-600 to-indigo-600">In Seconds with AI.</span>
+            class="reveal reveal-scale delay-100 text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-slate-900 leading-[1.15] max-w-4xl drop-shadow-sm">
+            Stop Spending Hours<br class="hidden sm:inline">
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-violet-600 via-fuchsia-600 to-indigo-600">Writing Reflective Journals.</span>
         </h1>
 
-        <p class="reveal delay-200 text-base sm:text-xl text-slate-600 max-w-3xl mt-6 mb-10 font-medium leading-relaxed">
-            Generate natural, university-ready reflective journals with proper formatting, personalized content, and one-click PDF downloads.
+        <p class="reveal delay-200 text-base sm:text-xl text-slate-600 max-w-2xl mt-6 mb-6 font-medium leading-relaxed">
+            Create natural, university-ready reflective journals with AI. Personalized for your subject, professionally formatted, and ready to download in one click.
         </p>
 
-        <div class="reveal delay-300 flex flex-col sm:flex-row items-center gap-4">
+        <!-- 4 Community Impact Cards (Compact & Sleek Bar) -->
+        <div id="communityImpact" class="w-full max-w-4xl my-5 scroll-mt-24">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <!-- Card 1: Journals Generated -->
+                <div class="reveal reveal-scale delay-100 bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-xl p-3 sm:p-3.5 shadow-sm hover:shadow-md hover:border-violet-300 hover:-translate-y-0.5 transition-all duration-300 flex flex-col items-center text-center group">
+                    <div class="flex items-center gap-1.5 mb-1">
+                        <span class="text-base sm:text-lg">📄</span>
+                        <span id="statPdfCount" class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">1,214+</span>
+                    </div>
+                    <div class="text-[10px] font-extrabold text-slate-800 uppercase tracking-wider leading-none mb-1">Journals Generated</div>
+                    <p class="text-[9px] text-slate-500 font-normal leading-tight">Helping students complete work faster.</p>
+                </div>
+
+                <!-- Card 2: Students Helped -->
+                <div class="reveal reveal-scale delay-200 bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-xl p-3 sm:p-3.5 shadow-sm hover:shadow-md hover:border-violet-300 hover:-translate-y-0.5 transition-all duration-300 flex flex-col items-center text-center group">
+                    <div class="flex items-center gap-1.5 mb-1">
+                        <span class="text-base sm:text-lg">🎓</span>
+                        <span id="statStudentsCount" class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">101+</span>
+                    </div>
+                    <div class="text-[10px] font-extrabold text-slate-800 uppercase tracking-wider leading-none mb-1">Students Helped</div>
+                    <p class="text-[9px] text-slate-500 font-normal leading-tight">Used across NIAT × Aurora.</p>
+                </div>
+
+                <!-- Card 3: Hours Saved -->
+                <div class="reveal reveal-scale delay-300 bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-xl p-3 sm:p-3.5 shadow-sm hover:shadow-md hover:border-violet-300 hover:-translate-y-0.5 transition-all duration-300 flex flex-col items-center text-center group">
+                    <div class="flex items-center gap-1.5 mb-1">
+                        <span class="text-base sm:text-lg">⏱</span>
+                        <span id="statHoursCount" class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">303+</span>
+                    </div>
+                    <div class="text-[10px] font-extrabold text-slate-800 uppercase tracking-wider leading-none mb-1">Hours Saved</div>
+                    <p class="text-[9px] text-slate-500 font-normal leading-tight">Time saved on formatting.</p>
+                </div>
+
+                <!-- Card 4: Average Module Generation Time -->
+                <div class="reveal reveal-scale delay-400 bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-xl p-3 sm:p-3.5 shadow-sm hover:shadow-md hover:border-violet-300 hover:-translate-y-0.5 transition-all duration-300 flex flex-col items-center text-center group">
+                    <div class="flex items-center gap-1.5 mb-1">
+                        <span class="text-base sm:text-lg">⚡</span>
+                        <span id="statAvgTime" class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none">&lt;30 Sec</span>
+                    </div>
+                    <div class="text-[10px] font-extrabold text-slate-800 uppercase tracking-wider leading-none mb-1">Avg. Module Gen.</div>
+                    <p class="text-[9px] text-slate-500 font-normal leading-tight">From Generate click to PDF download.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="reveal delay-300 flex flex-col sm:flex-row items-center gap-4 mt-2">
             <a href="#generator" class="btn-glow px-8 py-4 rounded-xl text-lg font-bold flex items-center gap-3 shadow-2xl transition-all hover:scale-[1.02]">
-                🚀 Launch Generator
+                🚀 Start Generating
                 <svg class="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
                 </svg>
             </a>
             <a href="#howItWorks" class="px-7 py-4 rounded-xl text-base font-bold bg-white/80 hover:bg-white text-slate-700 border border-slate-200 shadow-sm transition-all hover:border-violet-300 hover:shadow">
-                💡 How It Works
+                📖 See How It Works
             </a>
         </div>
     </section>
@@ -90,105 +137,108 @@
             <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-3 mb-3">
                 Engineered for Academic Excellence
             </h2>
-            <p class="text-slate-500 font-medium max-w-lg mx-auto">Stop wasting hours on repetitive formatting and generic summaries.</p>
+            <p class="text-slate-500 font-medium max-w-lg mx-auto">Everything you need to complete reflective journals cleanly, correctly, and quickly.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Card 1 -->
-            <div class="reveal reveal-scale delay-100 glass-panel p-8 rounded-2xl hover-lift">
+            <div class="group reveal reveal-scale delay-100 glass-panel p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-purple-500/15 hover:border-violet-300">
                 <div
-                    class="w-12 h-12 rounded-lg bg-violet-100 border border-violet-200 flex items-center justify-center mb-6 text-violet-600 text-xl shadow-sm">
+                    class="w-12 h-12 rounded-xl bg-violet-100 border border-violet-200 flex items-center justify-center mb-6 text-violet-600 text-xl shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                     ⚡</div>
-                <h3 class="text-xl font-bold text-slate-800 mb-3">Instant AI Generation</h3>
-                <p class="text-slate-600 text-sm leading-relaxed">Turn your topic into a structured 2000-word academic
-                    journal instantly with highly context-aware AI models that understand exactly what you need.</p>
+                <h3 class="text-xl font-bold text-slate-900 mb-2 tracking-tight">Instant AI Generation</h3>
+                <p class="text-slate-600 text-sm leading-relaxed font-normal">Turn your selected topic into a structured reflective journal within minutes.</p>
             </div>
             <!-- Card 2 -->
-            <div class="reveal reveal-scale delay-200 glass-panel p-8 rounded-2xl hover-lift">
+            <div class="group reveal reveal-scale delay-200 glass-panel p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-purple-500/15 hover:border-violet-300">
                 <div
-                    class="w-12 h-12 rounded-lg bg-violet-100 border border-violet-200 flex items-center justify-center mb-6 text-violet-600 text-xl shadow-sm">
+                    class="w-12 h-12 rounded-xl bg-violet-100 border border-violet-200 flex items-center justify-center mb-6 text-violet-600 text-xl shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                     📄</div>
-                <h3 class="text-xl font-bold text-slate-800 mb-3">Auto-Formatted PDF</h3>
-                <p class="text-slate-600 text-sm leading-relaxed">Downloads perfectly structured with the official
-                    Aurora letterhead, cover tables, and exact formatting margins required for submission.</p>
+                <h3 class="text-xl font-bold text-slate-900 mb-2 tracking-tight">Professional PDF Formatting</h3>
+                <p class="text-slate-600 text-sm leading-relaxed font-normal">Automatically formatted according to your university submission structure.</p>
             </div>
             <!-- Card 3 -->
-            <div class="reveal reveal-scale delay-300 glass-panel p-8 rounded-2xl hover-lift">
+            <div class="group reveal reveal-scale delay-300 glass-panel p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-purple-500/15 hover:border-violet-300">
                 <div
-                    class="w-12 h-12 rounded-lg bg-violet-100 border border-violet-200 flex items-center justify-center mb-6 text-violet-600 text-xl shadow-sm">
-                    🎓</div>
-                <h3 class="text-xl font-bold text-slate-800 mb-3">Structured Content</h3>
-                <p class="text-slate-600 text-sm leading-relaxed">Automatically divides content into required sections:
-                    Experience, Feelings, Learning, Application, and Conclusion exactly as graded.</p>
+                    class="w-12 h-12 rounded-xl bg-violet-100 border border-violet-200 flex items-center justify-center mb-6 text-violet-600 text-xl shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                    🧠</div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2 tracking-tight">Natural Writing Style</h3>
+                <p class="text-slate-600 text-sm leading-relaxed font-normal">Designed to read like genuine student writing rather than generic AI responses.</p>
             </div>
             <!-- Card 4 -->
-            <div class="reveal reveal-scale delay-400 glass-panel p-8 rounded-2xl hover-lift">
+            <div class="group reveal reveal-scale delay-400 glass-panel p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-purple-500/15 hover:border-violet-300">
                 <div
-                    class="w-12 h-12 rounded-lg bg-violet-100 border border-violet-200 flex items-center justify-center mb-6 text-violet-600 text-xl shadow-sm">
-                    🧠</div>
-                <h3 class="text-xl font-bold text-slate-800 mb-3">Human-like Writing Style</h3>
-                <p class="text-slate-600 text-sm leading-relaxed">Bypasses basic AI checking patterns by using authentic
-                    reflection points, academic transitions, and natural student phrasing.</p>
+                    class="w-12 h-12 rounded-xl bg-violet-100 border border-violet-200 flex items-center justify-center mb-6 text-violet-600 text-xl shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                    📦</div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2 tracking-tight">Bulk Generation</h3>
+                <p class="text-slate-600 text-sm leading-relaxed font-normal">Generate an individual journal, an entire subject, or a complete academic term with just a few clicks.</p>
             </div>
             <!-- Card 5 -->
-            <div class="reveal reveal-scale delay-500 glass-panel p-8 rounded-2xl hover-lift lg:col-span-2">
-                <div class="flex items-start gap-6">
-                    <div
-                        class="w-12 h-12 shrink-0 rounded-lg bg-violet-100 border border-violet-200 flex items-center justify-center mt-1 text-violet-600 text-xl shadow-sm">
-                        ⏱️</div>
-                    <div>
-                        <h3 class="text-xl font-bold text-slate-800 mb-3">Saves 2–3 Hours Per Assignment</h3>
-                        <p class="text-slate-600 text-sm leading-relaxed max-w-lg">Focus on learning, not formatting.
-                            Reclaim your weekend while delivering top-tier reflective journals that hit every grading
-                            matrix point meticulously, cleanly, and securely.</p>
-                    </div>
-                </div>
+            <div class="group reveal reveal-scale delay-500 glass-panel p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-purple-500/15 hover:border-violet-300">
+                <div
+                    class="w-12 h-12 rounded-xl bg-violet-100 border border-violet-200 flex items-center justify-center mb-6 text-violet-600 text-xl shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                    🎓</div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2 tracking-tight">Multiple Academic Terms</h3>
+                <p class="text-slate-600 text-sm leading-relaxed font-normal">Supports multiple years, terms, subjects and modules through one unified dashboard.</p>
+            </div>
+            <!-- Card 6 -->
+            <div class="group reveal reveal-scale delay-600 glass-panel p-8 rounded-2xl transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-purple-500/15 hover:border-violet-300">
+                <div
+                    class="w-12 h-12 rounded-xl bg-violet-100 border border-violet-200 flex items-center justify-center mb-6 text-violet-600 text-xl shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                    ⏱️</div>
+                <h3 class="text-xl font-bold text-slate-900 mb-2 tracking-tight">Time Saving</h3>
+                <p class="text-slate-600 text-sm leading-relaxed font-normal">Reduce repetitive writing and formatting so you can focus on learning.</p>
             </div>
         </div>
     </section>
 
     <!-- 4. How It Works -->
     <section id="howItWorks" class="py-24 px-4 bg-white border-y border-slate-200 relative z-10 w-full shadow-sm scroll-mt-20">
-        <div class="max-w-5xl mx-auto text-center">
+        <div class="max-w-6xl mx-auto text-center">
             <div class="reveal text-center mb-16">
                 <span class="text-xs font-extrabold uppercase tracking-widest text-violet-600 bg-violet-100/80 px-3 py-1 rounded-full border border-violet-200">
                     ⚡ Simple Workflow
                 </span>
                 <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mt-3 mb-2">How It Works</h2>
-                <p class="text-slate-500 font-medium">Generate your reflective journal entry in 3 effortless steps</p>
+                <p class="text-slate-500 font-medium">Generate your reflective documents cleanly in four straightforward steps</p>
             </div>
 
-            <div class="flex flex-col md:flex-row justify-between relative gap-10">
-                <div class="step-glow-line hidden md:block"></div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
 
                 <div
-                    class="reveal reveal-left delay-100 relative z-10 flex flex-col items-center glass-panel p-6 rounded-2xl flex-1 border-violet-200 hover:border-violet-400 transition-colors bg-white">
+                    class="group reveal reveal-left delay-100 relative z-10 flex flex-col items-center glass-panel p-6 rounded-2xl border-violet-200 hover:border-violet-400 hover:-translate-y-1 hover:shadow-xl transition-all bg-white text-center">
                     <div
-                        class="w-12 h-12 rounded-full bg-violet-600 border-4 border-white flex items-center justify-center text-white font-bold mb-4 shadow-lg shadow-violet-500/30">
+                        class="w-12 h-12 rounded-full bg-violet-600 border-4 border-white flex items-center justify-center text-white font-bold mb-4 shadow-lg shadow-violet-500/30 group-hover:scale-110 transition-transform">
                         1</div>
-                    <h4 class="text-lg font-bold text-slate-800 mb-2">Enter Details</h4>
-                    <p class="text-slate-500 text-sm">Select your subject and topic from the academic dropdowns inside
-                        the dashboard.</p>
+                    <h4 class="text-base font-bold text-slate-900 mb-2">Enter Student Information</h4>
+                    <p class="text-slate-500 text-xs font-normal leading-relaxed">Provide your name, registration number, and class section details.</p>
                 </div>
 
                 <div
-                    class="reveal reveal-scale delay-200 relative z-10 flex flex-col items-center glass-panel p-6 rounded-2xl flex-1 border-violet-200 hover:border-violet-400 transition-colors bg-white">
+                    class="group reveal reveal-scale delay-200 relative z-10 flex flex-col items-center glass-panel p-6 rounded-2xl border-violet-200 hover:border-violet-400 hover:-translate-y-1 hover:shadow-xl transition-all bg-white text-center">
                     <div
-                        class="w-12 h-12 rounded-full bg-violet-600 border-4 border-white flex items-center justify-center text-white font-bold mb-4 shadow-lg shadow-violet-500/30">
+                        class="w-12 h-12 rounded-full bg-violet-600 border-4 border-white flex items-center justify-center text-white font-bold mb-4 shadow-lg shadow-violet-500/30 group-hover:scale-110 transition-transform">
                         2</div>
-                    <h4 class="text-lg font-bold text-slate-800 mb-2">AI Generates Content</h4>
-                    <p class="text-slate-500 text-sm">Our powerful cloud AI engine writes a highly structured academic
-                        entry for you instantly.</p>
+                    <h4 class="text-base font-bold text-slate-900 mb-2">Select Academic Details</h4>
+                    <p class="text-slate-500 text-xs font-normal leading-relaxed">Choose Year, Term, Subject, and Module — or generate an entire Subject or Term.</p>
                 </div>
 
                 <div
-                    class="reveal reveal-right delay-300 relative z-10 flex flex-col items-center glass-panel p-6 rounded-2xl flex-1 border-violet-200 hover:border-violet-400 transition-colors bg-gradient-to-b from-violet-50 to-white">
+                    class="group reveal reveal-scale delay-300 relative z-10 flex flex-col items-center glass-panel p-6 rounded-2xl border-violet-200 hover:border-violet-400 hover:-translate-y-1 hover:shadow-xl transition-all bg-white text-center">
                     <div
-                        class="w-12 h-12 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 border-4 border-white flex items-center justify-center text-white font-bold mb-4 shadow-lg shadow-fuchsia-500/40">
+                        class="w-12 h-12 rounded-full bg-violet-600 border-4 border-white flex items-center justify-center text-white font-bold mb-4 shadow-lg shadow-violet-500/30 group-hover:scale-110 transition-transform">
                         3</div>
-                    <h4 class="text-lg font-bold text-slate-800 mb-2">Download PDF</h4>
-                    <p class="text-slate-500 text-sm">Export a professionally formatted PDF ready to submit, completely
-                        seamlessly.</p>
+                    <h4 class="text-base font-bold text-slate-900 mb-2">AI Generates Your Content</h4>
+                    <p class="text-slate-500 text-xs font-normal leading-relaxed">Smart algorithms draft context-aware reflection entries structured into required sections.</p>
+                </div>
+
+                <div
+                    class="group reveal reveal-right delay-400 relative z-10 flex flex-col items-center glass-panel p-6 rounded-2xl border-violet-200 hover:border-violet-400 hover:-translate-y-1 hover:shadow-xl transition-all bg-gradient-to-b from-violet-50 to-white text-center">
+                    <div
+                        class="w-12 h-12 rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 border-4 border-white flex items-center justify-center text-white font-bold mb-4 shadow-lg shadow-fuchsia-500/40 group-hover:scale-110 transition-transform">
+                        4</div>
+                    <h4 class="text-base font-bold text-slate-900 mb-2">Download Formatted PDF</h4>
+                    <p class="text-slate-500 text-xs font-normal leading-relaxed">Export clean, submission-ready PDF files formatted with official academic headers.</p>
                 </div>
             </div>
         </div>
@@ -198,32 +248,36 @@
     <section class="py-24 px-4 w-full max-w-6xl mx-auto relative z-10 flex flex-col lg:flex-row items-center gap-16">
         <div class="reveal reveal-left flex-1">
             <h2
-                class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-500 mb-6">
-                Pixel-Perfect Formatting.</h2>
-            <p class="text-slate-600 text-lg leading-relaxed mb-6 font-medium">
-                Don't worry about tables, margins, fonts, or headers. QuickJournal automatically aligns everything
-                perfectly to match academic submission guidelines visually.
+                class="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 mb-6 tracking-tight">
+                Clean, Submission-Ready Documents</h2>
+            <p class="text-slate-600 text-base sm:text-lg leading-relaxed mb-6 font-normal">
+                Your journal is automatically prepared in a clean, professional format ready for submission. No manual formatting, no editing tables, no adjusting margins — simply review and download.
             </p>
             <ul class="space-y-4">
                 <li class="flex items-center gap-3 text-slate-700 font-semibold">
                     <span
-                        class="text-violet-600 bg-violet-100 rounded-full w-6 h-6 flex items-center justify-center">✓</span>
-                    Official University Letterhead Injection
+                        class="text-violet-600 bg-violet-100 rounded-full w-6 h-6 flex items-center justify-center shrink-0">✓</span>
+                    Official University Header Integration
                 </li>
                 <li class="flex items-center gap-3 text-slate-700 font-semibold">
                     <span
-                        class="text-violet-600 bg-violet-100 rounded-full w-6 h-6 flex items-center justify-center">✓</span>
-                    Automated Cover Information Tables
+                        class="text-violet-600 bg-violet-100 rounded-full w-6 h-6 flex items-center justify-center shrink-0">✓</span>
+                    Pre-Formatted Student Cover Information
                 </li>
                 <li class="flex items-center gap-3 text-slate-700 font-semibold">
                     <span
-                        class="text-violet-600 bg-violet-100 rounded-full w-6 h-6 flex items-center justify-center">✓</span>
-                    Standardized Font & Margin Compliance
+                        class="text-violet-600 bg-violet-100 rounded-full w-6 h-6 flex items-center justify-center shrink-0">✓</span>
+                    Standardized Typography & Compliant Margins
                 </li>
             </ul>
         </div>
-        <div class="reveal reveal-right delay-200 flex-1 preview-tilt-container perspective w-full max-w-md">
-            <div class="preview-tilt p-6 text-xs text-black border border-slate-200">
+        <div class="reveal reveal-right delay-200 flex-1 preview-tilt-container perspective w-full max-w-md relative">
+            <!-- Official PDF Format Premium Badge -->
+            <div class="absolute -top-3 -right-3 z-30 px-3.5 py-1.5 bg-white/95 backdrop-blur-md text-violet-700 font-extrabold text-xs rounded-full border border-violet-200/90 shadow-lg flex items-center gap-1.5">
+                <span class="text-sm">✨</span> Official PDF Format
+            </div>
+
+            <div class="preview-tilt p-6 text-xs text-black border border-slate-200 animate-float">
                 <div class="border-b-4 border-black pb-4 mb-4 text-center pb-2">
                     <h3 class="text-lg font-bold uppercase" style="font-family: serif;">Aurora Higher Education</h3>
                     <p class="text-slate-600">Uppal, Hyderabad, Telangana</p>
@@ -248,7 +302,7 @@
                         Learning:</span> Mastered iteration including while and for loops...</div>
             </div>
         </div>
-    </div>
+    </section>
     </div>
 
     <!-- 8. Generator App (The core form) -->
@@ -260,11 +314,21 @@
             <h2 class="text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-violet-600 via-fuchsia-600 to-indigo-600 mt-3 mb-2">
                 Build Your Document
             </h2>
-            <p class="text-slate-500 font-medium">Select your options below to construct your reflective journal PDF.</p>
+            <p class="text-slate-600 font-medium max-w-xl mx-auto">Choose how you want to generate your documents. Whether you need one journal or an entire term, QuickJournal simplifies the entire process.</p>
         </div>
 
         <main class="reveal reveal-scale w-full bg-white border border-slate-200/90 rounded-2xl p-6 sm:p-10 shadow-2xl relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-violet-600 via-fuchsia-500 to-indigo-600"></div>
+
+            <!-- Trust Note Box -->
+            <div class="mb-8 p-4 bg-violet-50/70 border border-violet-200/80 rounded-xl text-xs text-slate-700 space-y-1 shadow-sm">
+                <div class="flex items-center gap-1.5 font-bold text-violet-800 text-xs sm:text-sm">
+                    <span>🔒</span> <span>Personalized Content Generation</span>
+                </div>
+                <p class="leading-relaxed font-normal text-slate-600">
+                    Every journal is generated based on your selected Year, Term, Subject, Module, and Student Details. This helps create personalized content, making it highly unlikely that two students will receive the exact same journal.
+                </p>
+            </div>
             <div class="flex items-center justify-between mb-10 relative">
                 <div
                     class="absolute left-0 top-[20px] -translate-y-1/2 w-full h-[3px] bg-slate-100 z-0 rounded-full hidden sm:block">
@@ -598,20 +662,28 @@
                 </div>
 
                 <div id="successMsg"
-                    class="hidden step-content mt-6 p-6 bg-emerald-50 text-emerald-700 rounded-xl text-center font-bold border border-emerald-200 shadow-lg">
-                    <div class="flex flex-col items-center gap-4">
-                        <div class="flex items-center gap-2 text-lg">
-                            <span class="text-2xl">🎉</span> 
-                            <span>PDF Generated Successfully!</span>
+                    class="hidden step-content mt-6 p-8 bg-gradient-to-b from-emerald-50 to-white text-emerald-950 rounded-2xl text-center border border-emerald-200 shadow-xl space-y-5">
+                    <div class="flex flex-col items-center gap-3">
+                        <div class="w-14 h-14 bg-emerald-100 border border-emerald-200 rounded-full flex items-center justify-center text-3xl shadow-sm">
+                            ✅
                         </div>
-                        <p class="text-sm font-medium text-emerald-600 mb-2">Check your downloads folder for the document.</p>
-                        <button type="button" id="resetBtn" 
-                            class="flex items-center gap-2 px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-all shadow-md hover:shadow-xl active:scale-95 group">
-                            <svg class="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                            </svg>
-                            Generate New Journal
-                        </button>
+                        <div>
+                            <h3 class="text-2xl font-black text-slate-900 tracking-tight">Your Reflective Journal is Ready!</h3>
+                            <p class="text-sm font-semibold text-slate-600 mt-1">Your PDF has been generated successfully.</p>
+                        </div>
+                        <div class="px-4 py-3 bg-violet-50 border border-violet-200/80 rounded-xl text-violet-800 text-xs sm:text-sm font-bold shadow-sm flex items-center gap-2">
+                            <span>💡</span> <span>You just saved approximately 2–3 hours of manual work.</span>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3 pt-2 w-full max-w-sm justify-center">
+                            <button type="button" id="resetBtn" 
+                                class="flex-1 py-3 px-6 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold transition-all shadow-md hover:shadow-xl active:scale-95 text-sm flex items-center justify-center gap-2">
+                                🚀 Generate Another Journal
+                            </button>
+                            <button type="button" id="closeSuccessBtn" 
+                                class="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl border border-slate-200 transition-all text-sm">
+                                Close
+                            </button>
+                        </div>
                     </div>
                 </div>
             </form>
@@ -623,11 +695,10 @@
         <section
             class="py-24 px-4 text-center border-t border-slate-200 bg-gradient-to-t from-violet-50 to-transparent relative z-10 w-full">
             <h2 class="text-4xl font-bold text-slate-800 mb-6">Start Generating Now</h2>
-            <p class="text-slate-600 mb-10 max-w-xl mx-auto font-medium">Join hundreds of successful students submitting
-                flawless reflective journals instantly without the stress of manual formatting.</p>
+            <p class="text-slate-600 mb-10 max-w-xl mx-auto font-medium">Join hundreds of students submitting university-ready reflective journals instantly without formatting stress.</p>
             <a href="#generator"
                 class="btn-glow px-10 py-4 mx-auto rounded-xl text-lg inline-block font-semibold shadow-xl">
-                Launch Generator
+                🚀 Generate My Journal
             </a>
         </section>
     </div>
@@ -697,7 +768,7 @@
             <!-- Bottom Section: Tagline and Copyright -->
             <div class="mt-8 pt-4 border-t border-slate-100 flex flex-col items-center text-center">
                 <p class="text-xs text-slate-800 font-medium tracking-wide">
-                    Helping students focus on learning, not formatting.
+                    Built independently to help NIAT × Aurora students save time and simplify reflective journal writing.
                 </p>
                 <p class="mt-1 text-[10px] text-slate-800 uppercase tracking-tighter">
                     © 2026 <span class="text-indigo-600"> QuickJournal </span> All rights reserved.
@@ -709,7 +780,7 @@
 
 
     <!-- 🚀 Premium Naavik Badge -->
-    <div id="naavikBadge" class="fixed bottom-28 right-6 z-[60] cursor-pointer group">
+    <div id="naavikBadge" class="fixed bottom-6 right-6 z-[60] cursor-pointer group">
         <div class="relative w-24 h-24 flex flex-col items-center justify-center bg-white rounded-full shadow-[0_8px_30px_rgb(139,92,246,0.6)] animate-bounce group-hover:scale-110 transition-all duration-300 ring-4 ring-violet-500/50">
             <div class="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
                 <div class="absolute inset-0 bg-gradient-to-tr from-violet-500/20 to-fuchsia-500/20 blur-md animate-pulseGlow"></div>
@@ -864,99 +935,6 @@
                     </div>
                 </div>
 
-            </div>
-        </div>
-    </div>
-
-    <!-- 🏆 Milestone Celebration -->
-    <div id="milestoneBadge" class="fixed bottom-6 right-6 z-[60] cursor-pointer group">
-        <div class="relative w-16 h-16 flex flex-col items-center justify-center bg-gradient-to-tr from-violet-600 via-indigo-600 to-fuchsia-500 rounded-full shadow-[0_8px_30px_rgb(139,92,246,0.4)] group-hover:scale-115 transition-all duration-300 ring-4 ring-white/50">
-            <span id="badgePdfCount" class="text-white font-extrabold text-[13px] tracking-tighter leading-none">1.2K+</span>
-            <span class="text-white/80 font-bold text-[7px] uppercase tracking-widest mt-0.5 leading-none">PDFs</span>
-            <div class="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 rounded-full border-2 border-white flex items-center justify-center text-[10px] shadow-md animate-pulse">⭐</div>
-        </div>
-        <div class="absolute top-1/2 right-full mr-4 -translate-y-1/2 opacity-0 scale-90 origin-right group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 bg-slate-950/95 backdrop-blur-md text-slate-100 text-[11px] px-4 py-2.5 rounded-xl shadow-2xl font-bold border border-violet-500/20 tracking-wider pointer-events-none flex flex-col items-start gap-1.5 whitespace-nowrap">
-            <div class="flex items-center gap-1.5">👨‍🎓 <span id="tooltipStudentsCount">100</span>+ Students Helped</div>
-            <div class="flex items-center gap-1.5">📄 <span id="tooltipPdfCount">1200</span>+ Journals Generated</div>
-            <div class="flex items-center gap-1.5">⏳ <span id="tooltipHoursCount">300</span>+ Hours Saved</div>
-        </div>
-    </div>
-
-
-    <div id="milestoneModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
-        <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-md opacity-0 transition-opacity duration-500"
-            id="modalOverlay"></div>
-        <div class="relative glass-panel w-full max-w-md mx-4 p-8 rounded-3xl text-center overflow-hidden transform scale-90 opacity-0 transition-all duration-500"
-            id="modalContent">
-            <!-- Decorative Background Elements -->
-            <div class="absolute -top-10 -left-10 w-36 h-36 bg-violet-500/15 rounded-full blur-3xl"></div>
-            <div class="absolute -bottom-10 -right-10 w-36 h-36 bg-fuchsia-500/15 rounded-full blur-3xl"></div>
-
-            <div class="relative z-10">
-                <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-tr from-violet-600 via-indigo-600 to-fuchsia-500 rounded-full shadow-2xl shadow-violet-500/40 mb-6 ring-4 ring-white relative overflow-hidden group">
-                    <span class="text-3.5xl text-white animate-pulse">🎉</span>
-                    <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                </div>
-
-                <h2 class="text-3xl font-extrabold text-slate-800 mb-2 tracking-tight">Milestones Reached!</h2>
-                <p class="text-slate-500 font-medium mb-8 leading-relaxed text-sm">
-                    We've officially expanded our impact in helping students learn smarter and submit faster:
-                </p>
-
-                <!-- Stats Grid -->
-                <div class="grid grid-cols-3 gap-3 mb-8">
-                    <!-- Students Card -->
-                    <div class="bg-gradient-to-br from-violet-50/70 to-violet-100/30 border border-violet-100/80 p-4 rounded-2xl hover:scale-105 transition-all duration-300 shadow-sm hover:shadow-md">
-                        <svg class="w-6 h-6 text-violet-600 mb-2 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A11.386 11.386 0 0110.089 21c-2.243 0-4.352-.64-6.136-1.758a10.974 10.974 0 01.322-3.359c.799-2.228 3.011-3.693 5.485-3.693a4.878 4.878 0 012.747.832M12 9.75a3 3 0 11-6 0 3 3 0 016 0zm9 5.25a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-1.5-6.75a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
-                        </svg>
-                        <div id="modalStudentsCount" class="text-violet-600 font-extrabold text-2xl tracking-tight leading-none">100+</div>
-                        <div class="text-slate-500 text-[9px] font-extrabold uppercase tracking-wider mt-2">Students Helped</div>
-                    </div>
-                    <!-- PDFs Card -->
-                    <div class="bg-gradient-to-br from-fuchsia-50/70 to-fuchsia-100/30 border border-fuchsia-100/80 p-4 rounded-2xl hover:scale-105 transition-all duration-300 shadow-sm hover:shadow-md">
-                        <svg class="w-6 h-6 text-fuchsia-600 mb-2 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                        </svg>
-                        <div id="modalPdfCount" class="text-fuchsia-600 font-extrabold text-2xl tracking-tight leading-none">1200+</div>
-                        <div id="modalPdfLabel" class="text-slate-500 text-[9px] font-extrabold uppercase tracking-wider mt-2">Journals Generated</div>
-                    </div>
-                    <!-- Hours Saved Card -->
-                    <div class="bg-gradient-to-br from-indigo-50/70 to-indigo-100/30 border border-indigo-100/80 p-4 rounded-2xl hover:scale-105 transition-all duration-300 shadow-sm hover:shadow-md">
-                        <svg class="w-6 h-6 text-indigo-600 mb-2 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <div id="modalHoursCount" class="text-indigo-600 font-extrabold text-2xl tracking-tight leading-none">300+</div>
-                        <div class="text-slate-500 text-[9px] font-extrabold uppercase tracking-wider mt-2">Hours Saved</div>
-                    </div>
-                </div>
-
-                <div class="space-y-4 mb-8">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">Connect with the Creator</p>
-                    <div class="flex items-center justify-center gap-4">
-                        <a href="https://www.linkedin.com/in/kandadicharantej/" target="_blank"
-                            class="flex items-center gap-2 px-5 py-2.5 bg-blue-50 text-blue-600 rounded-xl font-bold hover:bg-blue-600 hover:text-white transition-all duration-300 shadow-sm hover:shadow-md group">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-                            </svg>
-                            LinkedIn
-                        </a>
-                        <a href="https://github.com/KandadiCharanTej" target="_blank"
-                            class="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all duration-300 shadow-sm hover:shadow-md group">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
-                            </svg>
-                            GitHub
-                        </a>
-                    </div>
-                </div>
-
-                <button id="closeMilestone"
-                    class="w-full py-4 text-slate-400 font-bold text-sm hover:text-slate-600 transition-colors uppercase tracking-widest border-t border-slate-100 mt-4">
-                    Dismiss
-                </button>
             </div>
         </div>
     </div>

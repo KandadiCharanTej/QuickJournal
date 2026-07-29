@@ -189,58 +189,117 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 📊 JOURNAL COUNTER TRACKING (localStorage)
-    function initJournalCounter() {
-        let count = localStorage.getItem('total_journals_count');
-        if (!count || parseInt(count, 10) < 1200) {
-            count = 1200;
-            localStorage.setItem('total_journals_count', count);
-        } else {
-            count = parseInt(count, 10);
+    // =========================================================
+    // 📊 PRODUCTION REAL-TIME ANALYTICS ENGINE
+    // =========================================================
+    const qjAnalytics = (() => {
+        const API_BASE = window.API_BASE_URL || (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000' : '');
+        // --- Smooth animated number counter ---
+        function animateValue(el, target, suffix = '+') {
+            if (!el) return;
+            const current = parseInt(el.dataset.rawValue || '0', 10);
+            if (current === target) { el.innerText = target.toLocaleString() + suffix; return; }
+            el.dataset.rawValue = target;
+            let start = current;
+            const duration = 900;
+            const stepTime = 20;
+            const steps = Math.max(1, duration / stepTime);
+            const inc = (target - start) / steps;
+            const timer = setInterval(() => {
+                start += inc;
+                if ((inc > 0 && start >= target) || (inc < 0 && start <= target)) {
+                    el.innerText = target.toLocaleString() + suffix;
+                    clearInterval(timer);
+                } else {
+                    el.innerText = Math.floor(start).toLocaleString() + suffix;
+                }
+            }, stepTime);
         }
-        updateJournalCountUI(count);
-    }
 
-    function formatBadgeCount(count) {
-        if (count >= 1000) {
-            return (count / 1000).toFixed(1) + 'K+';
+        // --- Update all homepage stat card DOM elements ---
+        function applyToDOM(summary) {
+            const elPdf = document.getElementById('statPdfCount');
+            const elStudents = document.getElementById('statStudentsCount');
+            const elHours = document.getElementById('statHoursCount');
+            const elAvg = document.getElementById('statAvgTime');
+
+            if (elPdf) animateValue(elPdf, summary.total_journals_generated, '+');
+            if (elStudents) animateValue(elStudents, summary.total_students_helped, '+');
+            if (elHours) animateValue(elHours, summary.total_hours_saved, '+');
+            if (elAvg) {
+                const sec = summary.avg_generation_time_sec || 4.2;
+                const rounded = Math.round(sec);
+                const display = rounded < 30 ? '<30 Sec' : `${rounded} Sec`;
+                elAvg.innerText = display;
+            }
         }
-        return count + '+';
+
+        // --- Load initial summary from backend, set up SSE stream ---
+        async function initLive() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/analytics/summary`, { signal: AbortSignal.timeout(5000) });
+                if (resp.ok) {
+                    const { summary } = await resp.json();
+                    applyToDOM(summary);
+                }
+            } catch (e) {
+                // Backend offline — keep HTML defaults silently
+            }
+
+            // Real-time SSE stream
+            try {
+                const evtSource = new EventSource(`${API_BASE}/api/analytics/stream`);
+                evtSource.onmessage = (evt) => {
+                    try {
+                        const payload = JSON.parse(evt.data);
+                        if (payload.type === 'ANALYTICS_UPDATE' && payload.summary) {
+                            applyToDOM(payload.summary);
+                        }
+                    } catch (e) {}
+                };
+                evtSource.onerror = () => evtSource.close();
+            } catch (e) {}
+        }
+
+        // --- Record a successful generation event ---
+        async function recordEvent({ generationType, moduleCount, durationMs }) {
+            // Read student details from the form
+            const studentName  = (document.getElementById('studentName')  || {}).value || '';
+            const regNumber    = (document.getElementById('regNumber')    || {}).value || '';
+            const classSection = (document.getElementById('classSection') || {}).value || '';
+
+            try {
+                await fetch(`${API_BASE}/api/analytics/event`, {
+                    method : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body   : JSON.stringify({
+                        studentName, regNumber, classSection,
+                        generationType,
+                        moduleCount: typeof moduleCount === 'number' ? moduleCount : 1,
+                        durationMs
+                    })
+                });
+            } catch (e) {
+                // Backend offline — silently skip; never block PDF delivery
+            }
+        }
+
+        // --- Initialise on load ---
+        initLive();
+
+        return { recordEvent };
+    })();
+
+    // Shared generation start timestamp (set at generate click, consumed after doc.save())
+    let _genStartTime = null;
+    function markGenerationStart() { _genStartTime = performance.now(); }
+    function consumeGenerationDuration() {
+        if (_genStartTime === null) return 4000;
+        const d = Math.round(performance.now() - _genStartTime);
+        _genStartTime = null;
+        return d;
     }
 
-    function updateJournalCountUI(count) {
-        const badgePdf = document.getElementById('badgePdfCount');
-        
-        // Tooltip elements
-        const tooltipPdf = document.getElementById('tooltipPdfCount');
-        const tooltipStudents = document.getElementById('tooltipStudentsCount');
-        const tooltipHours = document.getElementById('tooltipHoursCount');
-        
-        // Modal elements
-        const modalPdf = document.getElementById('modalPdfCount');
-        const modalStudents = document.getElementById('modalStudentsCount');
-        const modalHours = document.getElementById('modalHoursCount');
-
-        const studentsHelped = Math.floor(count / 12);
-        const hoursSaved = Math.floor((count * 15) / 60);
-
-        if (badgePdf) badgePdf.innerText = formatBadgeCount(count);
-        
-        if (tooltipPdf) tooltipPdf.innerText = count;
-        if (tooltipStudents) tooltipStudents.innerText = studentsHelped;
-        if (tooltipHours) tooltipHours.innerText = hoursSaved;
-
-        if (modalPdf) modalPdf.innerText = count + "+";
-        if (modalStudents) modalStudents.innerText = studentsHelped + "+";
-        if (modalHours) modalHours.innerText = hoursSaved + "+";
-    }
-
-    function incrementJournalCounter() {
-        let count = parseInt(localStorage.getItem('total_journals_count'), 10) || 1200;
-        count++;
-        localStorage.setItem('total_journals_count', count);
-        updateJournalCountUI(count);
-    }
 
     function validateCurrentStep(skipAssessment = false) {
         const genModeEl = document.querySelector('input[name="genMode"]:checked');
@@ -1132,13 +1191,20 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                 clearInterval(timerInterval);
                 
                 try {
-                    aiFillBtn.innerHTML = `<span>✨ Generating Content...</span>`;
+                    const loadingSteps = [
+                        "🧠 AI is writing your journal...",
+                        "✍️ Structuring content...",
+                        "📄 Formatting PDF...",
+                        "✅ Almost Ready..."
+                    ];
+                    let stepIdx = 0;
+                    aiFillBtn.innerHTML = `<span>${loadingSteps[0]}</span>`;
                     aiSpinner.classList.remove('hidden');
 
                     const fetchPromises = sections.map(async (sec, index) => {
-                        // ⏱️ Stagger the starts slightly to update progressive counter cleanly
-                        await new Promise(r => setTimeout(r, index * 300));
-                        aiFillBtn.innerHTML = `<span>✨ Generating ${sec.name}...</span>`;
+                        await new Promise(r => setTimeout(r, index * 350));
+                        stepIdx = (index + 1) % loadingSteps.length;
+                        aiFillBtn.innerHTML = `<span>${loadingSteps[stepIdx]}</span>`;
 
                         let retries = 0; 
                         let success = false;
@@ -1265,6 +1331,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
             const btnText = document.getElementById('btnText');
             if (btnText) btnText.innerText = "Generating PDF...";
             document.getElementById('generateBtn').disabled = true;
+            markGenerationStart(); // 📊 Start timing
 
             const headerImageData = await getBase64ImageFromURL('header.png').catch(() => null);
 
@@ -1437,11 +1504,33 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
             const docType = isTerm4 ? "Assignment" : "RJ";
             const cleanFilename = `${safeName}_${safeReg}_${docType}_${safeSub}-${moduleRoman}`;
             doc.save(`${cleanFilename}.pdf`);
-            incrementJournalCounter();
+            qjAnalytics.recordEvent({ generationType: isTerm4 ? 'ASSIGNMENT' : 'MODULE', moduleCount: 1, durationMs: consumeGenerationDuration() }); // 📊 Analytics
 
             // Show Success Notification
             successMsg.classList.remove('hidden');
             successMsg.classList.add('active');
+
+            const resetBtn = document.getElementById('resetBtn');
+            if (resetBtn) {
+                resetBtn.onclick = () => {
+                    successMsg.classList.add('hidden');
+                    successMsg.classList.remove('active');
+                    if (typeof updateStepUI === 'function') {
+                        currentStep = 1;
+                        updateStepUI();
+                    }
+                    const genSec = document.getElementById('generator');
+                    if (genSec) genSec.scrollIntoView({ behavior: 'smooth' });
+                };
+            }
+
+            const closeSuccessBtn = document.getElementById('closeSuccessBtn');
+            if (closeSuccessBtn) {
+                closeSuccessBtn.onclick = () => {
+                    successMsg.classList.add('hidden');
+                    successMsg.classList.remove('active');
+                };
+            }
 
             if (document.getElementById('btnText')) {
                 document.getElementById('btnText').innerText = "Generate PDF";
@@ -2016,7 +2105,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
             a.download = `${cleanFilename}.pdf`;
             a.click();
             URL.revokeObjectURL(url);
-            incrementJournalCounter();
+            qjAnalytics.recordEvent({ generationType: (termSel.value === '4') ? 'ASSIGNMENT' : 'MODULE', moduleCount: 1, durationMs: consumeGenerationDuration() }); // 📊 Analytics
 
             const successMsg = document.getElementById('successMsg');
             if (successMsg) {
@@ -2066,7 +2155,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
             const safeSub = subjSel.value.replace(/[^a-zA-Z0-9\s]/g, '');
             a.download = `${safeSub}_All_RJs.zip`;
             a.click();
-            incrementJournalCounter();
+            qjAnalytics.recordEvent({ generationType: 'SUBJECT', moduleCount: addedCount, durationMs: consumeGenerationDuration() }); // 📊 Analytics (moduleCount = actual modules in ZIP)
 
             const successMsg = document.getElementById('successMsg');
             if (successMsg) {
@@ -2598,7 +2687,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                 const safeSub = subName.replace(/[^a-zA-Z0-9\s]/g, '');
                 a.download = `${safeSub}_All_RJs.zip`;
                 a.click();
-                incrementJournalCounter();
+                qjAnalytics.recordEvent({ generationType: 'TERM', moduleCount: addedCount, durationMs: 0 }); // 📊 Analytics (moduleCount = modules in this subject's ZIP)
             } else {
                 alert("No modules generated yet for this subject.");
             }
@@ -2630,7 +2719,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                 a.download = `${safeName}_${safeReg}_${docType}_${safeSub}-${modObj.roman}.pdf`;
                 a.click();
                 URL.revokeObjectURL(url);
-                incrementJournalCounter();
+                qjAnalytics.recordEvent({ generationType: (completeTermState.term === '4') ? 'ASSIGNMENT' : 'MODULE', moduleCount: 1, durationMs: 0 }); // 📊 Analytics
             }
         } catch (err) {
             console.error("Module PDF download error:", err);
@@ -2688,7 +2777,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
             modObj.pdfBlob = await buildPDFBlobForModule(subName, modObj, cachedHeader);
             subData.completedCount++;
             completeTermState.generatedModulesCount++;
-            incrementJournalCounter();
+            qjAnalytics.recordEvent({ generationType: (completeTermState.term === '4') ? 'ASSIGNMENT' : 'MODULE', moduleCount: 1, durationMs: 0 }); // 📊 Analytics
         } else {
             modObj.status = 'failed';
         }
@@ -2833,7 +2922,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                         modObj.pdfBlob = await buildPDFBlobForModule(subName, modObj, cachedHeader);
                         subData.completedCount++;
                         completeTermState.generatedModulesCount++;
-                        incrementJournalCounter();
+                        qjAnalytics.recordEvent({ generationType: isTerm4 ? 'ASSIGNMENT' : 'MODULE', moduleCount: 1, durationMs: 0 }); // 📊 Analytics
                     } catch (pdfErr) {
                         console.error("PDF Blob generation failed:", pdfErr);
                         modObj.status = 'failed';
@@ -2970,7 +3059,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                             subData.completedCount++;
                             completeTermState.failedModulesCount = Math.max(0, completeTermState.failedModulesCount - 1);
                             completeTermState.generatedModulesCount++;
-                            incrementJournalCounter();
+                            qjAnalytics.recordEvent({ generationType: isTerm4 ? 'ASSIGNMENT' : 'MODULE', moduleCount: 1, durationMs: 0 }); // 📊 Analytics
                         } catch (pdfErr) {
                             modObj.status = 'failed';
                         }
@@ -3242,32 +3331,15 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
         });
     }
 
-    // ---------------- MILESTONE CELEBRATION ----------------
+    // ---------------- MILESTONE FLOATING SHORTCUT ----------------
     const milestoneBadge = document.getElementById('milestoneBadge');
-    const milestoneModal = document.getElementById('milestoneModal');
-    // ---------------- MODAL LOGIC ----------------
-
-    const closeMilestone = document.getElementById('closeMilestone');
-    const modalOverlay = document.getElementById('modalOverlay');
-
-    if (milestoneBadge && milestoneModal) {
-        const showMilestone = () => {
-            milestoneModal.classList.remove('hidden');
-            setTimeout(() => {
-                milestoneModal.classList.add('active');
-            }, 10);
-        };
-
-        const hideMilestone = () => {
-            milestoneModal.classList.remove('active');
-            setTimeout(() => {
-                milestoneModal.classList.add('hidden');
-            }, 500);
-        };
-
-        milestoneBadge.addEventListener('click', showMilestone);
-        if (closeMilestone) closeMilestone.addEventListener('click', hideMilestone);
-        if (modalOverlay) modalOverlay.addEventListener('click', hideMilestone);
+    if (milestoneBadge) {
+        milestoneBadge.addEventListener('click', () => {
+            const section = document.getElementById('communityImpact');
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
     }
 
     // ---------------- NAAVIK MODAL ----------------
@@ -3427,7 +3499,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
 
     // Initialize UI on load
     updateUI();
-    initJournalCounter();
+    // Analytics engine is self-initializing via qjAnalytics (no separate init call needed)
     initStudentDetailsPersistence();
 
     // Synchronously set default selections to Year II, Term 1

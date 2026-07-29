@@ -88,6 +88,15 @@ body {
     box-shadow: 0 15px 30px rgba(0,0,0,0.08);
 }
 
+@keyframes floatPreview {
+    0%, 100% { transform: rotateX(15deg) rotateY(-15deg) translateY(0px) scale(0.95); }
+    50% { transform: rotateX(15deg) rotateY(-15deg) translateY(-8px) scale(0.95); }
+}
+
+.animate-float {
+    animation: floatPreview 5s ease-in-out infinite;
+}
+
 /* Step Flow Connectors */
 .step-glow-line {
     position: absolute;

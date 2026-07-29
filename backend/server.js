@@ -1,4 +1,20 @@
-require("dotenv").config();
+// Load .env manually — bypasses dotenvx CLI which intercepts require('dotenv') and injects 0 vars
+(function loadEnv() {
+    const fs   = require('fs');
+    const path = require('path');
+    const envPath = path.join(__dirname, '.env');
+    if (!fs.existsSync(envPath)) return;
+    const lines = fs.readFileSync(envPath, 'utf8').split('\n');
+    for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('#')) continue;
+        const eqIdx = trimmed.indexOf('=');
+        if (eqIdx < 0) continue;
+        const key = trimmed.slice(0, eqIdx).trim();
+        const val = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, '');
+        if (key && !(key in process.env)) process.env[key] = val;
+    }
+})();
 
 // 🐛 DEBUGGING HANDLERS (To find why it's crashing with Status 1)
 process.on('uncaughtException', (err) => {
@@ -736,5 +752,122 @@ function getDynamicAssignmentFallback(subject, question) {
     
     return matchedText;
 }
+
+/* =========================================================
+   📊 ANALYTICS SYSTEM
+   Public: GET /api/analytics/summary, GET /api/analytics/stream
+   Protected: POST /api/analytics/event (open — fires from browser after PDF)
+   Admin: POST /api/admin/login, GET /api/admin/students, GET /api/admin/student/:reg
+   Dashboard: GET /dashboard
+========================================================= */
+const analyticsDB = require("./analytics_db");
+const crypto      = require("crypto");
+
+let sseClients   = [];
+let adminToken   = null;   // One active token, lives until server restart
+let tokenExpiry  = null;
+
+function broadcastAnalyticsUpdate(summary) {
+    const data = `data: ${JSON.stringify({ type: "ANALYTICS_UPDATE", summary })}\n\n`;
+    sseClients.forEach(c => { try { c.res.write(data); } catch (e) {} });
+}
+
+function verifyAdmin(req, res) {
+    const provided = req.headers["x-admin-token"] || "";
+    if (!adminToken || provided !== adminToken || Date.now() > tokenExpiry) {
+        res.status(401).json({ error: "Unauthorized" });
+        return false;
+    }
+    return true;
+}
+
+// ── Public stats (used by homepage) ──────────────────────────────────────────
+
+app.get("/api/analytics/summary", (req, res) => {
+    try { res.json({ success: true, summary: analyticsDB.getSummary() }); }
+    catch (err) { res.status(500).json({ error: "Failed" }); }
+});
+
+app.get("/api/analytics/stream", (req, res) => {
+    res.setHeader("Content-Type",  "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection",    "keep-alive");
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    if (res.flushHeaders) res.flushHeaders();
+
+    const id = Date.now() + Math.random();
+    sseClients.push({ id, res });
+    res.write(`data: ${JSON.stringify({ type: "ANALYTICS_UPDATE", summary: analyticsDB.getSummary() })}\n\n`);
+    req.on("close", () => { sseClients = sseClients.filter(c => c.id !== id); });
+});
+
+// ── Record event (called from browser after successful PDF) ───────────────────
+
+app.post("/api/analytics/event", (req, res) => {
+    try {
+        const { studentName, regNumber, classSection, generationType, moduleCount, durationMs } = req.body;
+        if (!generationType) return res.status(400).json({ error: "generationType required" });
+
+        const summary = analyticsDB.recordEvent({
+            studentName, regNumber, classSection, generationType,
+            moduleCount: typeof moduleCount === "number" ? moduleCount : 1,
+            durationMs
+        });
+        broadcastAnalyticsUpdate(summary);
+        res.json({ success: true, summary });
+    } catch (err) {
+        console.error("[Analytics] Event error:", err);
+        res.status(500).json({ error: "Failed to record event" });
+    }
+});
+
+// ── Admin login ───────────────────────────────────────────────────────────────
+
+app.post("/api/admin/login", (req, res) => {
+    const { password } = req.body;
+    const correct = process.env.ADMIN_PASSWORD || "quickjournal@admin2026";
+    if (!password || password !== correct) {
+        return res.status(401).json({ error: "Incorrect password" });
+    }
+    adminToken  = crypto.randomBytes(32).toString("hex");
+    tokenExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+    res.json({ success: true, token: adminToken });
+});
+
+// ── Admin protected routes ────────────────────────────────────────────────────
+
+app.get("/api/admin/students", (req, res) => {
+    if (!verifyAdmin(req, res)) return;
+    try { res.json({ success: true, students: analyticsDB.getStudents() }); }
+    catch (err) { res.status(500).json({ error: "Failed" }); }
+});
+
+app.get("/api/admin/student/:reg", (req, res) => {
+    if (!verifyAdmin(req, res)) return;
+    try {
+        const student = analyticsDB.getStudentDetail(req.params.reg);
+        if (!student) return res.status(404).json({ error: "Student not found" });
+        res.json({ success: true, student });
+    } catch (err) { res.status(500).json({ error: "Failed" }); }
+});
+
+app.get("/api/admin/stats", (req, res) => {
+    if (!verifyAdmin(req, res)) return;
+    try { res.json({ success: true, summary: analyticsDB.getSummary() }); }
+    catch (err) { res.status(500).json({ error: "Failed" }); }
+});
+
+// ── Admin Dashboard page ──────────────────────────────────────────────────────
+
+app.get("/dashboard", (req, res) => {
+    const dashboardPath = path.join(__dirname, "dashboard.html");
+    fs.readFile(dashboardPath, "utf8", (err, html) => {
+        if (err) return res.status(404).send("Dashboard not found");
+        res.setHeader("Content-Type", "text/html");
+        res.send(html);
+    });
+});
+
 app.get("/", (req, res) => res.send("QuickJournal Engine Active 🚀"));
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
