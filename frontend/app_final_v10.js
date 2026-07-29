@@ -52,18 +52,28 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const singleContainer = document.getElementById('singleModuleContainer');
         const multiContainer = document.getElementById('multiModuleContainer');
+        const termProgressContainer = document.getElementById('termProgressContainer');
         const aiFillBtn = document.getElementById('aiFillBtn');
         const generateBtn = document.getElementById('generateBtn');
 
-        if (genMode === 'complete') {
+        if (genMode === 'term') {
+            if(singleContainer) singleContainer.classList.add('hidden');
+            if(multiContainer) multiContainer.classList.add('hidden');
+            if(termProgressContainer) termProgressContainer.classList.remove('hidden');
+            if(aiFillBtn) aiFillBtn.classList.add('hidden');
+            if(generateBtn) generateBtn.classList.add('hidden');
+            renderCompleteTermUI();
+        } else if (genMode === 'complete') {
             if(singleContainer) singleContainer.classList.add('hidden');
             if(multiContainer) multiContainer.classList.remove('hidden');
+            if(termProgressContainer) termProgressContainer.classList.add('hidden');
             if(aiFillBtn) aiFillBtn.classList.add('hidden');
             if(generateBtn) generateBtn.classList.add('hidden');
             renderMultiModuleCards();
         } else {
             if(singleContainer) singleContainer.classList.remove('hidden');
             if(multiContainer) multiContainer.classList.add('hidden');
+            if(termProgressContainer) termProgressContainer.classList.add('hidden');
             if(aiFillBtn) aiFillBtn.classList.remove('hidden');
             if(generateBtn) generateBtn.classList.remove('hidden');
 
@@ -232,16 +242,33 @@ document.addEventListener('DOMContentLoaded', () => {
         updateJournalCountUI(count);
     }
 
-    function validateCurrentStep() {
+    function validateCurrentStep(skipAssessment = false) {
+        const genModeEl = document.querySelector('input[name="genMode"]:checked');
+        const genMode = genModeEl ? genModeEl.value : 'single';
+
+        if (currentStep === 2 && genMode === 'term') {
+            const selectedCheckboxes = document.querySelectorAll('input[name="termSubject"]:checked');
+            const errEl = document.getElementById('termSubjectError');
+            if (selectedCheckboxes.length === 0) {
+                if (errEl) errEl.classList.remove('hidden');
+                return false;
+            } else {
+                if (errEl) errEl.classList.add('hidden');
+            }
+        }
+
         const currentContainer = document.getElementById(`step-${currentStep}`);
         const inputs = currentContainer.querySelectorAll('input, select, textarea');
         let isValid = true;
-        inputs.forEach(input => {
-            if(!input.checkValidity()) {
+        for (let input of inputs) {
+            if (input.disabled || input.closest('.hidden') || input.style.display === 'none') continue;
+            if (skipAssessment && input.id === 'assessmentNo') continue;
+            if (!input.checkValidity()) {
                 input.reportValidity();
                 isValid = false;
+                break;
             }
-        });
+        }
         return isValid;
     }
 
@@ -315,6 +342,12 @@ document.addEventListener('DOMContentLoaded', () => {
         disableSelect(assessSel, 'Select Subject First');
         topicInp.value = "";
         updateAssessmentLabel();
+        if (generationModeContainer) generationModeContainer.style.display = 'block';
+
+        const genModeEl = document.querySelector('input[name="genMode"]:checked');
+        if (genModeEl && genModeEl.value === 'term') {
+            populateTermSubjectsList();
+        }
     });
 
     const generationModeContainer = document.getElementById('generationModeContainer');
@@ -323,20 +356,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
     genModeRadios.forEach(radio => {
         radio.addEventListener('change', (e) => {
+            const val = e.target.value;
             const globalDateContainer = document.getElementById('globalDateContainer');
             const journalDate = document.getElementById('journalDate');
-            if (e.target.value === 'complete') {
+            const subjContainer = subjSel.closest('div');
+            const termSubjContainer = document.getElementById('termSubjectSelectionContainer');
+
+            if (val === 'term') {
                 assessmentNoContainer.style.display = 'none';
-                assessSel.required = false; // Skip validation when hidden
+                assessSel.required = false;
+                if (subjContainer) subjContainer.style.display = 'none';
+                subjSel.required = false;
+                topicInp.value = "Topics auto-generate for complete term";
+                if(globalDateContainer) globalDateContainer.style.display = 'none';
+                if(journalDate) journalDate.required = false;
+                if(termSubjContainer) {
+                    termSubjContainer.classList.remove('hidden');
+                    populateTermSubjectsList();
+                }
+            } else if (val === 'complete') {
+                assessmentNoContainer.style.display = 'none';
+                assessSel.required = false;
+                if (subjContainer) subjContainer.style.display = 'block';
+                subjSel.required = true;
                 topicInp.value = "Topics auto-generate for all modules";
                 if(globalDateContainer) globalDateContainer.style.display = 'none';
                 if(journalDate) journalDate.required = false;
+                if(termSubjContainer) termSubjContainer.classList.add('hidden');
             } else {
                 assessmentNoContainer.style.display = 'block';
                 assessSel.required = true;
                 assessSel.dispatchEvent(new Event('change')); 
+                if (subjContainer) subjContainer.style.display = 'block';
+                subjSel.required = true;
                 if(globalDateContainer) globalDateContainer.style.display = 'block';
                 if(journalDate) journalDate.required = true;
+                if(termSubjContainer) termSubjContainer.classList.add('hidden');
             }
         });
     });
@@ -1170,10 +1225,14 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
     document.getElementById('journalForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        const isCompleteSubject = document.querySelector('input[name="genMode"]:checked').value === "complete";
+        const genMode = document.querySelector('input[name="genMode"]:checked').value;
         
-        if (isCompleteSubject) {
-            if(!validateCurrentStep(true)) return; // Pass true to skip assessmentNo validation
+        if (genMode === "term") {
+            return;
+        }
+
+        if (genMode === "complete") {
+            if(!validateCurrentStep(true)) return;
             await handleCompleteSubjectGeneration();
             return;
         }
@@ -1444,12 +1503,22 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
         completeSubjectState = {};
         const romanNumerals = ["I","II","III","IV","V","VI","VII","VIII","IX","X"];
 
-        // Add a global date picker for convenience
+        // Add a global date picker and weekly auto-assign button for convenience
         const globalDateRow = document.createElement('div');
-        globalDateRow.className = "mb-4 p-4 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-between";
+        globalDateRow.className = "mb-4 p-3 bg-violet-50/80 border border-violet-200 rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-sm";
         globalDateRow.innerHTML = `
-            <span class="text-sm font-bold text-slate-700">Set Date for All Modules:</span>
-            <input type="date" id="global-multi-date" class="form-input px-3 py-1.5 text-sm rounded border border-slate-300">
+            <span class="font-extrabold text-violet-800 flex items-center gap-1.5">
+                <span>📅</span> Date Assignment
+            </span>
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="flex items-center gap-2 bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+                    <span class="font-bold text-slate-700">Start Date:</span>
+                    <input type="date" id="global-multi-date" class="form-input px-2 py-1 text-xs rounded border border-slate-300">
+                </div>
+                <button type="button" id="auto-assign-subject-weekly-btn" class="px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-lg shadow-sm transition-all flex items-center gap-1.5">
+                    ⚡ Weekly Dates
+                </button>
+            </div>
         `;
         container.appendChild(globalDateRow);
         
@@ -1460,6 +1529,21 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                 completeSubjectState[num].date = val;
                 const dInput = document.getElementById(`date-input-${num}`);
                 if (dInput) dInput.value = val;
+            });
+        };
+
+        const autoAssignSubWeeklyBtn = globalDateRow.querySelector('#auto-assign-subject-weekly-btn');
+        autoAssignSubWeeklyBtn.onclick = () => {
+            const baseStr = globalDateInput.value ? globalDateInput.value : new Date().toISOString().split('T')[0];
+            const baseDate = new Date(baseStr);
+            const keys = Object.keys(completeSubjectState);
+            keys.forEach((num, idx) => {
+                const weekDate = new Date(baseDate);
+                weekDate.setDate(weekDate.getDate() + (idx * 7));
+                const dateStr = weekDate.toISOString().split('T')[0];
+                completeSubjectState[num].date = dateStr;
+                const dInput = document.getElementById(`date-input-${num}`);
+                if (dInput) dInput.value = dateStr;
             });
         };
 
@@ -1998,6 +2082,1107 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
         
         btn.innerText = "📦 Download All (ZIP)";
         btn.disabled = false;
+    }
+
+    // =========================================================
+    //  OPTION 3: GENERATE COMPLETE TERM ENGINE & UI
+    // =========================================================
+    function populateTermSubjectsList() {
+        const year = yearSel.value;
+        const term = termSel.value;
+        const listContainer = document.getElementById('termSubjectsList');
+        const selectAllCheckbox = document.getElementById('selectAllSubjects');
+        const errEl = document.getElementById('termSubjectError');
+        if (!listContainer) return;
+        if (errEl) errEl.classList.add('hidden');
+
+        const subjects = Object.keys(academicData[year]?.[term] || {});
+        listContainer.innerHTML = '';
+
+        if (subjects.length === 0) {
+            listContainer.innerHTML = `<p class="text-sm font-medium text-slate-500 col-span-2">No subjects found for the selected Year and Term.</p>`;
+            return;
+        }
+
+        subjects.forEach((sub) => {
+            const item = document.createElement('label');
+            item.className = "flex items-center gap-3 p-3 bg-white border border-slate-200 rounded-lg cursor-pointer hover:border-violet-300 transition-colors shadow-sm";
+            item.innerHTML = `
+                <input type="checkbox" name="termSubject" value="${sub}" checked class="term-subject-checkbox w-4 h-4 text-violet-600 rounded">
+                <span class="text-sm font-semibold text-slate-800">${sub}</span>
+            `;
+            listContainer.appendChild(item);
+        });
+
+        if (selectAllCheckbox) selectAllCheckbox.checked = true;
+
+        const checkboxes = listContainer.querySelectorAll('input[name="termSubject"]');
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', () => {
+                if (errEl) errEl.classList.add('hidden');
+                const allChecked = Array.from(checkboxes).every(c => c.checked);
+                if (selectAllCheckbox) selectAllCheckbox.checked = allChecked;
+            });
+        });
+
+        if (selectAllCheckbox) {
+            selectAllCheckbox.onchange = (e) => {
+                if (errEl) errEl.classList.add('hidden');
+                const isChecked = e.target.checked;
+                checkboxes.forEach(cb => cb.checked = isChecked);
+            };
+        }
+    }
+
+    let completeTermState = {
+        year: '',
+        term: '',
+        yearText: '',
+        termText: '',
+        selectedSubjects: [],
+        subjectModulesMap: {},
+        isGenerating: false,
+        isCancelled: false,
+        totalModulesCount: 0,
+        generatedModulesCount: 0,
+        failedModulesCount: 0,
+        startTime: 0
+    };
+
+    function renderCompleteTermUI() {
+        const container = document.getElementById('termProgressContainer');
+        if (!container) return;
+
+        const year = yearSel.value;
+        const term = termSel.value;
+        const yearText = year === 'I' ? 'First Year' : (year === 'II' ? 'Second Year' : `${year} Year`);
+        const termText = `Term ${term}`;
+
+        const selectedCheckboxes = document.querySelectorAll('input[name="termSubject"]:checked');
+        const selectedSubjects = Array.from(selectedCheckboxes).map(cb => cb.value);
+
+        completeTermState = {
+            year: year,
+            term: term,
+            yearText: yearText,
+            termText: termText,
+            selectedSubjects: selectedSubjects,
+            subjectModulesMap: {},
+            isGenerating: false,
+            isCancelled: false,
+            totalModulesCount: 0,
+            generatedModulesCount: 0,
+            failedModulesCount: 0,
+            startTime: 0
+        };
+
+        const romanNumerals = ["I","II","III","IV","V","VI","VII","VIII","IX","X"];
+        let totalModules = 0;
+
+        selectedSubjects.forEach(sub => {
+            const modulesData = academicData[year]?.[term]?.[sub] || {};
+            const modKeys = Object.keys(modulesData);
+            totalModules += modKeys.length;
+
+            completeTermState.subjectModulesMap[sub] = {
+                status: 'pending',
+                totalCount: modKeys.length,
+                completedCount: 0,
+                failedCount: 0,
+                modules: {}
+            };
+
+            modKeys.forEach(num => {
+                const mData = modulesData[num];
+                const title = mData.title || `Module ${num}`;
+                const roman = (term === '4') ? num : (romanNumerals[parseInt(num) - 1] || num);
+                completeTermState.subjectModulesMap[sub].modules[num] = {
+                    num: num,
+                    roman: roman,
+                    title: title,
+                    syllabus: mData.syllabus || "",
+                    status: 'pending',
+                    retried: false,
+                    date: '',
+                    content: { EXP: '', FEEL: '', LEARN: '', APP: '', CONC: '', ASSIGN: '' },
+                    pdfBlob: null
+                };
+            });
+        });
+
+        completeTermState.totalModulesCount = totalModules;
+
+        const titleEl = document.getElementById('termProgressTitle');
+        const subtitleEl = document.getElementById('termProgressSubtitle');
+        if (titleEl) titleEl.innerText = `Generating Complete Term - ${yearText}, ${termText}`;
+        if (subtitleEl) subtitleEl.innerText = `${selectedSubjects.length} Subject(s) • ${totalModules} Total Modules`;
+
+        // Date Controls Handler 1: Global Term Date
+        const globalDateInput = document.getElementById('globalTermDateInput');
+        if (globalDateInput) {
+            globalDateInput.onchange = (e) => {
+                const val = e.target.value;
+                completeTermState.selectedSubjects.forEach(sub => {
+                    const subData = completeTermState.subjectModulesMap[sub];
+                    if (subData) {
+                        subData.subjectDate = val;
+                        Object.keys(subData.modules).forEach(mNum => {
+                            subData.modules[mNum].date = val;
+                        });
+                    }
+                });
+                renderTermSubjectsStatusList();
+            };
+        }
+
+        // Date Controls Handler 2: Auto-Assign Module Pattern
+        const autoAssignBtn = document.getElementById('autoAssignModuleDatesBtn');
+        if (autoAssignBtn) {
+            autoAssignBtn.onclick = () => {
+                let baseDateStr = globalDateInput && globalDateInput.value ? globalDateInput.value : new Date().toISOString().split('T')[0];
+                const baseDate = new Date(baseDateStr);
+
+                completeTermState.selectedSubjects.forEach(sub => {
+                    const subData = completeTermState.subjectModulesMap[sub];
+                    if (subData) {
+                        const mKeys = Object.keys(subData.modules);
+                        mKeys.forEach(mNum => {
+                            const weekDayOffset = (parseInt(mNum) - 1) * 7; // 1-week gap per module
+                            const modDate = new Date(baseDate);
+                            modDate.setDate(modDate.getDate() + weekDayOffset);
+                            const dateString = modDate.toISOString().split('T')[0];
+                            subData.modules[mNum].date = dateString;
+                        });
+                        if (mKeys.length > 0) {
+                            subData.subjectDate = subData.modules[mKeys[0]].date;
+                        }
+                    }
+                });
+                renderTermSubjectsStatusList();
+            };
+        }
+
+        updateTermProgressDisplay(0, "Ready to start", "Module 0 of 0", "--");
+
+        const summaryContainer = document.getElementById('termSummaryContainer');
+        if (summaryContainer) summaryContainer.classList.add('hidden');
+
+        renderTermSubjectsStatusList();
+
+        const startBtn = document.getElementById('startTermGenBtn');
+        const cancelBtn = document.getElementById('cancelTermGenBtn');
+        const retryBtn = document.getElementById('retryFailedTermBtn');
+        const downloadBtn = document.getElementById('downloadTermZipBtn');
+
+        if (startBtn) {
+            startBtn.classList.remove('hidden');
+            startBtn.disabled = false;
+            startBtn.innerHTML = `🚀 Start Term Generation`;
+            startBtn.onclick = () => startTermGeneration();
+        }
+        if (cancelBtn) {
+            cancelBtn.classList.add('hidden');
+            cancelBtn.onclick = () => cancelTermGeneration();
+        }
+        if (retryBtn) {
+            retryBtn.onclick = () => retryFailedTermModules();
+        }
+        if (downloadBtn) {
+            downloadBtn.onclick = () => downloadTermZip();
+        }
+    }
+
+    function renderTermSubjectsStatusList() {
+        const listContainer = document.getElementById('termSubjectsStatusList');
+        if (!listContainer) return;
+        
+        // Preserve open accordion states if re-rendering
+        const openSubFolders = new Set();
+        document.querySelectorAll('.term-sub-body:not(.hidden)').forEach(el => {
+            openSubFolders.add(el.id);
+        });
+        const openModCards = new Set();
+        document.querySelectorAll('.term-mod-content:not(.hidden)').forEach(el => {
+            openModCards.add(el.id);
+        });
+
+        listContainer.innerHTML = '';
+
+        const isTerm4 = (completeTermState.term === '4');
+        const sectionsDef = [
+            { tag: "EXP", name: "Experience" },
+            { tag: "FEEL", name: "Feelings" },
+            { tag: "LEARN", name: "Learning" },
+            { tag: "APP", name: "Application" },
+            { tag: "CONC", name: "Conclusion" }
+        ];
+
+        completeTermState.selectedSubjects.forEach(sub => {
+            const subData = completeTermState.subjectModulesMap[sub];
+            if (!subData) return;
+
+            const subSafe = sub.replace(/[^a-zA-Z0-9]/g, '');
+            const card = document.createElement('div');
+            card.id = `term-sub-card-${subSafe}`;
+            card.className = "bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden mb-4 transition-all";
+
+            let statusBadgeHTML = `<span class="px-2.5 py-1 bg-slate-200 text-slate-600 font-bold text-xs rounded-full">Pending</span>`;
+            if (subData.status === 'generating') {
+                statusBadgeHTML = `<span class="px-2.5 py-1 bg-violet-100 text-violet-700 font-bold text-xs rounded-full animate-pulse flex items-center gap-1.5"><svg class="animate-spin w-3 h-3 text-violet-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> In Progress</span>`;
+            } else if (subData.status === 'completed') {
+                statusBadgeHTML = `<span class="px-2.5 py-1 bg-emerald-100 text-emerald-700 font-bold text-xs rounded-full flex items-center gap-1">✓ Completed (${subData.completedCount}/${subData.totalCount})</span>`;
+            } else if (subData.status === 'completed_with_errors') {
+                statusBadgeHTML = `<span class="px-2.5 py-1 bg-amber-100 text-amber-700 font-bold text-xs rounded-full flex items-center gap-1">⚠️ ${subData.completedCount}/${subData.totalCount} Completed</span>`;
+            }
+
+            const header = document.createElement('div');
+            header.className = "p-4 bg-slate-50 border-b border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 cursor-pointer select-none hover:bg-slate-100/80 transition-colors";
+            
+            const titleArea = document.createElement('div');
+            titleArea.className = "flex items-center gap-3 flex-grow";
+            titleArea.innerHTML = `
+                <svg id="arrow-${subSafe}" class="w-4 h-4 text-slate-500 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                <div>
+                    <h3 class="font-bold text-slate-800 text-sm md:text-base">${sub}</h3>
+                    <p class="text-xs text-slate-500 font-medium">${subData.completedCount} of ${subData.totalCount} modules generated</p>
+                </div>
+            `;
+
+            const controlsArea = document.createElement('div');
+            controlsArea.className = "flex flex-wrap items-center gap-2";
+            controlsArea.onclick = (e) => e.stopPropagation();
+
+            const firstModKey = Object.keys(subData.modules)[0];
+            const initialSubDate = subData.subjectDate || (firstModKey ? subData.modules[firstModKey].date : '');
+
+            const subDateInput = document.createElement('input');
+            subDateInput.type = 'date';
+            subDateInput.value = initialSubDate || '';
+            subDateInput.className = "form-input px-2.5 py-1 text-xs rounded border border-slate-300";
+            subDateInput.title = "Set date for all modules in this subject";
+            subDateInput.onchange = (e) => {
+                const val = e.target.value;
+                subData.subjectDate = val;
+                Object.keys(subData.modules).forEach(mNum => {
+                    subData.modules[mNum].date = val;
+                    const dInp = document.getElementById(`term-mod-date-${subSafe}-${mNum}`);
+                    if (dInp) dInp.value = val;
+                });
+            };
+
+            const subWeeklyBtn = document.createElement('button');
+            subWeeklyBtn.className = "px-2.5 py-1 bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs rounded transition-colors flex items-center gap-1";
+            subWeeklyBtn.innerHTML = `<span>⚡ Weekly Dates</span>`;
+            subWeeklyBtn.title = "Auto-assign weekly dates (+7 days) for this subject";
+            subWeeklyBtn.onclick = () => {
+                const globalDateInput = document.getElementById('globalTermDateInput');
+                const baseStr = subDateInput.value ? subDateInput.value : (globalDateInput && globalDateInput.value ? globalDateInput.value : new Date().toISOString().split('T')[0]);
+                const baseDate = new Date(baseStr);
+                const keys = Object.keys(subData.modules);
+                keys.forEach((mNum, idx) => {
+                    const weekDate = new Date(baseDate);
+                    weekDate.setDate(weekDate.getDate() + (idx * 7));
+                    const dateStr = weekDate.toISOString().split('T')[0];
+                    subData.modules[mNum].date = dateStr;
+                    const dInp = document.getElementById(`term-mod-date-${subSafe}-${mNum}`);
+                    if (dInp) dInp.value = dateStr;
+                });
+                if (keys.length > 0) {
+                    const firstDate = subData.modules[keys[0]].date;
+                    subData.subjectDate = firstDate;
+                    subDateInput.value = firstDate;
+                }
+            };
+
+            const subZipBtn = document.createElement('button');
+            subZipBtn.className = "px-3 py-1 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed";
+            subZipBtn.innerHTML = `<span>📦 Subject ZIP</span>`;
+            subZipBtn.disabled = (subData.completedCount === 0);
+            subZipBtn.onclick = () => downloadTermSubjectZip(sub);
+
+            controlsArea.appendChild(subDateInput);
+            controlsArea.appendChild(subWeeklyBtn);
+            controlsArea.appendChild(subZipBtn);
+            controlsArea.appendChild(document.createRange().createContextualFragment(statusBadgeHTML));
+
+            header.appendChild(titleArea);
+            header.appendChild(controlsArea);
+
+            const body = document.createElement('div');
+            const bodyId = `term-sub-body-${subSafe}`;
+            body.id = bodyId;
+            const isPreviouslyOpen = openSubFolders.has(bodyId);
+            body.className = `${isPreviouslyOpen ? '' : 'hidden '}term-sub-body p-4 space-y-3 bg-slate-50/50 border-t border-slate-100`;
+
+            header.onclick = () => {
+                body.classList.toggle('hidden');
+                const arrow = document.getElementById(`arrow-${subSafe}`);
+                if (arrow) arrow.classList.toggle('rotate-180');
+            };
+
+            if (isPreviouslyOpen) {
+                setTimeout(() => {
+                    const arrow = document.getElementById(`arrow-${subSafe}`);
+                    if (arrow) arrow.classList.add('rotate-180');
+                }, 0);
+            }
+
+            Object.keys(subData.modules).forEach(mNum => {
+                const modObj = subData.modules[mNum];
+                const modCard = document.createElement('div');
+                modCard.className = "bg-white border border-slate-200 rounded-lg p-3 shadow-sm transition-all";
+
+                const modHeader = document.createElement('div');
+                modHeader.className = "flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 cursor-pointer select-none hover:opacity-90 transition-opacity";
+
+                let modBadge = '';
+                if (modObj.status === 'generating') {
+                    const statusText = modObj.generatingSectionName ? `Generating ${modObj.generatingSectionName}...` : 'Generating...';
+                    modBadge = `<span class="px-2.5 py-1 bg-violet-100 text-violet-700 font-bold text-xs rounded-full animate-pulse flex items-center gap-1.5"><svg class="animate-spin w-3 h-3 text-violet-600" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> ${statusText}</span>`;
+                } else if (modObj.status === 'generated') {
+                    modBadge = `<span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 font-bold text-[11px] rounded">✓ Generated</span>`;
+                } else if (modObj.status === 'failed') {
+                    modBadge = `<span class="px-2 py-0.5 bg-rose-100 text-rose-700 font-bold text-[11px] rounded">⚠️ Failed</span>`;
+                }
+
+                const modTitleDiv = document.createElement('div');
+                modTitleDiv.className = "flex items-center gap-2 flex-grow";
+                modTitleDiv.innerHTML = `
+                    <svg id="mod-arrow-${subSafe}-${mNum}" class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    <h4 class="font-bold text-slate-800 text-xs sm:text-sm">${isTerm4 ? 'Assessment' : 'Module'} ${modObj.roman}: ${modObj.title}</h4>
+                `;
+
+                const modControls = document.createElement('div');
+                modControls.className = "flex flex-wrap items-center gap-2";
+                modControls.onclick = (e) => e.stopPropagation();
+
+                const modDateInput = document.createElement('input');
+                modDateInput.id = `term-mod-date-${subSafe}-${mNum}`;
+                modDateInput.type = 'date';
+                modDateInput.value = modObj.date || '';
+                modDateInput.className = "form-input px-2 py-1 text-[11px] rounded border border-slate-300";
+                modDateInput.onchange = (e) => { modObj.date = e.target.value; };
+
+                modControls.appendChild(modDateInput);
+
+                if (modObj.status === 'pending' || modObj.status === 'failed') {
+                    const modGenBtn = document.createElement('button');
+                    modGenBtn.className = "px-2.5 py-1 bg-violet-100 hover:bg-violet-200 text-violet-700 font-bold text-xs rounded transition-colors disabled:opacity-50";
+                    modGenBtn.innerHTML = `✨ Generate`;
+                    modGenBtn.onclick = async () => {
+                        modGenBtn.disabled = true;
+                        modGenBtn.innerText = "⏳...";
+                        await generateSingleTermModule(sub, mNum);
+                    };
+                    modControls.appendChild(modGenBtn);
+                }
+
+                const modDlBtn = document.createElement('button');
+                modDlBtn.className = "px-2.5 py-1 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
+                modDlBtn.innerText = "📄 Download";
+                modDlBtn.disabled = (modObj.status !== 'generated' && modObj.status !== 'failed');
+                modDlBtn.onclick = () => downloadTermModulePDF(sub, mNum);
+
+                modControls.appendChild(modDlBtn);
+                if (modBadge) {
+                    modControls.appendChild(document.createRange().createContextualFragment(modBadge));
+                }
+
+                modHeader.appendChild(modTitleDiv);
+                modHeader.appendChild(modControls);
+                modCard.appendChild(modHeader);
+
+                const modContentDiv = document.createElement('div');
+                const modContentId = `term-mod-content-${subSafe}-${mNum}`;
+                modContentDiv.id = modContentId;
+                const isModOpen = openModCards.has(modContentId);
+                modContentDiv.className = `${isModOpen ? '' : 'hidden '}term-mod-content space-y-2 pt-2 border-t border-slate-100 mt-2`;
+
+                modHeader.onclick = () => {
+                    modContentDiv.classList.toggle('hidden');
+                    const modArrow = document.getElementById(`mod-arrow-${subSafe}-${mNum}`);
+                    if (modArrow) modArrow.classList.toggle('rotate-180');
+                };
+
+                if (isModOpen) {
+                    setTimeout(() => {
+                        const modArrow = document.getElementById(`mod-arrow-${subSafe}-${mNum}`);
+                        if (modArrow) modArrow.classList.add('rotate-180');
+                    }, 0);
+                }
+
+                if (isTerm4) {
+                    const assignDiv = document.createElement('div');
+                    assignDiv.innerHTML = `
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Assignment Answers</label>
+                        <textarea id="ta-term-${subSafe}-${mNum}-ASSIGN" class="w-full form-input px-2.5 py-1.5 text-xs rounded border border-slate-300 h-24">${modObj.content.ASSIGN || ''}</textarea>
+                    `;
+                    modContentDiv.appendChild(assignDiv);
+                } else {
+                    sectionsDef.forEach(sec => {
+                        const secDiv = document.createElement('div');
+                        const wcId = `wc-term-${subSafe}-${mNum}-${sec.tag}`;
+                        secDiv.innerHTML = `
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-[11px] font-bold text-slate-600">${sec.name}</span>
+                                <span id="${wcId}" class="text-[9px] bg-slate-100 text-slate-500 border border-slate-200 px-1.5 py-0.5 rounded font-bold">0 words</span>
+                            </div>
+                            <textarea id="ta-term-${subSafe}-${mNum}-${sec.tag}" class="w-full form-input px-2.5 py-1.5 text-xs rounded border border-slate-300 h-16">${modObj.content[sec.tag] || ''}</textarea>
+                        `;
+                        modContentDiv.appendChild(secDiv);
+                    });
+                }
+
+                modCard.appendChild(modContentDiv);
+                body.appendChild(modCard);
+
+                setTimeout(() => {
+                    if (isTerm4) {
+                        const ta = document.getElementById(`ta-term-${subSafe}-${mNum}-ASSIGN`);
+                        if (ta) ta.addEventListener('input', (e) => { modObj.content.ASSIGN = e.target.value; });
+                    } else {
+                        sectionsDef.forEach(sec => {
+                            const ta = document.getElementById(`ta-term-${subSafe}-${mNum}-${sec.tag}`);
+                            const wc = document.getElementById(`wc-term-${subSafe}-${mNum}-${sec.tag}`);
+                            if (ta) {
+                                const updateWC = () => {
+                                    const val = ta.value;
+                                    modObj.content[sec.tag] = val;
+                                    if (wc) {
+                                        const count = val.trim() === '' ? 0 : val.trim().split(/\s+/).length;
+                                        wc.innerText = `${count} words`;
+                                        if (count >= 420) {
+                                            wc.className = "text-[9px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-1.5 py-0.5 rounded font-bold";
+                                        } else {
+                                            wc.className = "text-[9px] bg-slate-100 text-slate-500 border border-slate-200 px-1.5 py-0.5 rounded font-bold";
+                                        }
+                                    }
+                                };
+                                ta.addEventListener('input', updateWC);
+                                updateWC();
+                            }
+                        });
+                    }
+                }, 0);
+            });
+
+            card.appendChild(header);
+            card.appendChild(body);
+            listContainer.appendChild(card);
+        });
+    }
+
+    async function downloadTermSubjectZip(subName) {
+        const subData = completeTermState.subjectModulesMap[subName];
+        if (!subData) return;
+
+        try {
+            const zip = new JSZip();
+            const subFolder = zip.folder(subName);
+            let addedCount = 0;
+
+            const modKeys = Object.keys(subData.modules);
+            for (let i = 0; i < modKeys.length; i++) {
+                const num = modKeys[i];
+                const modObj = subData.modules[num];
+                if (modObj.pdfBlob && (modObj.status === 'generated' || modObj.status === 'failed')) {
+                    subFolder.file(`Module ${num}.pdf`, modObj.pdfBlob);
+                    addedCount++;
+                }
+            }
+
+            if (addedCount > 0) {
+                const zipContent = await zip.generateAsync({ type: "blob" });
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(zipContent);
+                const safeSub = subName.replace(/[^a-zA-Z0-9\s]/g, '');
+                a.download = `${safeSub}_All_RJs.zip`;
+                a.click();
+                incrementJournalCounter();
+            } else {
+                alert("No modules generated yet for this subject.");
+            }
+        } catch (err) {
+            console.error("Subject ZIP download error:", err);
+            alert("Failed to create subject ZIP.");
+        }
+    }
+
+    async function downloadTermModulePDF(subName, modNum) {
+        const subData = completeTermState.subjectModulesMap[subName];
+        if (!subData) return;
+        const modObj = subData.modules[modNum];
+        if (!modObj) return;
+
+        try {
+            if (!modObj.pdfBlob) {
+                const cachedHeader = await getBase64ImageFromURL('header.png').catch(() => null);
+                modObj.pdfBlob = await buildPDFBlobForModule(subName, modObj, cachedHeader);
+            }
+            if (modObj.pdfBlob) {
+                const url = URL.createObjectURL(modObj.pdfBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                const safeName = (document.getElementById('studentName').value || 'Student').replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+                const safeReg = (document.getElementById('regNumber').value || 'REG').replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+                const safeSub = subName.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+                const docType = (completeTermState.term === '4') ? "Assignment" : "RJ";
+                a.download = `${safeName}_${safeReg}_${docType}_${safeSub}-${modObj.roman}.pdf`;
+                a.click();
+                URL.revokeObjectURL(url);
+                incrementJournalCounter();
+            }
+        } catch (err) {
+            console.error("Module PDF download error:", err);
+            alert("Failed to download PDF.");
+        }
+    }
+
+    async function generateSingleTermModule(subName, modNum) {
+        const subData = completeTermState.subjectModulesMap[subName];
+        if (!subData) return;
+        const modObj = subData.modules[modNum];
+        if (!modObj) return;
+
+        const isTerm4 = (completeTermState.term === '4');
+        modObj.status = 'generating';
+        renderTermSubjectsStatusList();
+
+        let success = false;
+        try {
+            if (isTerm4) {
+                modObj.content.ASSIGN = getClientAssignmentFallback(subName, modObj.roman, modObj.title, modObj.roman);
+                success = true;
+            } else {
+                for (let secIdx = 0; secIdx < sectionsDefinition.length; secIdx++) {
+                    const sec = sectionsDefinition[secIdx];
+                    modObj.generatingSectionName = sec.name;
+                    renderTermSubjectsStatusList();
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 3000);
+                        const res = await fetch(`${API_BASE_URL}/api/generate-section`, {
+                            method: "POST", headers: { "Content-Type": "application/json" },
+                            signal: controller.signal,
+                            body: JSON.stringify({ 
+                                subject: subName, moduleRoman: modObj.roman, topic: modObj.title, 
+                                syllabus: modObj.syllabus, sectionTag: sec.tag, styleInstruction: sec.hint, requestSeed: Date.now()
+                            })
+                        });
+                        clearTimeout(timeoutId);
+                        const data = await res.json();
+                        if (!res.ok) throw new Error("API error");
+                        modObj.content[sec.tag] = data.text;
+                    } catch (e) {
+                        modObj.content[sec.tag] = getClientFallback(sec.tag, subName, modObj.title);
+                    }
+                }
+                modObj.generatingSectionName = '';
+                success = true;
+            }
+        } catch (e) {}
+
+        if (success) {
+            modObj.status = 'generated';
+            const cachedHeader = await getBase64ImageFromURL('header.png').catch(() => null);
+            modObj.pdfBlob = await buildPDFBlobForModule(subName, modObj, cachedHeader);
+            subData.completedCount++;
+            completeTermState.generatedModulesCount++;
+            incrementJournalCounter();
+        } else {
+            modObj.status = 'failed';
+        }
+
+        if (subData.completedCount === subData.totalCount) subData.status = 'completed';
+        renderTermSubjectsStatusList();
+    }
+
+    function updateTermProgressDisplay(percent, subjectText, moduleText, timeText) {
+        const percentEl = document.getElementById('termProgressPercent');
+        const barEl = document.getElementById('termProgressBar');
+        const subjEl = document.getElementById('termCurrentSubjectText');
+        const modEl = document.getElementById('termCurrentModuleText');
+        const timeEl = document.getElementById('termTimeRemainingText');
+
+        const cleanPercent = Math.min(100, Math.max(0, Math.round(percent)));
+        if (percentEl) percentEl.innerText = `${cleanPercent}%`;
+        if (barEl) barEl.style.width = `${cleanPercent}%`;
+        if (subjEl) subjEl.innerText = `Current Subject: ${subjectText}`;
+        if (modEl) modEl.innerText = `Current Module: ${moduleText}`;
+        if (timeEl) timeEl.innerText = `Est. Time Remaining: ${timeText}`;
+    }
+
+    async function startTermGeneration() {
+        if (completeTermState.isGenerating) return;
+
+        completeTermState.isGenerating = true;
+        completeTermState.isCancelled = false;
+        completeTermState.startTime = Date.now();
+
+        const startBtn = document.getElementById('startTermGenBtn');
+        const cancelBtn = document.getElementById('cancelTermGenBtn');
+        const summaryContainer = document.getElementById('termSummaryContainer');
+
+        if (startBtn) {
+            startBtn.disabled = true;
+            startBtn.innerHTML = `<svg class="animate-spin w-4 h-4 inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating...`;
+        }
+        if (cancelBtn) cancelBtn.classList.remove('hidden');
+        if (summaryContainer) summaryContainer.classList.add('hidden');
+
+        const isTerm4 = (completeTermState.term === '4');
+        let processedCount = 0;
+
+        const cachedHeader = await getBase64ImageFromURL('header.png').catch(() => null);
+
+        for (let sIdx = 0; sIdx < completeTermState.selectedSubjects.length; sIdx++) {
+            if (completeTermState.isCancelled) break;
+
+            const subName = completeTermState.selectedSubjects[sIdx];
+            const subData = completeTermState.subjectModulesMap[subName];
+            subData.status = 'generating';
+            renderTermSubjectsStatusList();
+
+            const modKeys = Object.keys(subData.modules);
+
+            for (let mIdx = 0; mIdx < modKeys.length; mIdx++) {
+                if (completeTermState.isCancelled) break;
+
+                const modNum = modKeys[mIdx];
+                const modObj = subData.modules[modNum];
+
+                if (modObj.status === 'generated') {
+                    processedCount++;
+                    continue;
+                }
+
+                modObj.status = 'generating';
+
+                const percent = (processedCount / completeTermState.totalModulesCount) * 100;
+                const elapsedSec = (Date.now() - completeTermState.startTime) / 1000;
+                let estTimeStr = "--";
+                if (processedCount > 0) {
+                    const avgSec = elapsedSec / processedCount;
+                    const remCount = completeTermState.totalModulesCount - processedCount;
+                    const remSec = Math.ceil(avgSec * remCount);
+                    const mins = Math.floor(remSec / 60);
+                    const secs = remSec % 60;
+                    estTimeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+                }
+
+                const isAssessmentLabel = isTerm4 ? `Assessment ${modNum}` : `Module ${modObj.roman} of ${modKeys.length}`;
+                updateTermProgressDisplay(percent, subName, isAssessmentLabel, estTimeStr);
+
+                let success = false;
+                let attempt = 0;
+
+                while (attempt < 2 && !success && !completeTermState.isCancelled) {
+                    attempt++;
+                    try {
+                        if (isTerm4) {
+                            modObj.content.ASSIGN = getClientAssignmentFallback(subName, modObj.roman, modObj.title, modObj.roman);
+                            success = true;
+                        } else {
+                            for (let secIdx = 0; secIdx < sectionsDefinition.length; secIdx++) {
+                                if (completeTermState.isCancelled) break;
+                                const sec = sectionsDefinition[secIdx];
+                                modObj.generatingSectionName = sec.name;
+                                renderTermSubjectsStatusList();
+                                
+                                try {
+                                    const controller = new AbortController();
+                                    const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+                                    const res = await fetch(`${API_BASE_URL}/api/generate-section`, {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        signal: controller.signal,
+                                        body: JSON.stringify({ 
+                                            subject: subName, 
+                                            moduleRoman: modObj.roman, 
+                                            topic: modObj.title, 
+                                            syllabus: modObj.syllabus, 
+                                            sectionTag: sec.tag,
+                                            styleInstruction: sec.hint,
+                                            requestSeed: Date.now()
+                                        })
+                                    });
+                                    clearTimeout(timeoutId);
+                                    const data = await res.json();
+                                    if (!res.ok) throw new Error(data.error || "API failed");
+                                    modObj.content[sec.tag] = data.text;
+                                } catch (err) {
+                                    modObj.content[sec.tag] = getClientFallback(sec.tag, subName, modObj.title);
+                                }
+                            }
+                            success = true;
+                        }
+                    } catch (err) {
+                        console.warn(`Attempt ${attempt} failed for module ${modNum} of ${subName}:`, err);
+                        if (attempt < 2) {
+                            await new Promise(r => setTimeout(r, 1000));
+                        }
+                    }
+                }
+
+                modObj.generatingSectionName = '';
+
+                if (success && !completeTermState.isCancelled) {
+                    modObj.status = 'generated';
+                    try {
+                        modObj.pdfBlob = await buildPDFBlobForModule(subName, modObj, cachedHeader);
+                        subData.completedCount++;
+                        completeTermState.generatedModulesCount++;
+                        incrementJournalCounter();
+                    } catch (pdfErr) {
+                        console.error("PDF Blob generation failed:", pdfErr);
+                        modObj.status = 'failed';
+                        subData.failedCount++;
+                        completeTermState.failedModulesCount++;
+                    }
+                } else {
+                    modObj.status = 'failed';
+                    subData.failedCount++;
+                    completeTermState.failedModulesCount++;
+                }
+
+                processedCount++;
+                renderTermSubjectsStatusList();
+            }
+
+            if (subData.completedCount === subData.totalCount) {
+                subData.status = 'completed';
+            } else {
+                subData.status = 'completed_with_errors';
+            }
+            renderTermSubjectsStatusList();
+        }
+
+        completeTermState.isGenerating = false;
+        if (cancelBtn) cancelBtn.classList.add('hidden');
+
+        if (startBtn) {
+            startBtn.disabled = false;
+            startBtn.innerHTML = `🚀 Restart Generation`;
+        }
+
+        const finalPercent = (processedCount / completeTermState.totalModulesCount) * 100;
+        updateTermProgressDisplay(finalPercent, "Completed", "Finished", "0s");
+
+        finishTermGenerationSummary();
+    }
+
+    function finishTermGenerationSummary() {
+        const summaryContainer = document.getElementById('termSummaryContainer');
+        const summaryTitle = document.getElementById('termSummaryTitle');
+        const summaryText = document.getElementById('termSummaryText');
+        const summaryIcon = document.getElementById('termSummaryIcon');
+        const retryBtn = document.getElementById('retryFailedTermBtn');
+        const downloadBtn = document.getElementById('downloadTermZipBtn');
+
+        if (!summaryContainer) return;
+        summaryContainer.classList.remove('hidden');
+
+        const totalGenerated = completeTermState.generatedModulesCount;
+        const totalFailed = completeTermState.failedModulesCount;
+
+        if (summaryText) {
+            summaryText.innerText = `Completed: ${totalGenerated} PDFs | Failed: ${totalFailed} PDFs`;
+        }
+
+        if (totalFailed > 0) {
+            if (summaryIcon) summaryIcon.innerText = "⚠️";
+            if (summaryTitle) summaryTitle.innerText = "Term Generation Finished with Issues";
+            if (retryBtn) retryBtn.classList.remove('hidden');
+        } else {
+            if (summaryIcon) summaryIcon.innerText = "🎉";
+            if (summaryTitle) summaryTitle.innerText = "Term Generation Complete!";
+            if (retryBtn) retryBtn.classList.add('hidden');
+        }
+
+        if (downloadBtn) {
+            downloadBtn.disabled = (totalGenerated === 0);
+        }
+    }
+
+    function cancelTermGeneration() {
+        completeTermState.isCancelled = true;
+        completeTermState.isGenerating = false;
+        const cancelBtn = document.getElementById('cancelTermGenBtn');
+        const startBtn = document.getElementById('startTermGenBtn');
+        if (cancelBtn) cancelBtn.classList.add('hidden');
+        if (startBtn) {
+            startBtn.disabled = false;
+            startBtn.innerHTML = `🚀 Resume / Restart Generation`;
+        }
+    }
+
+    async function retryFailedTermModules() {
+        if (completeTermState.isGenerating) return;
+
+        completeTermState.isGenerating = true;
+        completeTermState.isCancelled = false;
+
+        const retryBtn = document.getElementById('retryFailedTermBtn');
+        const cancelBtn = document.getElementById('cancelTermGenBtn');
+        if (retryBtn) {
+            retryBtn.disabled = true;
+            retryBtn.innerText = "⏳ Retrying Failed...";
+        }
+        if (cancelBtn) cancelBtn.classList.remove('hidden');
+
+        const isTerm4 = (completeTermState.term === '4');
+        const cachedHeader = await getBase64ImageFromURL('header.png').catch(() => null);
+
+        for (let sIdx = 0; sIdx < completeTermState.selectedSubjects.length; sIdx++) {
+            if (completeTermState.isCancelled) break;
+            const subName = completeTermState.selectedSubjects[sIdx];
+            const subData = completeTermState.subjectModulesMap[subName];
+            const modKeys = Object.keys(subData.modules);
+
+            for (let mIdx = 0; mIdx < modKeys.length; mIdx++) {
+                if (completeTermState.isCancelled) break;
+                const modNum = modKeys[mIdx];
+                const modObj = subData.modules[modNum];
+
+                if (modObj.status === 'failed') {
+                    modObj.status = 'generating';
+                    let success = false;
+
+                    try {
+                        if (isTerm4) {
+                            modObj.content.ASSIGN = getClientAssignmentFallback(subName, modObj.roman, modObj.title, modObj.roman);
+                            success = true;
+                        } else {
+                            for (let secIdx = 0; secIdx < sectionsDefinition.length; secIdx++) {
+                                const sec = sectionsDefinition[secIdx];
+                                modObj.content[sec.tag] = getClientFallback(sec.tag, subName, modObj.title);
+                            }
+                            success = true;
+                        }
+                    } catch (e) {}
+
+                    if (success) {
+                        modObj.status = 'generated';
+                        try {
+                            modObj.pdfBlob = await buildPDFBlobForModule(subName, modObj, cachedHeader);
+                            subData.failedCount = Math.max(0, subData.failedCount - 1);
+                            subData.completedCount++;
+                            completeTermState.failedModulesCount = Math.max(0, completeTermState.failedModulesCount - 1);
+                            completeTermState.generatedModulesCount++;
+                            incrementJournalCounter();
+                        } catch (pdfErr) {
+                            modObj.status = 'failed';
+                        }
+                    } else {
+                        modObj.status = 'failed';
+                    }
+                    renderTermSubjectsStatusList();
+                }
+            }
+
+            if (subData.completedCount === subData.totalCount) {
+                subData.status = 'completed';
+            }
+            renderTermSubjectsStatusList();
+        }
+
+        completeTermState.isGenerating = false;
+        if (cancelBtn) cancelBtn.classList.add('hidden');
+        if (retryBtn) {
+            retryBtn.disabled = false;
+            retryBtn.innerText = "🔄 Generate Failed Modules";
+        }
+
+        finishTermGenerationSummary();
+    }
+
+    async function buildPDFBlobForModule(subjectName, modObj, preloadedHeaderImage = null) {
+        const isTerm4 = (completeTermState.term === '4');
+        const headerImageData = preloadedHeaderImage || await getBase64ImageFromURL('header.png').catch(() => null);
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ format: 'a4', orientation: 'portrait' });
+        
+        const currentDate = formatDate(document.getElementById('journalDate').value || new Date().toISOString().split('T')[0]);
+
+        const dataObj = {
+            name: document.getElementById('studentName').value || 'Student',
+            reg: document.getElementById('regNumber').value || 'REG123',
+            sec: document.getElementById('classSection').value || 'SEC-A',
+            yt: formatYearTermPDF(completeTermState.year, completeTermState.term),
+            sub: subjectName,
+            assNum: modObj.roman,
+            date: currentDate,
+            topic: modObj.title,
+            assign: modObj.content.ASSIGN,
+            exp: modObj.content.EXP,
+            feel: modObj.content.FEEL,
+            learn: modObj.content.LEARN,
+            app: modObj.content.APP,
+            conc: modObj.content.CONC
+        };
+
+        const pageWidth = doc.internal.pageSize.width;
+        let startY = 45; 
+
+        doc.autoTable({
+            startY: startY, margin: { top: 45 }, theme: 'grid',
+            styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
+            body: [
+                [{ content: 'Student Name', styles: { fontStyle: 'bold', cellWidth: 50 } }, { content: dataObj.name, colSpan: 2, styles: { fontStyle: 'bold' } }],
+                [{ content: 'Student Registration Number', styles: { fontStyle: 'bold' } }, { content: dataObj.reg }, { content: `Class & Section: ${dataObj.sec}`, styles: { fontStyle: 'bold' } }],
+                [{ content: 'Study Level : UG/PG', styles: { fontStyle: 'bold' } }, { content: 'UG' }, { content: `Year & Term: ${dataObj.yt}`, styles: { fontStyle: 'bold' } }],
+                [{ content: 'Subject Name', styles: { fontStyle: 'bold' } }, { content: dataObj.sub, colSpan: 2, styles: { fontStyle: 'bold' } }]
+            ],
+        });
+
+        doc.autoTable({
+            startY: doc.lastAutoTable.finalY + 5, margin: { top: 45 }, theme: 'grid',
+            styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
+            body: [
+                [{ content: isTerm4 ? 'Assessment' : 'Name of the Assessment', styles: { fontStyle: 'bold', cellWidth: isTerm4 ? 50 : 60 } }, { content: `${isTerm4 ? "Assignment" : "Reflective Journal"} - ${dataObj.assNum}` }],
+                [{ content: 'Date of Submission', styles: { fontStyle: 'bold' } }, { content: dataObj.date }]
+            ],
+        });
+
+        let currentY = doc.lastAutoTable.finalY + 15;
+        doc.setFont("times", "bold");
+        doc.setFontSize(14);
+        doc.text(`${isTerm4 ? "Assignment" : "Reflective Journal"} - ${dataObj.assNum}`, pageWidth/2, currentY, { align: "center" });
+
+        let qaY;
+        if (!isTerm4) {
+            currentY += 8;
+            doc.autoTable({
+                startY: currentY, margin: { top: 45 }, theme: 'grid',
+                styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2 },
+                body: [
+                    [{ content: 'Date', styles: { fontStyle: 'normal', textColor: [192, 0, 0], cellWidth: 40 } }, { content: dataObj.date }],
+                    [{ content: `Journal Entry\nTopic`, styles: { fontStyle: 'normal', textColor: [192, 0, 0] } }, { content: dataObj.topic }]
+                ],
+            });
+            qaY = doc.lastAutoTable.finalY;
+        } else {
+            qaY = currentY + 10;
+        }
+
+        const drawContentSection = (title, content, startPosY) => {
+            doc.autoTable({
+                startY: startPosY, margin: { top: 45 }, theme: 'grid',
+                styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 4 },
+                columnStyles: { 0: { cellWidth: 40, fontStyle: 'bold' } },
+                body: [[title, content || ""]],
+            });
+        };
+
+        if (isTerm4) {
+            const qaBlocks = [];
+            const regex = /Question\s*(\d+):?\s*([\s\S]*?)\n+Answer:\s*([\s\S]*?)(?=\n*Question\s*\d+:|$)/gi;
+            let match;
+            while ((match = regex.exec(dataObj.assign)) !== null) {
+                qaBlocks.push({ qNum: match[1], question: match[2].trim(), answer: match[3].trim() });
+            }
+            let bodyData = [];
+            qaBlocks.forEach((block) => {
+                bodyData.push([{ content: `Question ${block.qNum}: ${block.question}`, styles: { fontStyle: 'bold', fontSize: 11 } }]);
+                bodyData.push([{ content: `Answer:\n\n${block.answer}`, styles: { fontStyle: 'normal' } }]);
+            });
+            doc.autoTable({
+                startY: qaY, margin: { top: 45 }, theme: 'grid',
+                styles: { font: 'times', fontSize: 11, textColor: [0, 0, 0], lineColor: [0, 0, 0], lineWidth: 0.2, cellPadding: 6 },
+                body: bodyData,
+                didParseCell: function(data) {
+                    if (data.row.index % 2 === 0) {
+                        data.cell.styles.lineWidth = { top: 0.2, right: 0.2, bottom: 0, left: 0.2 };
+                    } else {
+                        data.cell.styles.lineWidth = { top: 0, right: 0.2, bottom: 0.2, left: 0.2 };
+                    }
+                }
+            });
+        } else {
+            drawContentSection('1. Experience\n(Class Content)', dataObj.exp, qaY);
+            drawContentSection('2. Feelings\n(Emotional Reactions)', dataObj.feel, doc.lastAutoTable.finalY);
+            drawContentSection('3. Learning\n(Key Insights)', dataObj.learn, doc.lastAutoTable.finalY);
+            drawContentSection('4. Application\n(Practical Use)', dataObj.app, doc.lastAutoTable.finalY);
+            drawContentSection('5. Conclusion', dataObj.conc, doc.lastAutoTable.finalY);
+        }
+
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            if (headerImageData) {
+                doc.addImage(headerImageData, 'PNG', 0, 0, 210, 35);
+            } else {
+                doc.setFont("helvetica", "bold");
+                doc.setFontSize(22);
+                doc.text("AURORA HIGHER EDUCATION", pageWidth/2, 20, { align: "center" });
+                doc.setFontSize(12);
+                doc.setFont("helvetica", "normal");
+                doc.text("Deemed-to-be-University Estd.u/s.03 of UGC Act 1956", pageWidth/2, 27, { align: "center" });
+                doc.setFontSize(10);
+                doc.text("Uppal, Hyderabad, Telangana | Bhongir, Yadadri, Telangana", pageWidth/2, 33, { align: "center" });
+            }
+        }
+
+        return doc.output('blob');
+    }
+
+    async function downloadTermZip() {
+        const downloadBtn = document.getElementById('downloadTermZipBtn');
+        if (downloadBtn) {
+            downloadBtn.disabled = true;
+            downloadBtn.innerText = "📦 Zipping Complete Term...";
+        }
+
+        try {
+            const zip = new JSZip();
+            const topFolder = `${completeTermState.yearText} - Term ${completeTermState.term}`;
+            const folder = zip.folder(topFolder);
+
+            let addedCount = 0;
+
+            completeTermState.selectedSubjects.forEach(subName => {
+                const subData = completeTermState.subjectModulesMap[subName];
+                const subFolder = folder.folder(subName);
+                const modKeys = Object.keys(subData.modules);
+
+                modKeys.forEach(num => {
+                    const modObj = subData.modules[num];
+                    if (modObj.pdfBlob && modObj.status === 'generated') {
+                        subFolder.file(`Module ${num}.pdf`, modObj.pdfBlob);
+                        addedCount++;
+                    }
+                });
+            });
+
+            if (addedCount > 0) {
+                const zipContent = await zip.generateAsync({ type: "blob" });
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(zipContent);
+                a.download = `${topFolder}.zip`;
+                a.click();
+
+                const successMsg = document.getElementById('successMsg');
+                if (successMsg) {
+                    const successMsgText = document.getElementById('successMsgText');
+                    if (successMsgText) successMsgText.innerText = "Complete Term ZIP Downloaded Successfully!";
+                    successMsg.classList.remove('hidden');
+                    successMsg.classList.add('active');
+                    successMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            } else {
+                alert("No modules available for download.");
+            }
+        } catch (err) {
+            console.error("ZIP Generation error:", err);
+            alert("An error occurred while generating the ZIP file.");
+        } finally {
+            if (downloadBtn) {
+                downloadBtn.disabled = false;
+                downloadBtn.innerText = "📦 Download Complete Term (ZIP)";
+            }
+        }
     }
 
     // ---------------- RESET / NEW JOURNAL ----------------

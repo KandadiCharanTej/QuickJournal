@@ -350,7 +350,7 @@
                         </div>
                         <div class="lg:col-span-3 mt-4" id="generationModeContainer" style="display: none;">
                             <label class="block text-sm font-bold text-slate-700 mb-2">Generation Mode</label>
-                            <div class="flex gap-4">
+                            <div class="flex flex-wrap gap-4">
                                 <label class="flex items-center gap-2 cursor-pointer">
                                     <input type="radio" name="genMode" value="single" checked class="w-4 h-4 text-violet-600">
                                     <span class="text-sm font-semibold text-slate-700">Generate Single Module</span>
@@ -359,7 +359,26 @@
                                     <input type="radio" name="genMode" value="complete" class="w-4 h-4 text-violet-600">
                                     <span class="text-sm font-semibold text-slate-700">Generate Complete Subject</span>
                                 </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input type="radio" name="genMode" value="term" class="w-4 h-4 text-violet-600">
+                                    <span class="text-sm font-semibold text-slate-700">Generate Complete Term</span>
+                                </label>
                             </div>
+                        </div>
+                        <div class="lg:col-span-3 mt-4 hidden" id="termSubjectSelectionContainer">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="block text-sm font-bold text-slate-700">Select Subjects to Generate</label>
+                                <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-violet-600 hover:text-violet-800">
+                                    <input type="checkbox" id="selectAllSubjects" checked class="w-4 h-4 text-violet-600 rounded">
+                                    <span>Select All</span>
+                                </label>
+                            </div>
+                            <div id="termSubjectsList" class="grid grid-cols-1 md:grid-cols-2 gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                                <!-- Dynamically populated by JS -->
+                            </div>
+                            <p id="termSubjectError" class="hidden text-xs text-red-500 font-bold mt-2">
+                                ⚠️ Please select at least one subject to generate.
+                            </p>
                         </div>
                         <div id="assessmentNoContainer">
                             <label id="assessmentNoLabel" class="block text-sm font-bold text-slate-700 mb-2">Reflective Number</label>
@@ -476,6 +495,87 @@
                             <button type="button" id="downloadAllZipBtn" class="flex-1 py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow-md transition-all text-center flex justify-center items-center gap-2">
                                 📦 Download All (ZIP)
                             </button>
+                        </div>
+                    </div>
+
+                    <div id="termProgressContainer" class="hidden space-y-6">
+                        <!-- Date Configuration Bar -->
+                        <div class="p-3 bg-violet-50/80 border border-violet-200 rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-sm">
+                            <span class="font-extrabold text-violet-800 flex items-center gap-1.5">
+                                <span>📅</span> Date Assignment
+                            </span>
+                            <div class="flex flex-wrap items-center gap-3">
+                                <div class="flex items-center gap-2 bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 shadow-sm">
+                                    <span class="font-bold text-slate-700">Global Date:</span>
+                                    <input type="date" id="globalTermDateInput" class="form-input px-2 py-1 text-xs rounded border border-slate-300">
+                                </div>
+                                <button type="button" id="autoAssignModuleDatesBtn" class="px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-lg shadow-sm transition-all flex items-center gap-1.5">
+                                    ⚡ Weekly Dates
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Header & Control Bar -->
+                        <div class="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                                <div>
+                                    <h3 class="text-lg font-bold text-slate-800" id="termProgressTitle">Generating Complete Term</h3>
+                                    <p class="text-xs text-slate-500 font-medium" id="termProgressSubtitle">All selected subjects will be generated sequentially</p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button type="button" id="startTermGenBtn" class="px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-bold text-sm rounded-xl shadow-sm transition-all flex items-center gap-2">
+                                        🚀 Start Term Generation
+                                    </button>
+                                    <button type="button" id="cancelTermGenBtn" class="hidden px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold text-sm rounded-xl transition-all flex items-center gap-1.5">
+                                        ⛔ Cancel
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Progress Metrics & Bar -->
+                            <div>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Overall Progress</span>
+                                    <span id="termProgressPercent" class="text-sm font-extrabold text-violet-700">0%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 h-3.5 rounded-full overflow-hidden border border-slate-200">
+                                    <div id="termProgressBar" class="bg-gradient-to-r from-violet-600 to-fuchsia-500 h-full transition-all duration-300 w-0"></div>
+                                </div>
+                                <div class="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center mt-3 text-xs font-semibold text-slate-600 gap-1">
+                                    <span id="termCurrentSubjectText">Current Subject: Ready</span>
+                                    <span id="termCurrentModuleText">Module: 0 of 0</span>
+                                    <span id="termTimeRemainingText" class="text-slate-400">Est. Time Remaining: --</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Subjects Status Overview -->
+                        <div class="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4">Selected Subjects Progress</h4>
+                            <div id="termSubjectsStatusList" class="space-y-3">
+                                <!-- Dynamic list of subject statuses -->
+                            </div>
+                        </div>
+
+                        <!-- Completion / Error Summary Box -->
+                        <div id="termSummaryContainer" class="hidden p-6 bg-slate-50 border border-slate-200 rounded-2xl shadow-sm space-y-4">
+                            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-3xl" id="termSummaryIcon">🎉</span>
+                                    <div>
+                                        <h4 class="font-extrabold text-slate-800 text-lg" id="termSummaryTitle">Term Generation Complete</h4>
+                                        <p class="text-xs text-slate-600 font-medium" id="termSummaryText">Completed: 0 PDFs | Failed: 0 PDFs</p>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                                    <button type="button" id="retryFailedTermBtn" class="hidden px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                                        🔄 Generate Failed Modules
+                                    </button>
+                                    <button type="button" id="downloadTermZipBtn" class="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                                        📦 Download Complete Term (ZIP)
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
