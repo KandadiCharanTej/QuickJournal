@@ -561,11 +561,17 @@
                     <div id="multiModuleContainer" class="hidden space-y-6">
                         <!-- Module cards will be dynamically injected here by JS -->
                         
-                        <div id="multiModuleActions" class="flex flex-col sm:flex-row gap-4 mt-8 border-t border-slate-200 pt-6">
-                            <button type="button" id="generateAllModulesBtn" class="flex-1 py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl shadow-md transition-all text-center flex justify-center items-center gap-2">
+                        <div id="multiModuleActions" class="flex flex-wrap sm:flex-nowrap gap-3 mt-8 border-t border-slate-200 pt-6">
+                            <button type="button" id="generateAllModulesBtn" class="flex-1 py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl shadow-md transition-all text-center flex justify-center items-center gap-2 min-w-[160px]">
                                 ✨ Generate All Pending
                             </button>
-                            <button type="button" id="downloadAllZipBtn" class="flex-1 py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow-md transition-all text-center flex justify-center items-center gap-2">
+                            <button type="button" id="pauseSubjectGenBtn" class="hidden py-3 px-5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-md transition-all text-center flex justify-center items-center gap-1.5">
+                                ⏸️ Pause
+                            </button>
+                            <button type="button" id="stopSubjectGenBtn" class="hidden py-3 px-5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-md transition-all text-center flex justify-center items-center gap-1.5">
+                                ⏹️ Stop
+                            </button>
+                            <button type="button" id="downloadAllZipBtn" class="flex-1 py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow-md transition-all text-center flex justify-center items-center gap-2 min-w-[160px]">
                                 📦 Download All (ZIP)
                             </button>
                         </div>
@@ -595,9 +601,15 @@
                                     <h3 class="text-lg font-bold text-slate-800" id="termProgressTitle">Generating Complete Term</h3>
                                     <p class="text-xs text-slate-500 font-medium" id="termProgressSubtitle">All selected subjects will be generated sequentially</p>
                                 </div>
-                                <div class="flex gap-2">
+                                <div class="flex flex-wrap gap-2">
                                     <button type="button" id="startTermGenBtn" class="px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-bold text-sm rounded-xl shadow-sm transition-all flex items-center gap-2">
                                         🚀 Start Term Generation
+                                    </button>
+                                    <button type="button" id="pauseTermGenBtn" class="hidden px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-xl shadow-sm transition-all flex items-center gap-1.5">
+                                        ⏸️ Pause
+                                    </button>
+                                    <button type="button" id="stopTermGenBtn" class="hidden px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm rounded-xl shadow-sm transition-all flex items-center gap-1.5">
+                                        ⏹️ Stop
                                     </button>
                                     <button type="button" id="cancelTermGenBtn" class="hidden px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold text-sm rounded-xl transition-all flex items-center gap-1.5">
                                         ⛔ Cancel

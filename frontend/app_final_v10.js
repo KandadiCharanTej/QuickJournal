@@ -991,7 +991,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                             while (retries >= 0 && !success) {
                                 try {
                                     const controller = new AbortController();
-                                    const timeoutId = setTimeout(() => controller.abort(), 2500); 
+                                    const timeoutId = setTimeout(() => controller.abort(), 30000); 
 
                                     const res = await fetch(`${API_BASE_URL}/api/generate-section`, {
                                         method: "POST",
@@ -1213,7 +1213,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                         while (retries >= 0 && !success) {
                             try {
                                 const controller = new AbortController();
-                                const timeoutId = setTimeout(() => controller.abort(), 2500); 
+                                const timeoutId = setTimeout(() => controller.abort(), 15000); 
 
                                 const res = await fetch(`${API_BASE_URL}/api/generate-section`, {
                                     method: "POST",
@@ -1807,7 +1807,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                 while (retries >= 0 && !secSuccess) {
                     try {
                         const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 2500); // Fast timeout
+                        const timeoutId = setTimeout(() => controller.abort(), 15000);
 
                         const res = await fetch(`${API_BASE_URL}/api/generate-section`, {
                             method: "POST",
@@ -2483,6 +2483,12 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                 }
             };
 
+            const subGenBtn = document.createElement('button');
+            subGenBtn.className = "px-3 py-1 bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs rounded transition-colors flex items-center gap-1 disabled:opacity-50";
+            subGenBtn.innerHTML = `<span>🚀 Generate Subject</span>`;
+            subGenBtn.disabled = (subData.status === 'generating' || subData.completedCount === subData.totalCount);
+            subGenBtn.onclick = () => generateSingleSubjectInTerm(sub);
+
             const subZipBtn = document.createElement('button');
             subZipBtn.className = "px-3 py-1 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed";
             subZipBtn.innerHTML = `<span>📦 Subject ZIP</span>`;
@@ -2491,6 +2497,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
 
             controlsArea.appendChild(subDateInput);
             controlsArea.appendChild(subWeeklyBtn);
+            controlsArea.appendChild(subGenBtn);
             controlsArea.appendChild(subZipBtn);
             controlsArea.appendChild(document.createRange().createContextualFragment(statusBadgeHTML));
 
@@ -2697,6 +2704,29 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
         }
     }
 
+    async function generateSingleSubjectInTerm(subName) {
+        const subData = completeTermState.subjectModulesMap[subName];
+        if (!subData) return;
+        subData.status = 'generating';
+        renderTermSubjectsStatusList();
+        
+        const modKeys = Object.keys(subData.modules);
+        for (let mIdx = 0; mIdx < modKeys.length; mIdx++) {
+            if (completeTermState.isCancelled) break;
+            const mNum = modKeys[mIdx];
+            const modObj = subData.modules[mNum];
+            if (modObj.status !== 'generated') {
+                await generateSingleTermModule(subName, mNum);
+            }
+        }
+        if (subData.completedCount === subData.totalCount) {
+            subData.status = 'completed';
+        } else {
+            subData.status = 'completed_with_errors';
+        }
+        renderTermSubjectsStatusList();
+    }
+
     async function downloadTermModulePDF(subName, modNum) {
         const subData = completeTermState.subjectModulesMap[subName];
         if (!subData) return;
@@ -2749,7 +2779,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                     renderTermSubjectsStatusList();
                     try {
                         const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 3000);
+                        const timeoutId = setTimeout(() => controller.abort(), 15000);
                         const res = await fetch(`${API_BASE_URL}/api/generate-section`, {
                             method: "POST", headers: { "Content-Type": "application/json" },
                             signal: controller.signal,
@@ -3660,6 +3690,53 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
     document.querySelectorAll('a[href="#privacy"]').forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); openModalKey('privacy'); }));
     document.querySelectorAll('a[href="#terms"]').forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); openModalKey('terms'); }));
     document.querySelectorAll('a[href="#contact"]').forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); openModalKey('contact'); }));
+
+    // ---------------- PAUSE & STOP BATCH GENERATION CONTROL ----------------
+    let isBatchPaused = false;
+    let isBatchStopped = false;
+
+    async function checkPauseOrStop() {
+        if (isBatchStopped || (typeof completeTermState !== 'undefined' && completeTermState && completeTermState.isCancelled)) {
+            throw new Error("BATCH_STOPPED");
+        }
+        while (isBatchPaused && !isBatchStopped && (!completeTermState || !completeTermState.isCancelled)) {
+            await new Promise(r => setTimeout(r, 200));
+        }
+        if (isBatchStopped || (typeof completeTermState !== 'undefined' && completeTermState && completeTermState.isCancelled)) {
+            throw new Error("BATCH_STOPPED");
+        }
+    }
+
+    const pauseSubjectGenBtn = document.getElementById('pauseSubjectGenBtn');
+    const stopSubjectGenBtn = document.getElementById('stopSubjectGenBtn');
+    if (pauseSubjectGenBtn) {
+        pauseSubjectGenBtn.onclick = () => {
+            isBatchPaused = !isBatchPaused;
+            pauseSubjectGenBtn.innerText = isBatchPaused ? "▶️ Resume" : "⏸️ Pause";
+        };
+    }
+    if (stopSubjectGenBtn) {
+        stopSubjectGenBtn.onclick = () => {
+            isBatchStopped = true;
+            isBatchPaused = false;
+        };
+    }
+
+    const pauseTermGenBtn = document.getElementById('pauseTermGenBtn');
+    const stopTermGenBtn = document.getElementById('stopTermGenBtn');
+    if (pauseTermGenBtn) {
+        pauseTermGenBtn.onclick = () => {
+            isBatchPaused = !isBatchPaused;
+            pauseTermGenBtn.innerText = isBatchPaused ? "▶️ Resume" : "⏸️ Pause";
+        };
+    }
+    if (stopTermGenBtn) {
+        stopTermGenBtn.onclick = () => {
+            isBatchStopped = true;
+            isBatchPaused = false;
+            if (typeof completeTermState !== 'undefined' && completeTermState) completeTermState.isCancelled = true;
+        };
+    }
 
     // Auto reveal all elements immediately on load
     document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach(el => el.classList.add('revealed'));
