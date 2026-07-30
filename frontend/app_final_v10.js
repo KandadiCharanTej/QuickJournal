@@ -1183,58 +1183,68 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
         try {
             aiSpinner.classList.remove('hidden');
 
-            // ⚡ STEP 1: INSTANTLY POPULATE ALL 5 TEXTAREAS (10ms GUARANTEED)
-            sections.forEach(sec => {
-                const textarea = document.getElementById(sec.id);
-                if (textarea) {
-                    textarea.value = getClientFallback(sec.tag, subject, topic);
-                    textarea.dispatchEvent(new Event('input')); // Trigger word count immediately
-                }
-            });
-
-            // ⚡ STEP 2: SHOW PROGRESS & TRY UPGRADING WITH LIVE AI CONTENT
             for (let i = 0; i < sections.length; i++) {
                 const sec = sections[i];
                 aiFillBtn.innerHTML = `<svg class="animate-spin w-4 h-4 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Generating ${sec.name}...`;
 
-                try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 2000); 
+                let retries = 0; // Fail faster on batch
+                let secSuccess = false;
+                while (retries >= 0 && !secSuccess) {
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 2500); // Fast timeout
 
-                    const res = await fetch(`${API_BASE_URL}/api/generate-section`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        signal: controller.signal,
-                        body: JSON.stringify({ 
-                            subject, 
-                            moduleRoman, 
-                            topic, 
-                            syllabus, 
-                            sectionTag: sec.tag,
-                            styleInstruction: sec.hint,
-                            requestSeed: Date.now()
-                        })
-                    });
-                    clearTimeout(timeoutId);
-
-                    if (res.ok) {
+                        const res = await fetch(`${API_BASE_URL}/api/generate-section`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            signal: controller.signal,
+                            body: JSON.stringify({ 
+                                subject, 
+                                moduleRoman, 
+                                topic, 
+                                syllabus, 
+                                sectionTag: sec.tag,
+                                styleInstruction: sec.hint,
+                                requestSeed: Date.now()
+                            })
+                        });
+                        clearTimeout(timeoutId);
                         const data = await res.json();
-                        if (data && data.text) {
+                        
+                        if (!res.ok) {
+                            if (data.retryAfter) {
+                                await new Promise(r => setTimeout(r, parseInt(data.retryAfter) * 1000));
+                                throw new Error("Rate limit");
+                            }
+                            throw new Error(data.error || "API failed");
+                        }
+                        
+                        const textarea = document.getElementById(sec.id);
+                        if (textarea) {
+                            textarea.value = data.text;
+                            textarea.dispatchEvent(new Event('input')); // Trigger word count
+                        }
+                        secSuccess = true;
+                    } catch (err) {
+                        console.error(`Error generating section ${sec.tag}:`, err);
+                        retries--;
+                        if (retries < 0) {
+                            const fallbackText = getClientFallback(sec.tag, subject, topic);
                             const textarea = document.getElementById(sec.id);
                             if (textarea) {
-                                textarea.value = data.text;
-                                textarea.dispatchEvent(new Event('input'));
+                                textarea.value = fallbackText;
+                                textarea.dispatchEvent(new Event('input')); // Trigger word count
                             }
+                        } else {
+                            await new Promise(r => setTimeout(r, 2000));
                         }
                     }
-                } catch (err) {
-                    // Ignore API timeout/error silently since fallback is already populated!
                 }
             }
 
             aiFillBtn.innerHTML = `<span>✓ Generated</span>`;
-            aiFillBtn.className = "flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-100 text-emerald-700 font-bold rounded-lg transition-colors border border-emerald-200 shadow-sm hover:shadow-md cursor-pointer";
-            aiFillBtn.disabled = false;
+            aiFillBtn.className = "flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-100 text-emerald-700 font-bold rounded-lg transition-colors border border-emerald-200 shadow-sm opacity-80 cursor-default";
+            aiFillBtn.disabled = true;
             delete aiFillBtn.dataset.generating;
             aiSpinner.classList.add('hidden');
 
