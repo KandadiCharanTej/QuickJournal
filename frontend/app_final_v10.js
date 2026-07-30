@@ -5,6 +5,8 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    const HEADER_IMAGE_DATA_URL = 'data:image/png;base64,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';
+
     // ---------------- STEPPER ----------------
     let currentStep = 1;
     const totalSteps = 3;
@@ -16,24 +18,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // 🌐 CONFIGURATION
     const REMOTE_URL = 'https://quickjournal-backend.onrender.com';
     const LOCAL_URL = 'http://localhost:5000';
-    const isLocalHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    let API_BASE_URL = isLocalHost ? (window.location.origin || LOCAL_URL) : REMOTE_URL;
+    const isLocalHost = window.location.hostname === 'localhost' || 
+                        window.location.hostname === '127.0.0.1' || 
+                        window.location.hostname.startsWith('192.168.') || 
+                        window.location.hostname.startsWith('10.') || 
+                        window.location.hostname.endsWith('.local') ||
+                        window.location.port === '5000' ||
+                        window.location.protocol === 'file:';
+    let API_BASE_URL = isLocalHost ? (window.location.origin.startsWith('http') ? window.location.origin : LOCAL_URL) : REMOTE_URL;
 
     // 🛰️ SERVER HEALTH CHECK (With Auto-Wakeup Retry)
     async function checkServer() {
         if (isLocalHost) {
-            API_BASE_URL = window.location.origin || LOCAL_URL;
+            API_BASE_URL = window.location.origin.startsWith('http') ? window.location.origin : LOCAL_URL;
             return;
         }
-        let retries = 3;
-        while (retries > 0) {
-            try {
-                const res = await fetch(`${REMOTE_URL}/`, { signal: AbortSignal.timeout(5000) });
-                if (res.ok) { API_BASE_URL = REMOTE_URL; return; }
-            } catch (e) {}
-            retries--;
-            if (retries > 0) await new Promise(r => setTimeout(r, 2000));
-        }
+        try {
+            const res = await fetch(`${REMOTE_URL}/`, { signal: AbortSignal.timeout(2000) });
+            if (res.ok) { API_BASE_URL = REMOTE_URL; return; }
+        } catch (e) {}
     }
 
     checkServer();
@@ -86,7 +89,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 defaultJournalFields.forEach(id => {
                     const el = document.getElementById(id);
                     if (el) {
-                        el.closest('div').classList.add('hidden');
+                        const parent = el.closest('div');
+                        if (parent) parent.classList.add('hidden');
                         el.removeAttribute('required');
                     }
                 });
@@ -102,7 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 defaultJournalFields.forEach(id => {
                     const el = document.getElementById(id);
                     if (el) {
-                        el.closest('div').classList.remove('hidden');
+                        const parent = el.closest('div');
+                        if (parent) parent.classList.remove('hidden');
                         el.setAttribute('required', 'required');
                     }
                 });
@@ -117,42 +122,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateUI() {
         for (let i = 1; i <= totalSteps; i++) {
-            document.getElementById(`step-${i}`).classList.remove('active');
+            const stepEl = document.getElementById(`step-${i}`);
+            if (stepEl) stepEl.classList.remove('active');
             const indicatorWrap = document.getElementById(`indicator-${i}`);
             if (!indicatorWrap) continue;
             const indicator = indicatorWrap.querySelector('div');
             const label = indicatorWrap.querySelector('span');
 
             if (i < currentStep) {
-                indicator.className = "w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold shadow-md shadow-emerald-500/30 transition-all border-2 border-white";
-                indicator.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`;
+                if (indicator) {
+                    indicator.className = "w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold shadow-md shadow-emerald-500/30 transition-all border-2 border-white";
+                    indicator.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`;
+                }
                 if (label) label.className = "text-xs font-extrabold text-violet-700 hidden sm:block";
             } else if (i === currentStep) {
-                indicator.className = "w-10 h-10 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold shadow-lg shadow-violet-500/40 transition-all border-2 border-white ring-4 ring-violet-100";
-                indicator.innerHTML = i;
+                if (indicator) {
+                    indicator.className = "w-10 h-10 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold shadow-lg shadow-violet-500/40 transition-all border-2 border-white ring-4 ring-violet-100";
+                    indicator.innerHTML = i;
+                }
                 if (label) label.className = "text-xs font-extrabold text-violet-700 hidden sm:block";
             } else {
-                indicator.className = "w-10 h-10 rounded-full bg-slate-100 border-2 border-slate-200 text-slate-400 flex items-center justify-center font-bold transition-all shadow-sm";
-                indicator.innerHTML = i;
+                if (indicator) {
+                    indicator.className = "w-10 h-10 rounded-full bg-slate-100 border-2 border-slate-200 text-slate-400 flex items-center justify-center font-bold transition-all shadow-sm";
+                    indicator.innerHTML = i;
+                }
                 if (label) label.className = "text-xs font-bold text-slate-400 hidden sm:block";
             }
         }
 
-        document.getElementById(`step-${currentStep}`).classList.add('active');
+        const activeStepEl = document.getElementById(`step-${currentStep}`);
+        if (activeStepEl) activeStepEl.classList.add('active');
 
         // Progress Bar
         const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
         const progressBar = document.getElementById('progress-bar');
         if(progressBar) progressBar.style.width = `${progress}%`;
 
-        prevBtn.classList.toggle('hidden', currentStep === 1);
+        if (prevBtn) prevBtn.classList.toggle('hidden', currentStep === 1);
 
         if (currentStep === totalSteps) {
-            nextBtn.classList.add('hidden');
-            generateBtn.classList.remove('hidden');
+            if (nextBtn) nextBtn.classList.add('hidden');
+            if (generateBtn) generateBtn.classList.remove('hidden');
         } else {
-            nextBtn.classList.remove('hidden');
-            generateBtn.classList.add('hidden');
+            if (nextBtn) nextBtn.classList.remove('hidden');
+            if (generateBtn) generateBtn.classList.add('hidden');
         }
 
         if (currentStep === 3) {
@@ -248,9 +261,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Backend offline — keep HTML defaults silently
             }
 
-            // Clean 10s polling (avoids HTTP 1.1 socket exhaustion)
+            // Clean 60s polling (avoids console and server log clutter)
             if (!window._analyticsInterval) {
-                window._analyticsInterval = setInterval(initLive, 10000);
+                window._analyticsInterval = setInterval(initLive, 60000);
             }
         }
 
@@ -1124,7 +1137,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
         
         aiFillBtn.disabled = true;
         const originalBtnHTML = aiFillBtn.innerHTML;
-        aiErrorMsg.classList.add('hidden');
+        if (aiErrorMsg) aiErrorMsg.classList.add('hidden');
 
         // 🎨 Opening Variation Engine (Forces different starting styles)
         const getOpeningStyle = (tag) => {
@@ -1172,7 +1185,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                     clearInterval(cooldownInterval);
                     aiFillBtn.disabled = false;
                     aiFillBtn.innerHTML = originalBtnHTML;
-                    aiErrorMsg.classList.add('hidden');
+                    if (aiErrorMsg) aiErrorMsg.classList.add('hidden');
                 } else {
                     aiFillBtn.innerHTML = `<span>⏳ Wait ${timeLeft}s...</span>`;
                     timeLeft--;
@@ -1181,7 +1194,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
         }
 
         try {
-            aiSpinner.classList.remove('hidden');
+            if (aiSpinner) aiSpinner.classList.remove('hidden');
 
             for (let i = 0; i < sections.length; i++) {
                 const sec = sections[i];
@@ -1245,15 +1258,17 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
             aiFillBtn.innerHTML = `<span>✓ Generated</span>`;
             aiFillBtn.className = "flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-100 text-emerald-700 font-bold rounded-lg transition-colors border border-emerald-200 shadow-sm opacity-80 cursor-default";
             aiFillBtn.disabled = true;
-            delete aiFillBtn.dataset.generating;
-            aiSpinner.classList.add('hidden');
-
         } catch (error) {
             console.error("AI Generation Error:", error);
-            aiSpinner.classList.add('hidden');
+            if (aiErrorMsg) {
+                aiErrorMsg.textContent = "❌ " + error.message;
+                aiErrorMsg.classList.remove('hidden');
+            }
             aiFillBtn.disabled = false;
-            delete aiFillBtn.dataset.generating;
             aiFillBtn.innerHTML = `<span>✨ Auto-Fill with AI</span>`;
+        } finally {
+            if (aiSpinner) aiSpinner.classList.add('hidden');
+            delete aiFillBtn.dataset.generating;
         }
     });
 
@@ -1276,23 +1291,30 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
         if(!validateCurrentStep()) return;
 
         const successMsg = document.getElementById('successMsg');
-        successMsg.classList.add('hidden');
-        successMsg.classList.remove('active');
+        if (successMsg) {
+            successMsg.classList.add('hidden');
+            successMsg.classList.remove('active');
+        }
         
-        // Helper to load image
+        // Helper to load image safely with timeout
         const getBase64ImageFromURL = (url) => {
-            return new Promise((resolve, reject) => {
+            return new Promise((resolve) => {
                 var img = new Image();
                 img.setAttribute("crossOrigin", "anonymous");
                 img.onload = () => {
-                    var canvas = document.createElement("canvas");
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    var ctx = canvas.getContext("2d");
-                    ctx.drawImage(img, 0, 0);
-                    resolve(canvas.toDataURL("image/png"));
+                    try {
+                        var canvas = document.createElement("canvas");
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        var ctx = canvas.getContext("2d");
+                        ctx.drawImage(img, 0, 0);
+                        resolve(canvas.toDataURL("image/png"));
+                    } catch(e) {
+                        resolve(null);
+                    }
                 };
-                img.onerror = error => reject(error);
+                img.onerror = () => resolve(null);
+                setTimeout(() => resolve(null), 1000); // 1s safety timeout
                 img.src = url;
             });
         };
@@ -1451,10 +1473,9 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
             const totalPages = doc.internal.getNumberOfPages();
             for (let i = 1; i <= totalPages; i++) {
                 doc.setPage(i);
-                if (headerImageData) {
-                    doc.addImage(headerImageData, 'PNG', 0, 0, pageWidth, 35);
-                } else {
-                    // Fallback if image failed to load
+                try {
+                    doc.addImage(HEADER_IMAGE_DATA_URL, 'PNG', 0, 0, pageWidth, 35);
+                } catch(e) {
                     doc.setFont("times", "bold");
                     doc.setFontSize(16);
                     doc.text("AURORA HIGHER EDUCATION", pageWidth/2, 15, { align: "center" });
@@ -1477,8 +1498,12 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
             qjAnalytics.recordEvent({ generationType: 'MODULE', moduleCount: 1, durationMs: consumeGenerationDuration() }); // 📊 Analytics
 
             // Show Success Notification
-            successMsg.classList.remove('hidden');
-            successMsg.classList.add('active');
+            if (successMsg) {
+                const timeSavedSpan = document.getElementById('timeSavedSpan');
+                if (timeSavedSpan) timeSavedSpan.innerText = "You just saved approximately 7–8 minutes of manual work.";
+                successMsg.classList.remove('hidden');
+                successMsg.classList.add('active');
+            }
 
             const resetBtn = document.getElementById('resetBtn');
             if (resetBtn) {
@@ -1564,18 +1589,21 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
 
         // Add a global date picker and weekly auto-assign button for convenience
         const globalDateRow = document.createElement('div');
-        globalDateRow.className = "mb-4 p-3 bg-violet-50/80 border border-violet-200 rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-sm";
+        globalDateRow.className = "mb-6 p-4 bg-gradient-to-r from-violet-50 via-white to-emerald-50 border border-slate-200 rounded-2xl flex flex-wrap items-center justify-between gap-4 shadow-md";
         globalDateRow.innerHTML = `
-            <span class="font-extrabold text-violet-800 flex items-center gap-1.5">
+            <span class="font-black text-slate-800 flex items-center gap-2 text-sm sm:text-base">
                 <span>📅</span> Date Assignment
             </span>
             <div class="flex flex-wrap items-center gap-3">
-                <div class="flex items-center gap-2 bg-white px-2.5 py-1.5 rounded-lg border border-slate-200 shadow-sm">
-                    <span class="font-bold text-slate-700">Start Date:</span>
-                    <input type="date" id="global-multi-date" class="form-input px-2 py-1 text-xs rounded border border-slate-300">
+                <div class="flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-slate-300 shadow-sm">
+                    <span class="font-extrabold text-slate-700 text-xs sm:text-sm">Start Date:</span>
+                    <input type="date" id="global-multi-date" class="form-input px-2 py-1 text-xs sm:text-sm rounded-lg border border-slate-300 font-medium">
                 </div>
-                <button type="button" id="auto-assign-subject-weekly-btn" class="px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-lg shadow-sm transition-all flex items-center gap-1.5">
-                    ⚡ Weekly Dates
+                <button type="button" id="auto-assign-subject-weekly-btn" class="px-5 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer">
+                    <span>⚡</span> <span>Weekly Dates</span>
+                </button>
+                <button type="button" id="generateAllModulesBtn" class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer">
+                    <span>✨</span> <span>Generate All Modules</span>
                 </button>
             </div>
         `;
@@ -1726,8 +1754,10 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
         // Restore action buttons
         container.insertAdjacentHTML('beforeend', actionsHtml);
         
-        document.getElementById('generateAllModulesBtn').onclick = generateAllPendingModules;
-        document.getElementById('downloadAllZipBtn').onclick = downloadAllAsZip;
+        const genAllBtn = document.getElementById('generateAllModulesBtn');
+        if (genAllBtn) genAllBtn.onclick = generateAllPendingModules;
+        const dlZipBtn = document.getElementById('downloadAllZipBtn');
+        if (dlZipBtn) dlZipBtn.onclick = downloadAllAsZip;
     }
 
     async function generateModuleWithAI(num) {
@@ -2041,14 +2071,15 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
         const pageCount = doc.internal.getNumberOfPages();
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
-            if (headerImageData) {
-                doc.addImage(headerImageData, 'PNG', 0, 0, 210, 35);
-            } else {
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(22);
-                doc.text("AURORA HIGHER EDUCATION", pageWidth/2, 20, { align: "center" });
-                doc.setFontSize(12);
-                doc.setFont("helvetica", "normal");
+            try {
+                doc.addImage(HEADER_IMAGE_DATA_URL, 'PNG', 0, 0, pageWidth, 35);
+            } catch(e) {
+                doc.setFont("times", "bold");
+                doc.setFontSize(16);
+                doc.text("AURORA HIGHER EDUCATION", pageWidth/2, 15, { align: "center" });
+                doc.text("AND RESEARCH ACADEMY", pageWidth/2, 21, { align: "center" });
+                doc.setFontSize(11);
+                doc.setFont("times", "normal");
                 doc.text("Deemed-to-be-University Estd.u/s.03 of UGC Act 1956", pageWidth/2, 27, { align: "center" });
                 doc.setFontSize(10);
                 doc.text("Uppal, Hyderabad, Telangana | Bhongir, Yadadri, Telangana", pageWidth/2, 33, { align: "center" });
@@ -2066,19 +2097,23 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            const state = completeSubjectState[num];
-            const safeName = document.getElementById('studentName').value.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
-            const safeReg = document.getElementById('regNumber').value.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
-            const safeSub = subjSel.value.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+            const state = completeSubjectState[num] || {};
+            const romanNumerals = ["I","II","III","IV","V","VI","VII","VIII","IX","X"];
+            const roman = state.roman || (romanNumerals[parseInt(num) - 1] || num);
+            const safeName = (document.getElementById('studentName').value || 'Student').replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+            const safeReg = (document.getElementById('regNumber').value || 'Reg').replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+            const safeSub = (subjSel.value || 'Subject').replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
             const docType = (termSel.value === '4') ? "Assignment" : "RJ";
-            const cleanFilename = `${safeName}_${safeReg}_${docType}_${safeSub}-${state.roman}`;
+            const cleanFilename = `${safeName}_${safeReg}_${docType}_${safeSub}-${roman}`;
             a.download = `${cleanFilename}.pdf`;
             a.click();
             URL.revokeObjectURL(url);
-            qjAnalytics.recordEvent({ generationType: 'MODULE', moduleCount: 1, durationMs: consumeGenerationDuration() }); // 📊 Analytics
+            qjAnalytics.recordEvent({ generationType: 'MODULE', moduleCount: 1, durationMs: consumeGenerationDuration() });
 
             const successMsg = document.getElementById('successMsg');
             if (successMsg) {
+                const timeSavedSpan = document.getElementById('timeSavedSpan');
+                if (timeSavedSpan) timeSavedSpan.innerText = "You just saved approximately 7–8 minutes of manual work.";
                 const successMsgText = document.getElementById('successMsgText');
                 if (successMsgText) successMsgText.innerText = "PDF Generated Successfully!";
                 successMsg.classList.remove('hidden');
@@ -2087,6 +2122,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
             }
         } catch (err) {
             console.error("Single module PDF download error:", err);
+            alert("Error downloading PDF: " + err.message);
         } finally {
             if (btn) btn.innerText = "📄 Download";
         }
@@ -2094,53 +2130,60 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
 
     async function downloadAllAsZip() {
         const btn = document.getElementById('downloadAllZipBtn');
-        btn.disabled = true;
-        btn.innerText = "📦 Zipping...";
+        if (btn) {
+            btn.disabled = true;
+            btn.innerText = "📦 Zipping...";
+        }
         
-        const zip = new JSZip();
-        let addedCount = 0;
-        
-        // Pre-cache header image once for lightning fast zip generation
-        const cachedHeader = await getBase64ImageFromURL('header.png').catch(() => null);
-        
-        for (const num in completeSubjectState) {
-            const state = completeSubjectState[num];
-            // Allow download if generated
-            if (state.status === 'generated' || state.status === 'failed') {
-                const blob = await getPDFBlobForModule(num, cachedHeader);
-                const safeName = document.getElementById('studentName').value.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
-                const safeReg = document.getElementById('regNumber').value.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
-                const safeSub = subjSel.value.replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+        try {
+            const zip = new JSZip();
+            let addedCount = 0;
+            const romanNumerals = ["I","II","III","IV","V","VI","VII","VIII","IX","X"];
+            
+            for (const num in completeSubjectState) {
+                const state = completeSubjectState[num] || {};
+                const roman = state.roman || (romanNumerals[parseInt(num) - 1] || num);
+                const blob = await getPDFBlobForModule(num);
+                const safeName = (document.getElementById('studentName').value || 'Student').replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+                const safeReg = (document.getElementById('regNumber').value || 'Reg').replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
+                const safeSub = (subjSel.value || 'Subject').replace(/\s+/g, '').replace(/[^a-zA-Z0-9]/g, '');
                 const docType = (termSel.value === '4') ? "Assignment" : "RJ";
-                const cleanFilename = `${safeName}_${safeReg}_${docType}_${safeSub}-${state.roman}`;
+                const cleanFilename = `${safeName}_${safeReg}_${docType}_${safeSub}-${roman}`;
                 zip.file(`${cleanFilename}.pdf`, blob);
                 addedCount++;
             }
-        }
-        
-        if (addedCount > 0) {
-            const content = await zip.generateAsync({type:"blob"});
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(content);
-            const safeSub = subjSel.value.replace(/[^a-zA-Z0-9\s]/g, '');
-            a.download = `${safeSub}_All_RJs.zip`;
-            a.click();
-            qjAnalytics.recordEvent({ generationType: 'SUBJECT', moduleCount: addedCount, durationMs: consumeGenerationDuration() }); // 📊 Analytics (moduleCount = actual modules in ZIP)
+            
+            if (addedCount > 0) {
+                const content = await zip.generateAsync({type:"blob"});
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(content);
+                const safeSub = (subjSel.value || 'Subject').replace(/[^a-zA-Z0-9\s]/g, '');
+                a.download = `${safeSub}_All_RJs.zip`;
+                a.click();
+                qjAnalytics.recordEvent({ generationType: 'SUBJECT', moduleCount: addedCount, durationMs: consumeGenerationDuration() });
 
-            const successMsg = document.getElementById('successMsg');
-            if (successMsg) {
-                const successMsgText = document.getElementById('successMsgText');
-                if (successMsgText) successMsgText.innerText = "All Modules ZIP Downloaded Successfully!";
-                successMsg.classList.remove('hidden');
-                successMsg.classList.add('active');
-                successMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const successMsg = document.getElementById('successMsg');
+                if (successMsg) {
+                    const timeSavedSpan = document.getElementById('timeSavedSpan');
+                    if (timeSavedSpan) timeSavedSpan.innerText = "You just saved approximately 1–1.5 hours of manual work.";
+                    const successMsgText = document.getElementById('successMsgText');
+                    if (successMsgText) successMsgText.innerText = "All Modules ZIP Downloaded Successfully!";
+                    successMsg.classList.remove('hidden');
+                    successMsg.classList.add('active');
+                    successMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            } else {
+                alert("No modules available to download.");
             }
-        } else {
-            alert("No modules generated yet!");
+        } catch (err) {
+            console.error("ZIP download error:", err);
+            alert("Error creating ZIP archive: " + err.message);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerText = "📦 Download All Modules (ZIP)";
+            }
         }
-        
-        btn.innerText = "📦 Download All (ZIP)";
-        btn.disabled = false;
     }
 
     // =========================================================
@@ -3170,14 +3213,15 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
         const pageCount = doc.internal.getNumberOfPages();
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
-            if (headerImageData) {
-                doc.addImage(headerImageData, 'PNG', 0, 0, 210, 35);
-            } else {
-                doc.setFont("helvetica", "bold");
-                doc.setFontSize(22);
-                doc.text("AURORA HIGHER EDUCATION", pageWidth/2, 20, { align: "center" });
-                doc.setFontSize(12);
-                doc.setFont("helvetica", "normal");
+            try {
+                doc.addImage(HEADER_IMAGE_DATA_URL, 'PNG', 0, 0, pageWidth, 35);
+            } catch(e) {
+                doc.setFont("times", "bold");
+                doc.setFontSize(16);
+                doc.text("AURORA HIGHER EDUCATION", pageWidth/2, 15, { align: "center" });
+                doc.text("AND RESEARCH ACADEMY", pageWidth/2, 21, { align: "center" });
+                doc.setFontSize(11);
+                doc.setFont("times", "normal");
                 doc.text("Deemed-to-be-University Estd.u/s.03 of UGC Act 1956", pageWidth/2, 27, { align: "center" });
                 doc.setFontSize(10);
                 doc.text("Uppal, Hyderabad, Telangana | Bhongir, Yadadri, Telangana", pageWidth/2, 33, { align: "center" });
@@ -3224,6 +3268,11 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
 
                 const successMsg = document.getElementById('successMsg');
                 if (successMsg) {
+                    const subjCount = document.querySelectorAll('input[name="termSubject"]:checked').length || 5;
+                    const minHrs = (subjCount * 1).toString().replace(/\.0$/, '');
+                    const maxHrs = (subjCount * 1.5).toString().replace(/\.0$/, '');
+                    const timeSavedSpan = document.getElementById('timeSavedSpan');
+                    if (timeSavedSpan) timeSavedSpan.innerText = `You just saved approximately ${minHrs}–${maxHrs} hours (${subjCount} subjects × 1–1.5 hrs) of manual work.`;
                     const successMsgText = document.getElementById('successMsgText');
                     if (successMsgText) successMsgText.innerText = "Complete Term ZIP Downloaded Successfully!";
                     successMsg.classList.remove('hidden');

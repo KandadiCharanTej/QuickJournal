@@ -120,7 +120,7 @@ async function generateWithAI(prompt, systemContent) {
     const defaultSystem = "You are a B.Tech student writing a deeply personal, human-like reflective journal. Use first-person 'I', personal analogies, and relatable class-room experiences. Write in a natural, thoughtful tone with smooth transitions.";
     const system = systemContent || defaultSystem;
 
-    const maxAttempts = Math.min(3, combos.length);
+    const maxAttempts = Math.min(2, combos.length);
     for (let i = 0; i < maxAttempts; i++) {
         const combo = combos[(startIdx + i) % combos.length];
         try {
@@ -128,15 +128,15 @@ async function generateWithAI(prompt, systemContent) {
             const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                 method: "POST",
                 headers: { "Authorization": `Bearer ${combo.key}`, "Content-Type": "application/json" },
-                signal: AbortSignal.timeout(3000),
+                signal: AbortSignal.timeout(1800),
                 body: JSON.stringify({
                     model: combo.model,
                     messages: [
                         { role: "system", content: system },
                         { role: "user", content: prompt }
                     ],
-                    max_tokens: 6000,
-                    temperature: 0.95
+                    max_tokens: 600,
+                    temperature: 0.85
                 })
             });
 

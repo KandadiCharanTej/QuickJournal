@@ -603,12 +603,9 @@
                     <div id="multiModuleContainer" class="hidden space-y-6">
                         <!-- Module cards will be dynamically injected here by JS -->
                         
-                        <div id="multiModuleActions" class="flex flex-col sm:flex-row gap-4 mt-8 border-t border-slate-200 pt-6">
-                            <button type="button" id="generateAllModulesBtn" class="flex-1 py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-xl shadow-md transition-all text-center flex justify-center items-center gap-2">
-                                ✨ Generate All Pending
-                            </button>
-                            <button type="button" id="downloadAllZipBtn" class="flex-1 py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow-md transition-all text-center flex justify-center items-center gap-2">
-                                📦 Download All (ZIP)
+                        <div id="multiModuleActions" class="mt-8 border-t border-slate-200 pt-6 flex justify-center">
+                            <button type="button" id="downloadAllZipBtn" class="w-full max-w-md py-3.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow-md hover:shadow-xl transition-all text-center flex justify-center items-center gap-2 text-sm">
+                                📦 Download All Modules (ZIP)
                             </button>
                         </div>
                     </div>
@@ -723,16 +720,12 @@
                             <p class="text-sm font-semibold text-slate-600 mt-1">Your PDF has been generated successfully.</p>
                         </div>
                         <div class="px-4 py-3 bg-violet-50 border border-violet-200/80 rounded-xl text-violet-800 text-xs sm:text-sm font-bold shadow-sm flex items-center gap-2">
-                            <span>💡</span> <span>You just saved approximately 2–3 hours of manual work.</span>
+                            <span>💡</span> <span id="timeSavedSpan">You just saved approximately 7–8 minutes of manual work.</span>
                         </div>
-                        <div class="flex flex-col sm:flex-row gap-3 pt-2 w-full max-w-sm justify-center">
+                        <div class="flex pt-2 w-full max-w-xs justify-center">
                             <button type="button" id="resetBtn" 
-                                class="flex-1 py-3 px-6 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold transition-all shadow-md hover:shadow-xl active:scale-95 text-sm flex items-center justify-center gap-2">
+                                class="w-full py-3 px-6 bg-violet-600 hover:bg-violet-700 text-white rounded-xl font-bold transition-all shadow-md hover:shadow-xl active:scale-95 text-sm flex items-center justify-center gap-2">
                                 🚀 Generate Another Journal
-                            </button>
-                            <button type="button" id="closeSuccessBtn" 
-                                class="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl border border-slate-200 transition-all text-sm">
-                                Close
                             </button>
                         </div>
                     </div>
@@ -986,7 +979,7 @@
     </div>
 
     <script src="data.js?v=8"></script>
-    <script src="app_final_v10.js?v=17"></script>
+    <script src="app_final_v10.js?v=30"></script>
 </body>
 
 </html>
