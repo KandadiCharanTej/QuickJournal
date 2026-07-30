@@ -1213,7 +1213,7 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
                         while (retries >= 0 && !success) {
                             try {
                                 const controller = new AbortController();
-                                const timeoutId = setTimeout(() => controller.abort(), 2500); 
+                                const timeoutId = setTimeout(() => controller.abort(), 20000); 
 
                                 const res = await fetch(`${API_BASE_URL}/api/generate-section`, {
                                     method: "POST",
