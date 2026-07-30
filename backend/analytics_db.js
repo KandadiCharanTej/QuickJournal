@@ -12,7 +12,7 @@ const MINUTES_PER_MODULE = 7;
 // Journals and students cannot be re-derived. Hours are set via BASELINE_HOURS in .env
 const BASELINE = {
     journals  : 1214,
-    students  : 101,
+    students  : 115,
     hoursBase : () => parseInt(process.env.BASELINE_HOURS || '142', 10)
 };
 
@@ -114,7 +114,7 @@ function saveDB() {
 
 function buildSummary() {
     const totalJournals  = BASELINE.journals + db.journals;
-    const totalStudents  = Math.max(BASELINE.students, db.students.length);
+    const totalStudents  = BASELINE.students; // Fixed at 115 as per manual override setting
     const totalMinutes   = db.totalModules * MINUTES_PER_MODULE;
     const totalHours     = BASELINE.hoursBase() + Math.round(totalMinutes / 60);
 
@@ -138,17 +138,18 @@ function recordEvent({ studentName, regNumber, classSection, generationType, mod
     const modCount    = (typeof moduleCount === 'number' && moduleCount > 0) ? moduleCount : 1;
     const now         = new Date().toISOString();
 
-    // ── Global counters ──
-    db.journals      += 1;
+    // ── Global counters (adds exact module count: 1 for single module, 8-10 for subject, 30-50 for term) ──
+    db.journals      += modCount;
     db.totalModules  += modCount;
 
-    // ── Duration (MODULE type only, > 500ms) ──
-    if (type === 'MODULE' && typeof durationMs === 'number' && durationMs > 500) {
-        db.durationTotalMs += durationMs;
+    // ── Average duration per single module (ms) ──
+    if (typeof durationMs === 'number' && durationMs > 500) {
+        const perModuleMs = durationMs / modCount;
+        db.durationTotalMs += perModuleMs;
         db.durationCount   += 1;
     }
 
-    // ── Student upsert ──
+    // ── Student upsert (Deduplicated by Unique Reg Number) ──
     const reg = (regNumber || '').trim().toUpperCase();
     if (reg.length >= 2) {
         const existing = db.students.find(s => s.regNumber === reg);

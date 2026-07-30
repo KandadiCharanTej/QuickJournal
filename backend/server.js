@@ -57,6 +57,7 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "../frontend")));
 
 // 📝 REQUEST LOGGER
 app.use((req, res, next) => {
@@ -868,6 +869,6 @@ app.get("/dashboard", (req, res) => {
     });
 });
 
-app.get("/", (req, res) => res.send("QuickJournal Engine Active 🚀"));
+app.get("/", (req, res) => res.sendFile(path.join(__dirname, "../frontend/index.html")));
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 

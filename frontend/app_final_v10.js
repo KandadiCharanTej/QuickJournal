@@ -3549,24 +3549,119 @@ Because modern life is so stressful, the whole world is turning to Indian wellne
     const navBrand = document.getElementById('navBrand');
     if (navBrand) navBrand.addEventListener('click', showHomeView);
 
-    // ---------------- SCROLL REVEAL ANIMATIONS ----------------
-    function initScrollReveal() {
-        const observerOptions = {
-            root: null,
-            rootMargin: '0px',
-            threshold: 0.12
-        };
+    // ---------------- INFO MODALS (About, Privacy, Terms, Contact) ----------------
+    const infoModal = document.getElementById('infoModal');
+    const closeInfoModal = document.getElementById('closeInfoModal');
+    const infoModalContent = document.getElementById('infoModalContent');
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('revealed');
-                }
-            });
-        }, observerOptions);
+    const modalData = {
+        about: {
+            title: "About QuickJournal",
+            badge: "🎓 Built for Engineering Students",
+            badgeColor: "bg-violet-50 text-violet-700 border-violet-200",
+            body: `
+                <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                    <strong>QuickJournal</strong> is an AI-powered academic engine engineered specifically for NIAT × Aurora engineering students. It eliminates the hours spent formatting and drafting repetitive reflective journals.
+                </p>
+                <div class="bg-violet-50/70 border border-violet-100 p-4 rounded-xl space-y-2 mb-4 text-xs text-slate-700 font-medium">
+                    <div class="flex items-center gap-2"><span class="text-violet-600 font-bold">⚡ 30-Second Generation:</span> Complete single modules or entire academic terms in one click.</div>
+                    <div class="flex items-center gap-2"><span class="text-violet-600 font-bold">📄 Official Formatting:</span> Pre-formatted with cover headers, tables, and page layout.</div>
+                    <div class="flex items-center gap-2"><span class="text-violet-600 font-bold">🎯 Personalized Writing:</span> Context-aware content dynamically tailored to your exact module.</div>
+                </div>
+            `
+        },
+        privacy: {
+            title: "Privacy Policy",
+            badge: "🔒 100% Student Data Protection",
+            badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
+            body: `
+                <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                    Your academic privacy is our top priority. QuickJournal is designed with strict data privacy principles:
+                </p>
+                <ul class="space-y-2 text-xs text-slate-700 font-medium mb-4 list-disc pl-4">
+                    <li><strong>No Data Selling:</strong> We never sell or monetize your personal or academic information.</li>
+                    <li><strong>Temporary Processing:</strong> Student details (Name & Register Number) are used strictly to populate your generated PDF cover sheet.</li>
+                    <li><strong>Private Submissions:</strong> Your generated journals are private to you and never published.</li>
+                </ul>
+            `
+        },
+        terms: {
+            title: "Terms of Use",
+            badge: "📜 Academic Guidelines",
+            badgeColor: "bg-blue-50 text-blue-700 border-blue-200",
+            body: `
+                <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                    QuickJournal is an educational productivity tool designed to assist students in organizing, formatting, and generating reflective journal drafts for university coursework.
+                </p>
+                <div class="bg-slate-50 border border-slate-200/80 p-3.5 rounded-xl text-xs text-slate-600 leading-relaxed space-y-2">
+                    <p>• Students remain responsible for reviewing all generated content prior to official university submission.</p>
+                    <p>• Each journal entry is dynamically synthesized using your selected academic parameters to ensure unique, non-template output.</p>
+                </div>
+            `
+        },
+        contact: {
+            title: "Contact Developer",
+            badge: "💬 Student Support & Feedback",
+            badgeColor: "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200",
+            body: `
+                <p class="text-sm text-slate-600 leading-relaxed mb-4">
+                    Have questions, suggestions, or need help with journal generation? Reach out directly to the developer:
+                </p>
+                <div class="space-y-3 text-xs font-medium">
+                    <a href="mailto:kandadicharantej21@gmail.com" class="flex items-center gap-3 p-3 rounded-xl border border-slate-200/80 bg-white hover:border-violet-300 hover:text-violet-700 transition-all">
+                        <span class="text-base">✉️</span>
+                        <div>
+                            <div class="font-bold text-slate-800 text-sm">Email</div>
+                            <div class="text-slate-500">kandadicharantej21@gmail.com</div>
+                        </div>
+                    </a>
+                    <a href="https://www.linkedin.com/in/kandadicharantej/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-xl border border-slate-200/80 bg-white hover:border-violet-300 hover:text-violet-700 transition-all">
+                        <span class="text-base">💼</span>
+                        <div>
+                            <div class="font-bold text-slate-800 text-sm">LinkedIn</div>
+                            <div class="text-slate-500">linkedin.com/in/kandadicharantej</div>
+                        </div>
+                    </a>
+                    <a href="https://github.com/KandadiCharanTej" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-xl border border-slate-200/80 bg-white hover:border-violet-300 hover:text-violet-700 transition-all">
+                        <span class="text-base">💻</span>
+                        <div>
+                            <div class="font-bold text-slate-800 text-sm">GitHub</div>
+                            <div class="text-slate-500">github.com/KandadiCharanTej</div>
+                        </div>
+                    </a>
+                </div>
+            `
+        }
+    };
 
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    function openModalKey(key) {
+        const data = modalData[key];
+        if (!data || !infoModal || !infoModalContent) return;
+
+        infoModalContent.innerHTML = `
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border text-[11px] font-bold ${data.badgeColor} mb-3">
+                ${data.badge}
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">${data.title}</h3>
+            ${data.body}
+        `;
+
+        infoModal.classList.remove('hidden');
     }
 
+    if (closeInfoModal && infoModal) {
+        closeInfoModal.addEventListener('click', () => infoModal.classList.add('hidden'));
+        infoModal.addEventListener('click', (e) => {
+            if (e.target === infoModal) infoModal.classList.add('hidden');
+        });
+    }
+
+    document.querySelectorAll('a[href="#about"]').forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); openModalKey('about'); }));
+    document.querySelectorAll('a[href="#privacy"]').forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); openModalKey('privacy'); }));
+    document.querySelectorAll('a[href="#terms"]').forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); openModalKey('terms'); }));
+    document.querySelectorAll('a[href="#contact"]').forEach(el => el.addEventListener('click', (e) => { e.preventDefault(); openModalKey('contact'); }));
+
+    // Auto reveal all elements immediately on load
+    document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach(el => el.classList.add('revealed'));
     initScrollReveal();
 });
