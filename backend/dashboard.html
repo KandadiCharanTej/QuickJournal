@@ -774,7 +774,7 @@
     document.getElementById('sHours').textContent    = (s.total_hours_saved        || 0).toLocaleString() + '+';
     const sec = s.avg_generation_time_sec || 0;
     const rounded = Math.round(sec);
-    document.getElementById('sAvg').textContent = rounded < 30 ? '<30 Sec' : `${rounded} Sec`;
+    document.getElementById('sAvg').textContent = rounded < 20 ? '<20 Sec' : `${rounded} Sec`;
   }
 
   // ─── Students ─────────────────────────────────────────────────────────────

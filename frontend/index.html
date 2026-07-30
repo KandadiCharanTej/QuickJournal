@@ -132,7 +132,7 @@
                 <div class="reveal reveal-scale delay-400 bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-xl p-3.5 sm:p-4 shadow-2xs hover:shadow-sm hover:border-violet-300 transition-all flex flex-col items-center text-center">
                     <div class="flex items-center gap-1.5 mb-1">
                         <span class="text-base sm:text-lg">⚡</span>
-                        <span id="statAvgTime" class="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-none">&lt;30 Sec</span>
+                        <span id="statAvgTime" class="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-none">&lt;20 Sec</span>
                     </div>
                     <div class="text-[10px] sm:text-[11px] font-bold text-slate-700 uppercase tracking-wider leading-none mb-0.5">Avg. Module Gen.</div>
                     <p class="text-[9px] sm:text-[10px] text-slate-500 leading-tight">Click to PDF download.</p>
@@ -292,29 +292,71 @@
                 <span class="text-sm">✨</span> Official PDF Format
             </div>
 
-            <div class="preview-tilt p-6 text-xs text-black border border-slate-200 animate-float">
-                <div class="border-b-4 border-black pb-4 mb-4 text-center">
-                    <h3 class="text-lg font-bold uppercase" style="font-family: serif;">Aurora Higher Education</h3>
-                    <p class="text-slate-600">Uppal, Hyderabad, Telangana</p>
+            <div class="preview-tilt p-5 text-[11px] text-black border border-slate-300 animate-float bg-white rounded-xl shadow-2xl space-y-3 font-serif">
+                <!-- Header Banner -->
+                <div class="border-b-2 border-black pb-2 text-center overflow-hidden">
+                    <img src="header.png" alt="Aurora Higher Education Header" class="w-full h-auto max-h-20 object-contain mx-auto" onerror="this.style.display='none'; document.getElementById('fallbackHeaderTitle').classList.remove('hidden');">
+                    <div id="fallbackHeaderTitle" class="hidden text-center">
+                        <h3 class="text-sm font-bold uppercase tracking-wide text-black">AURORA HIGHER EDUCATION AND RESEARCH ACADEMY</h3>
+                        <p class="text-[10px] text-slate-700">Deemed-to-be-University Estd.u/s.03 of UGC Act 1956</p>
+                        <p class="text-[9px] text-slate-600 bg-slate-900 text-white py-0.5 mt-1 font-sans">Uppal, Hyderabad, Telangana | Bhongir, Yadadri, Telangana</p>
+                    </div>
                 </div>
-                <table class="w-full border-collapse border border-black mb-4">
+
+                <!-- Table 1: Student Information -->
+                <table class="w-full border-collapse border border-black text-[10px] font-sans">
                     <tr>
-                        <td class="border border-black p-1 font-bold">Student Name</td>
-                        <td class="border border-black p-1" colspan="2">Name</td>
+                        <td class="border border-black p-1 font-bold w-1/3">Student Name</td>
+                        <td class="border border-black p-1 font-bold" colspan="2">Rahul Sharma</td>
                     </tr>
                     <tr>
-                        <td class="border border-black p-1 font-bold">Registration No</td>
-                        <td class="border border-black p-1">Registration No</td>
-                        <td class="border border-black p-1 font-bold">Class & Section</td>
+                        <td class="border border-black p-1 font-bold">Student Registration Number</td>
+                        <td class="border border-black p-1">252U1R1203</td>
+                        <td class="border border-black p-1 font-bold">Class & Section: 105 & 2A</td>
+                    </tr>
+                    <tr>
+                        <td class="border border-black p-1 font-bold">Study Level : UG/PG</td>
+                        <td class="border border-black p-1">UG</td>
+                        <td class="border border-black p-1 font-bold">Year & Term: II Year & 1st Term</td>
+                    </tr>
+                    <tr>
+                        <td class="border border-black p-1 font-bold">Subject Name</td>
+                        <td class="border border-black p-1 font-bold" colspan="2">Probability Theory and Statistical Analysis</td>
                     </tr>
                 </table>
-                <h4 class="text-center font-bold mb-4" style="font-family: serif;">Reflective Journal - III</h4>
-                <div class="border border-black p-2 mb-2 bg-slate-50"><span class="font-bold text-slate-800">1.
-                        Experience:</span> The module comprehensively covered control structures...</div>
-                <div class="border border-black p-2 mb-2 bg-slate-50"><span class="font-bold text-slate-800">2.
-                        Feelings:</span> I felt engaged yet appropriately challenged by...</div>
-                <div class="border border-black p-2 bg-slate-50"><span class="font-bold text-slate-800">3.
-                        Learning:</span> Mastered iteration including while and for loops...</div>
+
+                <!-- Table 2: Assessment Metadata -->
+                <table class="w-full border-collapse border border-black text-[10px] font-sans">
+                    <tr>
+                        <td class="border border-black p-1 font-bold w-1/3">Name of the Assessment</td>
+                        <td class="border border-black p-1">Reflective Journal - I</td>
+                    </tr>
+                    <tr>
+                        <td class="border border-black p-1 font-bold">Date of Submission</td>
+                        <td class="border border-black p-1">07-07-2026</td>
+                    </tr>
+                </table>
+
+                <!-- Centered Document Title -->
+                <h4 class="text-center font-extrabold text-sm py-1 text-black font-serif tracking-wide">Reflective Journal - I</h4>
+
+                <!-- Table 3: Reflective Content Section -->
+                <table class="w-full border-collapse border border-black text-[10px] font-sans">
+                    <tr>
+                        <td class="border border-black p-1 font-bold text-red-600 w-1/3">Date</td>
+                        <td class="border border-black p-1">07-07-2026</td>
+                    </tr>
+                    <tr>
+                        <td class="border border-black p-1 font-bold text-red-600">Journal Entry Topic</td>
+                        <td class="border border-black p-1">Introduction to Statistics</td>
+                    </tr>
+                    <tr>
+                        <td class="border border-black p-1 font-bold align-top">1. Experience<br><span class="font-normal text-slate-700">(Class Content)</span></td>
+                        <td class="border border-black p-1.5 leading-relaxed text-slate-900">
+                            I arrived at the lecture ready to explore the nuances of Probability Theory and Statistical Analysis. The lecture was filled with diagrams explaining Introduction to Statistics logic. I feel a new sense of academic confidence now.
+                        </td>
+                    </tr>
+                </table>
             </div>
         </div>
     </section>
@@ -731,9 +773,10 @@
                 <!-- Center Social & Email Logos (100% Dead Centered) -->
                 <div class="flex items-center justify-center gap-2.5">
                     <!-- Email Icon -->
-                    <a href="mailto:kandadicharantej21@gmail.com" 
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=kandadicharantej21@gmail.com" 
+                        target="_blank" rel="noopener noreferrer"
                         class="p-2 px-2.5 rounded-lg border border-slate-200/90 bg-white text-slate-500 hover:text-[#864BED] hover:border-[#864BED]/50 hover:shadow-xs transition-all duration-200 flex items-center justify-center"
-                        title="Email: kandadicharantej21@gmail.com">
+                        title="Email via Gmail: kandadicharantej21@gmail.com">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 002-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                         </svg>
@@ -829,7 +872,7 @@
                                 class="w-full py-4 bg-violet-600 text-white rounded-2xl font-bold text-lg shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/40 hover:bg-violet-700 hover:-translate-y-1 transition-all mb-3 text-center flex items-center justify-center gap-2">
                                 🚀 Reserve My Spot
                             </a>
-                            <p class="text-xs font-semibold text-slate-500 mb-6 text-center lg:text-left">Free • Takes less than 30 seconds</p>
+                            <p class="text-xs font-semibold text-slate-500 mb-6 text-center lg:text-left">Free • Takes less than 20 seconds</p>
                             
                             <div class="grid grid-cols-2 gap-3 w-full">
                                 <a href="https://instagram.com/joinnaavik" target="_blank" id="instaNaavikBtn"
@@ -842,7 +885,7 @@
                                     <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
                                     LinkedIn
                                 </a>
-                                <a href="mailto:naavik.team@gmail.com"
+                                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=naavik.team@gmail.com" target="_blank" rel="noopener noreferrer"
                                     class="flex-1 py-2 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-600 text-xs sm:text-sm hover:bg-slate-100 hover:text-slate-900 hover:-translate-y-0.5 transition-all flex justify-center items-center gap-2">
                                     <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
                                     Email
@@ -943,7 +986,7 @@
     </div>
 
     <script src="data.js?v=8"></script>
-    <script src="app_final_v10.js"></script>
+    <script src="app_final_v10.js?v=16"></script>
 </body>
 
 </html>

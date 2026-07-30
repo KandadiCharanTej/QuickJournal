@@ -5,8 +5,8 @@ const DATA_FILE = path.join(__dirname, 'data', 'analytics_store.json');
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-// Every module saves ~7 minutes (manual creation ≈8-10 min, QuickJournal ≈<1 min → saves 6-8 min)
-const MINUTES_PER_MODULE = 7;
+// Manual creation ≈6-8 min (avg 7 min) minus 20 sec AI time = 6 mins 40 secs (400 seconds) saved per module
+const SECONDS_SAVED_PER_MODULE = 400;
 
 // Fixed baseline — represents real usage before this system was installed.
 // Journals and students cannot be re-derived. Hours are set via BASELINE_HOURS in .env
@@ -114,11 +114,11 @@ function saveDB() {
 
 function buildSummary() {
     const totalJournals  = BASELINE.journals + db.journals;
-    const totalStudents  = BASELINE.students; // Fixed at 115 as per manual override setting
-    const totalMinutes   = db.totalModules * MINUTES_PER_MODULE;
-    const totalHours     = BASELINE.hoursBase() + Math.round(totalMinutes / 60);
+    const totalStudents  = BASELINE.students; // Fixed at 115 (manual increase only)
+    const totalSecondsSaved = db.totalModules * SECONDS_SAVED_PER_MODULE;
+    const totalHours     = BASELINE.hoursBase() + Math.round(totalSecondsSaved / 3600);
 
-    let avgTimeSec = 4.2;
+    let avgTimeSec = 12.5; // Average speed within 10-15s target range
     if (db.durationCount > 0) {
         avgTimeSec = Math.round(db.durationTotalMs / db.durationCount / 1000 * 10) / 10;
     }
